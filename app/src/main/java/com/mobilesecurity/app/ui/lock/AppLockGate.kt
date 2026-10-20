@@ -31,12 +31,17 @@ fun AppLockGate(
     var error by remember { mutableStateOf<String?>(null) }
     var attempted by remember { mutableStateOf(false) }
     val canAuth = remember { BiometricPrompter.canAuthenticate(context) }
+    val lockEnabled = remember { AppLockManager.isEnabled(context) }
 
     LaunchedEffect(Unit) {
         val activity = context as? FragmentActivity ?: return@LaunchedEffect
         if (!canAuth) {
-            error = "This device no longer has a biometric or PIN set up. You can disable App " +
-                "Lock below to recover, then re-enable it after setting one up in system settings."
+            error = if (lockEnabled) {
+                "This device no longer has a biometric or PIN set up. Disable App Lock below " +
+                    "to recover, then re-enable it after setting one up in system settings."
+            } else {
+                "Panic lock engaged. Tap below to return to the app."
+            }
             return@LaunchedEffect
         }
         attempted = true
@@ -84,16 +89,19 @@ fun AppLockGate(
                 modifier = Modifier.padding(top = 24.dp)
             ) { Text(if (attempted) "Try again" else "Unlock") }
         } else {
-            // Recovery path: no biometric / PIN enrolled. Let the owner disable App Lock from
-            // the gate itself so they're never stuck out of their own app.
+            // No biometric / PIN enrolled. Two cases:
+            //  - App Lock was explicitly on → disable it so the owner isn't stuck.
+            //  - App Lock was never on (e.g. Panic lock) → just let them back in.
             Button(
                 onClick = {
-                    AppLockManager.setEnabled(context, false)
+                    if (lockEnabled) {
+                        AppLockManager.setEnabled(context, false)
+                    }
                     AppLockManager.resetUnlock(context)
                     onUnlocked()
                 },
                 modifier = Modifier.padding(top = 24.dp)
-            ) { Text("Disable App Lock and continue") }
+            ) { Text(if (lockEnabled) "Disable App Lock and continue" else "Return to app") }
         }
     }
 }

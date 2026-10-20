@@ -11,6 +11,11 @@
 
 > All four are fixed. C1–C3 landed with the first audit; C4 was caught on a Pixel 7 AVD during the first real-device preview and fixed in commit `6560a2f` (2026-10-20).
 
+### C5. Panic lock copy on AppLockGate was misleading when App Lock is OFF
+- **File:** `app/src/main/java/com/mobilesecurity/app/ui/lock/AppLockGate.kt`
+- **Why it was wrong:** Panic lock always navigates to AppLockGate regardless of App Lock state. On a device with no biometric AND App Lock not enabled, the fallback showed "Disable App Lock and continue" — misleading because App Lock was never on. Caught during on-device preview on Pixel 7 AVD.
+- **Fix (commit after this edit):** Branch the gate's error message and button text on `AppLockManager.isEnabled(context)`. If App Lock is off, show "Panic lock engaged. Tap below to return to the app." + "Return to app" button. If App Lock is on, keep the original "Disable App Lock and continue" recovery path.
+
 ### C4. App Lock lets the user enable it with no biometric or PIN enrolled → permanent lockout
 - **Files:** `app/src/main/java/com/mobilesecurity/app/ui/settings/SettingsScreen.kt` (toggle), `app/src/main/java/com/mobilesecurity/app/ui/lock/AppLockGate.kt` (gate).
 - **Why it's wrong:** The Settings toggle for App Lock accepted ON without first checking `BiometricPrompter.canAuthenticate()`. On a device with no fingerprint, no face, and no PIN set (common on fresh emulators; also happens if the owner removes their lock screen while App Lock is on), the next launch hits `AppLockGate` → the biometric prompt immediately fails → the only button is "Try again" which fails again, forever. The owner is locked out of their own app with no recovery path short of uninstalling.
