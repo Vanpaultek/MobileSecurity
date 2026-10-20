@@ -11,3 +11,9 @@ captures/
 *.ap_
 *.dex
 .DS_Store
+
+# iOS
+ios/build/
+ios/DerivedData/
+*.xcuserdata/
+ios/MobileSecurity.xcodeproj/xcuserdata/

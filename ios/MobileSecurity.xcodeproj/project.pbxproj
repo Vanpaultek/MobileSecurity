@@ -1,0 +1,406 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		025A6BFB15C7E097113FCA0D /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A526FCCFF268EE179269A762 /* PhoneUtils.swift */; };
+		1C7076FB56F358F93490066B /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58418566F611FF653D1C7D0 /* SettingsScreen.swift */; };
+		1E41110477ADEA318A40A921 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB8B3C09C974B5C5D6056B1 /* AppLockGate.swift */; };
+		1F781DE29EC72E04B76E316A /* VaultEditScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5342C3BF9B1D16B5DCDF33F3 /* VaultEditScreen.swift */; };
+		319245FD2AFC2BF4D17853D0 /* VaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290DFB8062DA868A1163AA03 /* VaultScreen.swift */; };
+		4242B6EA4A0077360632413F /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2B58EE50C0B2EE08E1B3D /* FieldCrypto.swift */; };
+		47F1FD887819673B72BB2E76 /* AppGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74065BBCAE98B8A317A13F37 /* AppGate.swift */; };
+		5047E0B10DDC978AF121A8E5 /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B764CF86B188E45625152D /* AboutScreen.swift */; };
+		54F3998C409ACBC683BDB896 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EBE2D3C5E00D54504103EE /* MainTabs.swift */; };
+		A79F97E44F8F413BD9EF3955 /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D7A338D158836BF9CC123C /* OnboardingScreen.swift */; };
+		AEC637E82D5719CB014F8384 /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ECD8419455450F49E664C75 /* VaultStore.swift */; };
+		C989F416B07EE67744468D0D /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A69BB2C995DED8D7A662D7 /* LegalContent.swift */; };
+		E595EEF0A5F0E9191B3C96FF /* MobileSecurityApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7313363D84B3857BFFBDEC7F /* MobileSecurityApp.swift */; };
+		F993EDEDF393CE02A773BC32 /* LegalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E4119511DDF3B5F4AFCDF7B /* LegalScreen.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		04FDE340CB54756A2D184348 /* MobileSecurity.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MobileSecurity.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10B764CF86B188E45625152D /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
+		18E2B58EE50C0B2EE08E1B3D /* FieldCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldCrypto.swift; sourceTree = "<group>"; };
+		290DFB8062DA868A1163AA03 /* VaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultScreen.swift; sourceTree = "<group>"; };
+		5342C3BF9B1D16B5DCDF33F3 /* VaultEditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultEditScreen.swift; sourceTree = "<group>"; };
+		5E4119511DDF3B5F4AFCDF7B /* LegalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalScreen.swift; sourceTree = "<group>"; };
+		5ECD8419455450F49E664C75 /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
+		7313363D84B3857BFFBDEC7F /* MobileSecurityApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSecurityApp.swift; sourceTree = "<group>"; };
+		74065BBCAE98B8A317A13F37 /* AppGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGate.swift; sourceTree = "<group>"; };
+		82A69BB2C995DED8D7A662D7 /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalContent.swift; sourceTree = "<group>"; };
+		A526FCCFF268EE179269A762 /* PhoneUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneUtils.swift; sourceTree = "<group>"; };
+		A58418566F611FF653D1C7D0 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		B8EBE2D3C5E00D54504103EE /* MainTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabs.swift; sourceTree = "<group>"; };
+		BCB8B3C09C974B5C5D6056B1 /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
+		E8D7A338D158836BF9CC123C /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		05C64C7F0D4EF8BFE9E8DF35 /* Legal */ = {
+			isa = PBXGroup;
+			children = (
+				82A69BB2C995DED8D7A662D7 /* LegalContent.swift */,
+				5E4119511DDF3B5F4AFCDF7B /* LegalScreen.swift */,
+			);
+			path = Legal;
+			sourceTree = "<group>";
+		};
+		3DF715BF4DF8B88875F06CD5 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E8315DA12CFBAF300D8FFE6E /* About */,
+				CDA5BCAA4E066E0ECA2932E3 /* App */,
+				05C64C7F0D4EF8BFE9E8DF35 /* Legal */,
+				6C72C6E5A8D4002485D82ECE /* Lock */,
+				7D450DE40E64F6AC0EAD4848 /* Onboarding */,
+				790B3B69F7D8DF66467EBCC5 /* Vault */,
+			);
+			name = Sources;
+			path = MobileSecurity/Sources;
+			sourceTree = "<group>";
+		};
+		6C72C6E5A8D4002485D82ECE /* Lock */ = {
+			isa = PBXGroup;
+			children = (
+				BCB8B3C09C974B5C5D6056B1 /* AppLockGate.swift */,
+			);
+			path = Lock;
+			sourceTree = "<group>";
+		};
+		790B3B69F7D8DF66467EBCC5 /* Vault */ = {
+			isa = PBXGroup;
+			children = (
+				18E2B58EE50C0B2EE08E1B3D /* FieldCrypto.swift */,
+				A526FCCFF268EE179269A762 /* PhoneUtils.swift */,
+				5342C3BF9B1D16B5DCDF33F3 /* VaultEditScreen.swift */,
+				290DFB8062DA868A1163AA03 /* VaultScreen.swift */,
+				5ECD8419455450F49E664C75 /* VaultStore.swift */,
+			);
+			path = Vault;
+			sourceTree = "<group>";
+		};
+		7D450DE40E64F6AC0EAD4848 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				E8D7A338D158836BF9CC123C /* OnboardingScreen.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		8A751B9719AF34A7056D09B5 = {
+			isa = PBXGroup;
+			children = (
+				3DF715BF4DF8B88875F06CD5 /* Sources */,
+				F2906F6B8490F95B3DCF4089 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CDA5BCAA4E066E0ECA2932E3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				74065BBCAE98B8A317A13F37 /* AppGate.swift */,
+				B8EBE2D3C5E00D54504103EE /* MainTabs.swift */,
+				7313363D84B3857BFFBDEC7F /* MobileSecurityApp.swift */,
+				A58418566F611FF653D1C7D0 /* SettingsScreen.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E8315DA12CFBAF300D8FFE6E /* About */ = {
+			isa = PBXGroup;
+			children = (
+				10B764CF86B188E45625152D /* AboutScreen.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
+		F2906F6B8490F95B3DCF4089 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				04FDE340CB54756A2D184348 /* MobileSecurity.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8A5B5183FE0C96A77AC19342 /* MobileSecurity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 09FD62A9AD05AD41676D9F83 /* Build configuration list for PBXNativeTarget "MobileSecurity" */;
+			buildPhases = (
+				40E51F10154A3602AC4D58BA /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MobileSecurity;
+			packageProductDependencies = (
+			);
+			productName = MobileSecurity;
+			productReference = 04FDE340CB54756A2D184348 /* MobileSecurity.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FA0E5848569D51534970C2AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					8A5B5183FE0C96A77AC19342 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = AEF374F6EBAF55D925ADD386 /* Build configuration list for PBXProject "MobileSecurity" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8A751B9719AF34A7056D09B5;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F2906F6B8490F95B3DCF4089 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8A5B5183FE0C96A77AC19342 /* MobileSecurity */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		40E51F10154A3602AC4D58BA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5047E0B10DDC978AF121A8E5 /* AboutScreen.swift in Sources */,
+				47F1FD887819673B72BB2E76 /* AppGate.swift in Sources */,
+				1E41110477ADEA318A40A921 /* AppLockGate.swift in Sources */,
+				4242B6EA4A0077360632413F /* FieldCrypto.swift in Sources */,
+				C989F416B07EE67744468D0D /* LegalContent.swift in Sources */,
+				F993EDEDF393CE02A773BC32 /* LegalScreen.swift in Sources */,
+				54F3998C409ACBC683BDB896 /* MainTabs.swift in Sources */,
+				E595EEF0A5F0E9191B3C96FF /* MobileSecurityApp.swift in Sources */,
+				A79F97E44F8F413BD9EF3955 /* OnboardingScreen.swift in Sources */,
+				025A6BFB15C7E097113FCA0D /* PhoneUtils.swift in Sources */,
+				1C7076FB56F358F93490066B /* SettingsScreen.swift in Sources */,
+				1F781DE29EC72E04B76E316A /* VaultEditScreen.swift in Sources */,
+				319245FD2AFC2BF4D17853D0 /* VaultScreen.swift in Sources */,
+				AEC637E82D5719CB014F8384 /* VaultStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		40E5340044190C98594913A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MobileSecurity;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "MobileSecurity uses Face ID to unlock the app and the family vault.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		7BDE56C8B338D5E40D39641D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = MobileSecurity/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mobilesecurity.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		DEC6A4C2836D02310EF272AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MobileSecurity;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "MobileSecurity uses Face ID to unlock the app and the family vault.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		DFEC81EC366E0EE663967746 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = MobileSecurity/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mobilesecurity.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		09FD62A9AD05AD41676D9F83 /* Build configuration list for PBXNativeTarget "MobileSecurity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFEC81EC366E0EE663967746 /* Debug */,
+				7BDE56C8B338D5E40D39641D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AEF374F6EBAF55D925ADD386 /* Build configuration list for PBXProject "MobileSecurity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				40E5340044190C98594913A5 /* Debug */,
+				DEC6A4C2836D02310EF272AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FA0E5848569D51534970C2AC /* Project object */;
+}
