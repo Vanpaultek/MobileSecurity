@@ -139,6 +139,15 @@ fun DashboardScreen(
             }
         )
 
+        PermissionHoldersCard(
+            onInspect = { pkg ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    .setData(android.net.Uri.parse("package:$pkg"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                runCatching { context.startActivity(intent) }
+            }
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -414,6 +423,83 @@ private fun MiniStat(
                 style = MaterialTheme.typography.titleLarge
             )
             Text(label, style = MaterialTheme.typography.bodyMedium, color = Color.Unspecified)
+        }
+    }
+}
+
+@androidx.compose.runtime.Composable
+private fun PermissionHoldersCard(onInspect: (String) -> Unit) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val snapshot = androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf<com.mobilesecurity.app.privacy.MicCameraHolders.Snapshot?>(null)
+    }
+    val expanded = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        snapshot.value = com.mobilesecurity.app.privacy.MicCameraHolders.read(ctx)
+    }
+    val data = snapshot.value ?: return
+
+    androidx.compose.material3.Card {
+        androidx.compose.foundation.layout.Column(
+            modifier = androidx.compose.ui.Modifier.padding(16.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)
+        ) {
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                androidx.compose.material3.Icon(
+                    androidx.compose.material.icons.Icons.Filled.Shield,
+                    contentDescription = null
+                )
+                androidx.compose.material3.Text(
+                    "Apps that can use mic / camera",
+                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+                    modifier = androidx.compose.ui.Modifier
+                        .padding(start = 8.dp)
+                        .weight(1f)
+                )
+                androidx.compose.material3.TextButton(onClick = { expanded.value = !expanded.value }) {
+                    androidx.compose.material3.Text(if (expanded.value) "Hide" else "Show all")
+                }
+            }
+            androidx.compose.material3.Text(
+                "Mic: ${data.micCount} app(s)   •   Camera: ${data.cameraCount} app(s)",
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+            )
+            if (expanded.value) {
+                data.holders.take(50).forEach { h ->
+                    androidx.compose.material3.TextButton(
+                        onClick = { onInspect(h.packageName) },
+                        modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.foundation.layout.Column(
+                            modifier = androidx.compose.ui.Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                        ) {
+                            androidx.compose.material3.Text(
+                                h.label,
+                                style = androidx.compose.material3.MaterialTheme.typography.titleLarge
+                            )
+                            val badges = buildString {
+                                if (h.hasMic) append("Mic ")
+                                if (h.hasCamera) append("Camera ")
+                            }.trim()
+                            androidx.compose.material3.Text(
+                                badges + "  ·  " + h.packageName,
+                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+                if (data.holders.size > 50) {
+                    androidx.compose.material3.Text(
+                        "Showing first 50 of ${data.holders.size}.",
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }

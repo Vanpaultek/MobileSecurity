@@ -37,6 +37,7 @@ struct DashboardScreen: View {
                     hasVaultEntry: !vault.contacts.isEmpty,
                     appLockOn: gate.appLockEnabled
                 )
+                MicCameraHoldersCard()
                 HonestLimitsCard()
             }
             .padding(16)
@@ -97,6 +98,43 @@ private struct QuickSetupCard: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
+    }
+}
+
+private struct MicCameraHoldersCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Apps that can use mic / camera", systemImage: "mic.badge.plus")
+                .font(.headline)
+
+            Text("iOS does not expose this list to third-party apps. The orange/green dot in your status bar is Apple's answer. For the full list and the ability to revoke access per app, open the two system pages below.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            Button {
+                openURL("App-prefs:Privacy&path=MICROPHONE")
+            } label: {
+                Label("Open Privacy → Microphone", systemImage: "mic.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+
+            Button {
+                openURL("App-prefs:Privacy&path=CAMERA")
+            } label: {
+                Label("Open Privacy → Camera", systemImage: "camera.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
+    }
+
+    private func openURL(_ raw: String) {
+        guard let url = URL(string: raw) else { return }
+        UIApplication.shared.open(url)
     }
 }
 
