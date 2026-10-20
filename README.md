@@ -37,21 +37,51 @@ A privacy-focused Android app that gives you visibility and control over who tou
 | `data/db/AppDatabase.kt`                 | Room DB with SQLCipher factory; key stored in EncryptedPrefs.  |
 | `ui/`                                    | Jetpack Compose + Material3 (Dashboard, Events, BlockList, Settings). |
 
-## Build
+## Repository layout
+
+```
+MobileSecurity/
+├── android/   ← Native Android app (Kotlin + Jetpack Compose)
+├── ios/       ← Native iOS app (Swift + SwiftUI)
+├── BUG_REPORT.md
+├── LICENSE
+└── README.md
+```
+
+## Build — Android
 
 Requires Android Studio Hedgehog (or newer) and JDK 17.
 
 ```
+cd android
 ./gradlew :app:assembleDebug
 ```
 
-The project uses:
+The Android app uses:
 
-- Kotlin 1.9.24, Compose BOM 2024.09.02
+- Kotlin 2.0.21, Compose BOM 2024.12.01
 - Room 2.6.1 + KSP
 - SQLCipher 4.5.4
 - androidx.security.crypto 1.1.0-alpha06
-- `compileSdk` 34, `minSdk` 26
+- `compileSdk` 36, `minSdk` 29
+
+## Build — iOS
+
+Requires Xcode 26 (or newer) and macOS 14+.
+
+```
+cd ios
+xcodebuild -scheme MobileSecurity -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
+
+The iOS app uses:
+
+- Swift 6, SwiftUI
+- CryptoKit + Keychain for the trusted-contact vault
+- LocalAuthentication (Face ID / Touch ID / device PIN) for App Lock
+- Deployment target iOS 17
+
+The iOS version has intentional feature gaps relative to Android (mic/camera monitoring, screen-overlay watermark, and permission audit of other apps are not possible on iOS at all). See the in-app "Honest claims" screen for the full list.
 
 ## Runtime permissions
 
