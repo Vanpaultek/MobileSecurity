@@ -24,9 +24,11 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LegalScreen() {
+fun LegalScreen(initialSectionTitle: String? = null) {
     val sections = LegalContent.sections
-    var selected by remember { mutableIntStateOf(0) }
+    val initial = sections.indexOfFirst { it.title.equals(initialSectionTitle, ignoreCase = true) }
+        .takeIf { it >= 0 } ?: 0
+    var selected by remember { mutableIntStateOf(initial) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         PrimaryTabRow(selectedTabIndex = selected) {

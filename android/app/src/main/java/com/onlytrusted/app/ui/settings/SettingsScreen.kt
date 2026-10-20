@@ -82,7 +82,7 @@ fun SettingsScreen(
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             val message = runCatching { EvidenceExporter.exportTo(context, uri) }
-                .map { "Evidence pack ready. Share only with your carrier, bank, or law enforcement — never with the suspected caller." }
+                .map { "Evidence pack ready. Share only with your carrier, bank, or law enforcement . never with the suspected caller." }
                 .getOrElse { "Evidence export failed: ${it.message ?: "unknown error"}" }
             snackbarHostState.showSnackbar(message)
         }
@@ -129,7 +129,7 @@ fun SettingsScreen(
                     scope.launch {
                         snackbarHostState.showSnackbar(
                             "Set up a device PIN, pattern, or biometric in system settings first " +
-                                "— otherwise App Lock would permanently lock you out."
+                                ". otherwise App Lock would permanently lock you out."
                         )
                     }
                     return@SettingToggle
@@ -142,7 +142,7 @@ fun SettingsScreen(
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Shield watermark", style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "Owner tag printed in the on-screen watermark. Short labels work best — " +
+                    "Owner tag printed in the on-screen watermark. Short labels work best . " +
                         "your initials or a nickname (max 24 chars).",
                     style = MaterialTheme.typography.bodyMedium
                 )

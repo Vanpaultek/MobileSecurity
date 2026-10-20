@@ -121,7 +121,7 @@ fun DashboardScreen(
             ownerTag = runtime.ownerTag,
             onStart = {
                 if (vm.startShield()) {
-                    // overlay started; no additional UI feedback needed — it's visible on screen
+                    // overlay started; no additional UI feedback needed . it's visible on screen
                 }
             },
             onStop = vm::stopShield,
@@ -272,7 +272,7 @@ private fun TrustedModeCard(
             SwitchRow("Flag SMS not in vault", sms, onToggleSms)
             if (contactCount == 0) {
                 Text(
-                    "Add family first — turning this on with an empty vault will silence everyone.",
+                    "Add family first . turning this on with an empty vault will silence everyone.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -322,7 +322,7 @@ private fun SensorOwnershipCard(
 @Composable
 private fun SensorRow(label: String, muted: Boolean?) {
     val (text, tint) = when (muted) {
-        true -> "muted — hardware off" to MaterialTheme.colorScheme.primary
+        true -> "muted . hardware off" to MaterialTheme.colorScheme.primary
         false -> "available to granted apps" to MaterialTheme.colorScheme.outline
         null -> "state unknown" to MaterialTheme.colorScheme.outline
     }
@@ -394,7 +394,7 @@ private fun ShieldOverlayCard(
                         }
                     }
                     Text(
-                        "Tip: this app cannot encrypt a cellular call — carriers own that layer. " +
+                        "Tip: this app cannot encrypt a cellular call . carriers own that layer. " +
                             "For end-to-end encrypted voice/video, use Signal or WhatsApp, then " +
                             "turn Shield on so the screen itself is still watermarked.",
                         style = MaterialTheme.typography.bodyMedium

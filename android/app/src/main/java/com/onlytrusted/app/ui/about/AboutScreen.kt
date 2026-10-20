@@ -66,15 +66,20 @@ fun AboutScreen() {
         Card {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Changelog", style = MaterialTheme.typography.titleLarge)
-                Text("0.1.0 — Initial release.")
-                Text("- Mic + camera usage alerts (notification + vibration).")
-                Text("- Call screening with user block list.")
-                Text("- SMS filtering with user block list.")
-                Text("- Pocket-dial detection and confirmation.")
-                Text("- Screenshot protection on this app's screens.")
-                Text("- Permission audit of installed apps.")
-                Text("- App lock with biometric or device credential.")
-                Text("- Encrypted local storage, no network use.")
+                Text(
+                    "Version 0.1.0",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    )
+                )
+                Text("• Microphone and camera usage alerts, with notification and vibration.")
+                Text("• Call screening with user block list.")
+                Text("• SMS filtering with user block list.")
+                Text("• Pocket-dial detection and confirmation.")
+                Text("• Screenshot protection on this app's screens.")
+                Text("• Permission audit of installed apps.")
+                Text("• App Lock with biometric or device credential.")
+                Text("• Encrypted local storage, no network use.")
             }
         }
 

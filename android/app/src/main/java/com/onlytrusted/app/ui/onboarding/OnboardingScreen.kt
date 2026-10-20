@@ -13,8 +13,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.onlytrusted.app.ui.legal.LegalScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.onlytrusted.app.privacy.OnboardingState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(onAccepted: () -> Unit) {
     val context = LocalContext.current
@@ -33,6 +39,8 @@ fun OnboardingScreen(onAccepted: () -> Unit) {
     var ownsDevice by remember { mutableStateOf(false) }
     var understandsLimits by remember { mutableStateOf(false) }
     val canContinue = isAdult && ownsDevice && understandsLimits
+    var legalSheetSection by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Column(
         modifier = Modifier
@@ -51,7 +59,7 @@ fun OnboardingScreen(onAccepted: () -> Unit) {
         Card {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("What this app does", style = MaterialTheme.typography.titleLarge)
-                Text("• Keeps your microphone and camera for you — alerts the moment another app uses them.")
+                Text("• Keeps your microphone and camera for you. Alerts the moment another app uses them.")
                 Text("• Protects your family's phone numbers and addresses with layered encryption.")
                 Text("• Blocks or silences everyone who is not on your trusted list, when you turn Trusted-only on.")
                 Text("• Keeps every piece of data on this device only. No cloud. No ads. No analytics.")
@@ -104,8 +112,24 @@ fun OnboardingScreen(onAccepted: () -> Unit) {
 
         Text(
             "By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. " +
-                "They can be reviewed any time from Settings → Privacy, terms & honest claims.",
+                "You can review them any time from Settings, Privacy, terms, and honest claims.",
             style = MaterialTheme.typography.bodyMedium
         )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = { legalSheetSection = "Privacy policy" }) { Text("Privacy policy") }
+            TextButton(onClick = { legalSheetSection = "Terms of use" }) { Text("Terms of use") }
+            TextButton(onClick = { legalSheetSection = "Honest claims" }) { Text("Honest claims") }
+        }
+    }
+
+    val currentSheetSection = legalSheetSection
+    if (currentSheetSection != null) {
+        ModalBottomSheet(
+            onDismissRequest = { legalSheetSection = null },
+            sheetState = sheetState
+        ) {
+            LegalScreen(initialSectionTitle = currentSheetSection)
+        }
     }
 }

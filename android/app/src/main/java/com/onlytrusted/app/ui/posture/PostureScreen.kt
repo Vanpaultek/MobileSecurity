@@ -53,7 +53,7 @@ fun PostureScreen() {
     ) {
         Text("Device posture", style = MaterialTheme.typography.headlineMedium)
         Text(
-            "A read-only health check of this phone. We only observe — we never flip system " +
+            "A read-only health check of this phone. We only observe . we never flip system " +
                 "switches for you. Tap any issue to open the system page where you fix it.",
             style = MaterialTheme.typography.bodyMedium
         )
