@@ -12,62 +12,197 @@ struct OnboardingScreen: View {
     private var canContinue: Bool { isAdult && ownsDevice && understandsLimits }
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("OnlyTrusted")
-                        .font(.largeTitle.weight(.bold))
-
-                    Text("This app is a serious privacy tool for the phone owner and their immediate family. It is not an entertainment or novelty app. Before you use it, please read and confirm the following.")
-                        .font(.body)
-
-                    GroupBox("What this app does on iOS") {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("• Encrypted family vault with Face ID / Touch ID unlock.")
-                            Text("• Call Directory Extension-based blocking (Phase 2).")
-                            Text("• SMS filter for unknown-sender messages (Phase 2).")
-                            Text("• Keeps every piece of data on this device only. No cloud. No ads. No analytics.")
-                        }.font(.footnote)
-                    }
-
-                    GroupBox("Honest limits iOS imposes") {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("• Apps on iOS cannot monitor mic/camera use by other apps — iOS reserves that for its own status bar indicator.")
-                            Text("• You cannot stop the other side of a video call from recording their own device.")
-                            Text("• Full screen-overlay watermarks are not possible on iOS at all.")
-                            Text("• Carrier/network tracking is outside any app's control.")
-                        }.font(.footnote)
-                    }
-
-                    Toggle(isOn: $isAdult) {
-                        Text("I am at least 18 years old (or the legal age of digital consent in my country).")
-                            .font(.footnote)
-                    }
-                    Toggle(isOn: $ownsDevice) {
-                        Text("I own or administer this phone and will only block numbers and intercept calls on devices I am authorised to manage.")
-                            .font(.footnote)
-                    }
-                    Toggle(isOn: $understandsLimits) {
-                        Text("I have read the honest limits above and understand this is a privacy aid, not a guarantee against determined attackers.")
-                            .font(.footnote)
-                    }
-
-                    Button {
-                        onAccepted()
-                    } label: {
-                        Text("I confirm and continue").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canContinue)
-                    .padding(.top, 8)
-
-                    Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. They can be reviewed any time from Settings → Privacy, terms & honest claims.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 32) {
+                    hero
+                    featuresCard
+                    limitsCard
+                    consentSection
+                    legalFootnote
                 }
-                .padding(20)
+                .padding(.horizontal, 24)
+                .padding(.top, 48)
+                .padding(.bottom, 24)
             }
-            .navigationBarHidden(true)
+
+            actionBar
         }
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+    }
+
+    // MARK: - Hero
+
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Image(systemName: "shield.lefthalf.filled")
+                .font(.system(size: 36, weight: .semibold))
+                .foregroundStyle(.tint)
+                .padding(.bottom, 4)
+
+            Text("OnlyTrusted")
+                .font(.system(.largeTitle, design: .default, weight: .bold))
+
+            Text("A serious privacy tool for you and your family — not an entertainment app. Please read and confirm the following before you continue.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Cards
+
+    private var featuresCard: some View {
+        InfoCard(
+            icon: "lock.shield.fill",
+            iconTint: .green,
+            title: "What this app does on iOS",
+            rows: [
+                "Encrypted family vault, unlocked with Face ID or Touch ID.",
+                "Call Directory Extension-based blocking (Phase 2).",
+                "SMS filter for unknown-sender messages (Phase 2).",
+                "Everything stays on this device. No cloud. No ads. No analytics."
+            ]
+        )
+    }
+
+    private var limitsCard: some View {
+        InfoCard(
+            icon: "exclamationmark.shield.fill",
+            iconTint: .orange,
+            title: "Honest limits iOS imposes",
+            rows: [
+                "iOS does not let any third-party app monitor other apps' mic or camera. Apple's status-bar indicator is the only source.",
+                "You cannot stop the other side of a video call from recording their own device.",
+                "Full screen-overlay watermarks are not possible on iOS at all.",
+                "Carrier and network-level tracking is outside any app's control."
+            ]
+        )
+    }
+
+    // MARK: - Consent
+
+    private var consentSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Please confirm")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                ConsentRow(
+                    title: "I'm an adult",
+                    detail: "At least 18 — or the legal age of digital consent in my country.",
+                    isOn: $isAdult
+                )
+                Divider().padding(.leading, 20)
+                ConsentRow(
+                    title: "This is my phone",
+                    detail: "I own or administer this device. I'll only block calls on phones I'm authorised to manage.",
+                    isOn: $ownsDevice
+                )
+                Divider().padding(.leading, 20)
+                ConsentRow(
+                    title: "I understand the limits",
+                    detail: "This is a privacy aid, not a guarantee against determined attackers.",
+                    isOn: $understandsLimits
+                )
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+            )
+        }
+    }
+
+    private var legalFootnote: some View {
+        Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings → Privacy, terms & honest claims.")
+            .font(.footnote)
+            .foregroundStyle(.tertiary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // MARK: - Sticky action bar
+
+    private var actionBar: some View {
+        VStack(spacing: 0) {
+            Divider()
+            Button(action: onAccepted) {
+                Text("I confirm and continue")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 32)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(!canContinue)
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+        }
+        .background(.ultraThinMaterial)
+    }
+}
+
+// MARK: - Reusable row components
+
+private struct InfoCard: View {
+    let icon: String
+    let iconTint: Color
+    let title: String
+    let rows: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(iconTint)
+                Text(title)
+                    .font(.headline)
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Circle()
+                            .fill(Color(.tertiaryLabel))
+                            .frame(width: 4, height: 4)
+                            .offset(y: -3)
+                        Text(row)
+                            .font(.subheadline)
+                            .foregroundStyle(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+    }
+}
+
+private struct ConsentRow: View {
+    let title: String
+    let detail: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.trailing, 8)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
     }
 }
