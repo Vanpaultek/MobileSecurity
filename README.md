@@ -2,7 +2,9 @@
 
 A privacy-focused Android app that gives you visibility and control over who touches your microphone, camera, calls, and texts — with everything stored encrypted on your device.
 
-**A product of 57Million LLC.** Copyright © 2026 57Million LLC. Licensed under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE). Support: `reddy@vanpaultek.com`.
+**A product of 57Million LLC.** Copyright © 2026 57Million LLC. Licensed under the **GNU Affero General Public License v3.0** — see [`LICENSE`](LICENSE). Support: `reddy@vanpaultek.com`.
+
+> **If you deploy a modified version of this software — including over a network — you must publish the full source of your modifications to its users under the same license.** This is the AGPL-3.0 network clause. It prevents commercial forks from stripping the privacy guarantees without their users seeing the code.
 
 ## What it does (and what it doesn't)
 
