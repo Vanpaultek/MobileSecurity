@@ -71,7 +71,7 @@ struct BlockListScreen: View {
             Section {
                 if vm.entries.isEmpty {
                     Text("No numbers blocked yet. Add one with the + button.")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.appSecondaryText)
                 } else {
                     ForEach(vm.entries) { record in
                         BlockedRow(record: record)
@@ -120,7 +120,11 @@ struct BlockListScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showAdd = true } label: { Image(systemName: "plus.circle.fill") }
+                Button { showAdd = true } label: {
+                    Image(systemName: "plus.circle.fill").decorativeAccessibility()
+                }
+                .accessibilityLabel("Block a number")
+                .minimumHitTarget()
             }
         }
         .sheet(isPresented: $showAdd) { AddBlockedSheet(vm: vm) }
@@ -135,7 +139,7 @@ struct BlockListScreen: View {
         case .reloading:
             HStack {
                 ProgressView().controlSize(.small)
-                Text("Reloading…").font(.footnote).foregroundStyle(.secondary)
+                Text("Reloading…").font(.footnote).foregroundStyle(Color.appSecondaryText)
             }
         case .ok:
             Label("Changes pushed to iOS.", systemImage: "checkmark.circle.fill")
@@ -160,7 +164,7 @@ private struct BlockedRow: View {
             Text(PhoneUtils.mask(record.normalisedNumber))
                 .font(.headline).monospaced()
             if let label = record.label {
-                Text(label).font(.subheadline).foregroundStyle(.secondary)
+                Text(label).font(.subheadline).foregroundStyle(Color.appSecondaryText)
             }
             HStack(spacing: 6) {
                 if record.blockCalls {
@@ -170,7 +174,7 @@ private struct BlockedRow: View {
                     Label("SMS", systemImage: "message.badge.fill").font(.caption)
                 }
             }
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.appSecondaryText)
         }
     }
 }

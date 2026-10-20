@@ -32,7 +32,7 @@ struct SettingsScreen: View {
                         gate.appLockEnabled = now
                     }
                 Text("Require Face ID / Touch ID / passcode to open OnlyTrusted.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Color.appSecondaryText)
             }
 
             Section("Data") {
@@ -65,7 +65,7 @@ struct SettingsScreen: View {
             Section {
                 Text("© 2026 57Million LLC. Licensed under the GNU Affero General Public License v3.0.\nSupport: reddy@vanpaultek.com")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.appSecondaryText)
             }
         }
         .navigationTitle("Settings")

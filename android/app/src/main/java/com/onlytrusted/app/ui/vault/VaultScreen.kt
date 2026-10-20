@@ -149,7 +149,10 @@ private fun ContactRow(
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 TextButton(onClick = onEdit) { Text("Edit") }
                 IconButton(onClick = onReveal) {
-                    Icon(Icons.Filled.Visibility, contentDescription = "Reveal")
+                    Icon(
+                        Icons.Filled.Visibility,
+                        contentDescription = "Reveal ${contact.displayName} with biometric unlock"
+                    )
                 }
             }
         }

@@ -36,8 +36,10 @@ struct EventsScreen: View {
                 Button {
                     reload()
                 } label: {
-                    Image(systemName: "arrow.clockwise")
+                    Image(systemName: "arrow.clockwise").decorativeAccessibility()
                 }
+                .accessibilityLabel("Reload event log")
+                .minimumHitTarget()
             }
         }
         .task { reload() }
@@ -94,9 +96,9 @@ private struct EventRow: View {
             Text(humanLabel(record.type)).font(.headline)
             Text(Date(timeIntervalSince1970: Double(record.timestampMillis) / 1000.0),
                  style: .relative)
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Color.appSecondaryText)
             if let detail = record.detail {
-                Text(detail).font(.caption).monospaced().foregroundStyle(.secondary)
+                Text(detail).font(.caption).monospaced().foregroundStyle(Color.appSecondaryText)
             }
         }
     }

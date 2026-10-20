@@ -12,6 +12,7 @@
 		1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
 		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
+		2684C20B6C66EC750384154D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFF4754051354FB2E3F10DA /* Theme.swift */; };
 		2A8308A8CEF8DEF2DAEC42DE /* MessageFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */; };
 		2C1C57334861C68F1D4697F5 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
@@ -100,6 +101,7 @@
 		E287E737C235F26B6F586928 /* SharedContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedContainer.swift; sourceTree = "<group>"; };
 		E490883DF89C527594BD0E0E /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
 		EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CallDirectoryExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEFF4754051354FB2E3F10DA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F0393312C797275B88012608 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -124,6 +126,7 @@
 				59FC3E7C7CBEEB57ED07CBFB /* Lock */,
 				8B2BAE45A4D64FD531E8626F /* Onboarding */,
 				7B0854CADCA48980A3484FC0 /* Shared */,
+				624695B8BED90C9B3D2A350A /* Theme */,
 				6090D23C3520BFEAD7394652 /* Vault */,
 			);
 			name = Sources;
@@ -184,6 +187,14 @@
 				83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */,
 			);
 			path = Vault;
+			sourceTree = "<group>";
+		};
+		624695B8BED90C9B3D2A350A /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				EEFF4754051354FB2E3F10DA /* Theme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		7B0854CADCA48980A3484FC0 /* Shared */ = {
@@ -385,6 +396,7 @@
 				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
 				9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */,
 				FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */,
+				2684C20B6C66EC750384154D /* Theme.swift in Sources */,
 				D86AAE6A5F9830A8315985C8 /* VaultEditScreen.swift in Sources */,
 				87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */,
 				54F1222A590D224BD05496FB /* VaultStore.swift in Sources */,

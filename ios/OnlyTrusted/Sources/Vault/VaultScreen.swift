@@ -41,7 +41,11 @@ struct VaultScreen: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showAdd = true
-                } label: { Image(systemName: "plus.circle.fill") }
+                } label: {
+                    Image(systemName: "plus.circle.fill").decorativeAccessibility()
+                }
+                .accessibilityLabel("Add trusted contact")
+                .minimumHitTarget()
             }
         }
         .task { await store.reload() }
@@ -110,6 +114,7 @@ private struct ContactRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: contact.isOwner ? "shield.lefthalf.filled" : "lock.fill")
+                    .decorativeAccessibility()
                 Text(contact.displayName).font(.headline)
                 Spacer()
                 if contact.isOwner {
@@ -118,13 +123,13 @@ private struct ContactRow: View {
                 }
             }
             if let relation = contact.relation {
-                Text(relation).font(.subheadline).foregroundStyle(.secondary)
+                Text(relation).font(.subheadline).foregroundStyle(Color.appSecondaryText)
             }
             ForEach(contact.maskedNumbers, id: \.self) { num in
                 Text(num).font(.subheadline).monospaced()
             }
             if let email = contact.maskedEmail {
-                Text(email).font(.subheadline).foregroundStyle(.secondary)
+                Text(email).font(.subheadline).foregroundStyle(Color.appSecondaryText)
             }
             HStack {
                 Spacer()
@@ -132,9 +137,11 @@ private struct ContactRow: View {
                 Button {
                     onReveal()
                 } label: {
-                    Image(systemName: "eye")
+                    Image(systemName: "eye").decorativeAccessibility()
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Reveal \(contact.displayName) with Face ID")
+                .minimumHitTarget()
             }
         }
         .padding(.vertical, 2)

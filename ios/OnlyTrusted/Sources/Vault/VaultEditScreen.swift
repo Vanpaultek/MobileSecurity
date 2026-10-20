@@ -92,8 +92,10 @@ struct VaultEditScreen: View {
                     Button(role: .destructive) {
                         if let id = contactId { try? store.delete(id: id); dismiss() }
                     } label: {
-                        Image(systemName: "trash")
+                        Image(systemName: "trash").decorativeAccessibility()
                     }
+                    .accessibilityLabel("Delete contact")
+                    .minimumHitTarget()
                 }
             }
         }

@@ -17,7 +17,7 @@ struct AboutScreen: View {
                     .font(.headline)
                 Text("A product of 57Million LLC. Licensed under the GNU Affero General Public License v3.0.")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.appSecondaryText)
             }
 
             Section("Support") {
@@ -60,7 +60,7 @@ private struct Attribution: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(name).font(.subheadline).fontWeight(.medium)
-            Text("License: \(license) · \(url)").font(.caption).foregroundStyle(.secondary)
+            Text("License: \(license) · \(url)").font(.caption).foregroundStyle(Color.appSecondaryText)
         }
     }
 }

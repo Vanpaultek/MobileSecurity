@@ -14,10 +14,11 @@ struct AppLockGate: View {
         VStack(spacing: 20) {
             Image(systemName: "lock.shield.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appSecondaryText)
+                .decorativeAccessibility()
 
             Text("Locked")
-                .font(.largeTitle.weight(.semibold))
+                .font(.appLargeTitle)
 
             if let error {
                 Text(error)
@@ -43,7 +44,7 @@ struct AppLockGate: View {
                          ? "This device no longer has a passcode or biometric set. Disable App Lock below to recover, then re-enable it after setting one up."
                          : "Panic lock engaged. Tap below to return to the app.")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.appSecondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                     Button {

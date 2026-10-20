@@ -58,7 +58,7 @@ private struct HeaderCard: View {
 
             Text("Mic & camera monitoring is managed by iOS itself. This app handles your trusted-contact vault, call & SMS screening, and the Panic lock.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appSecondaryText)
 
             Button(role: .destructive, action: onPanic) {
                 Label("Panic lock", systemImage: "lock.fill")
@@ -109,7 +109,7 @@ private struct MicCameraHoldersCard: View {
 
             Text("iOS does not expose this list to third-party apps. The orange/green dot in your status bar is Apple's answer. For the full list and the ability to revoke access per app, open the two system pages below.")
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appSecondaryText)
 
             Button {
                 openURL("App-prefs:Privacy&path=MICROPHONE")

@@ -119,7 +119,10 @@ fun BlockListScreen() {
                                 )
                             }
                             IconButton(onClick = { vm.remove(entry.number) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Remove")
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "Remove ${entry.number} from block list"
+                                )
                             }
                         }
                     }

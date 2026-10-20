@@ -154,8 +154,24 @@ enum LegalContent {
     """
 
     static let accessibility = """
-    We aim to meet WCAG 2.1 AA for colour contrast, text scaling, and VoiceOver labels, and to respect iOS's Dynamic Type, Bold Text, Increased Contrast, and Reduce Motion settings.
+    OnlyTrusted targets WCAG 2.1 AA (which is also what US Section 508 adopts). Specifically, this app:
 
-    If you find a screen that is hard to use with VoiceOver, Switch Control, or a large font size, email reddy@vanpaultek.com and we will treat it as a priority fix.
+    What we commit to
+
+    • Color contrast ≥ 4.5:1 for normal text and ≥ 3:1 for large text, icons, and dividers. All in-app text tokens have been measured against both light and dark surfaces and against Increase Contrast mode.
+    • Dynamic Type: every text style scales when you change Settings → Display & Brightness → Text Size, up to and including the Accessibility sizes (XXXL and larger). We do not pin text to fixed point sizes.
+    • VoiceOver: every button has a human-readable label. Decorative icons are hidden from VoiceOver so it doesn't read "shield shield shield" at you.
+    • Hit targets ≥ 44×44 points on every tappable control, per Apple HIG.
+    • Honors system settings: Reduce Motion, Bold Text, Increase Contrast, and Dark Mode all work without any in-app override needed.
+
+    What we do not claim
+
+    • Formal Section 508 VPAT certification requires an independent accessibility consultant to audit the shipping build. We have not engaged one. The commitments above are self-measured.
+    • Older iOS versions (below our minimum deployment target of iOS 17) are not supported.
+    • Third-party extensions (Call Directory, SMS filter) rely on iOS's own system UI for enablement — those pages are Apple's, not ours.
+
+    Report an issue
+
+    If anything on any screen is hard to use with VoiceOver, Switch Control, a large text size, or in Increase Contrast mode, email reddy@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your iOS text-size setting if possible.
     """
 }

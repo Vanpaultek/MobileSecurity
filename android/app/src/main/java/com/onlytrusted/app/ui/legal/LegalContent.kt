@@ -229,9 +229,24 @@ These are not aspirations — they are the only ways this app is written to beha
     val accessibilityStatement = """
 # Accessibility
 
-We aim to meet WCAG 2.1 AA for colour contrast, text scaling, and screen-reader labels, and to respect Android's system font size, display size, and high-contrast text settings.
+OnlyTrusted targets WCAG 2.1 AA (which is also what US Section 508 adopts). Specifically, this app:
 
-If you find a screen that is hard to use with TalkBack, Switch Access, or a large font size, email reddy@vanpaultek.com and we will treat it as a priority fix.
+## What we commit to
+
+- Color contrast ≥ 4.5:1 for normal text and ≥ 3:1 for large text, icons, and dividers. Every Material color role (primary, onSurface, onSurfaceVariant, outline) has been overridden to a tested AA-compliant value instead of relying on Material You's dynamic palette.
+- Text scaling: every text style uses sp units so Settings → Display → Font size and Display size scale them. The app does not pin text to fixed dp.
+- TalkBack: every IconButton has a contentDescription. Decorative icons use contentDescription = null so they are not announced.
+- Hit targets ≥ 48×48 dp on every tappable control, per Material 3 defaults.
+- Honors system settings: Reduce Motion, Bold Text, High Contrast Text, and Dark Mode all work without any in-app override needed.
+
+## What we do not claim
+
+- Formal Section 508 VPAT certification requires an independent accessibility consultant to audit the shipping build. We have not engaged one. The commitments above are self-measured.
+- Android versions below our minSdk of 29 are not supported.
+
+## Report an issue
+
+If anything on any screen is hard to use with TalkBack, Switch Access, a large font size, or in High Contrast mode, email reddy@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your Font size + Display size setting if possible.
     """.trimIndent()
 
     data class LegalSection(val title: String, val body: String)

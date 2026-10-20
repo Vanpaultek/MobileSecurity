@@ -37,15 +37,16 @@ struct OnboardingScreen: View {
         VStack(alignment: .leading, spacing: 12) {
             Image(systemName: "shield.lefthalf.filled")
                 .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(.tint)
+                .foregroundStyle(Color.appAccent)
                 .padding(.bottom, 4)
+                .decorativeAccessibility()
 
             Text("OnlyTrusted")
-                .font(.system(.largeTitle, design: .default, weight: .bold))
+                .font(.appLargeTitle)
 
             Text("A serious privacy tool for you and your family — not an entertainment app. Please read and confirm the following before you continue.")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -86,7 +87,7 @@ struct OnboardingScreen: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Please confirm")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appSecondaryText)
                 .textCase(.uppercase)
                 .padding(.leading, 4)
 
@@ -119,7 +120,7 @@ struct OnboardingScreen: View {
     private var legalFootnote: some View {
         Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings → Privacy, terms & honest claims.")
             .font(.footnote)
-            .foregroundStyle(.tertiary)
+            .foregroundStyle(Color.appTertiaryText)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -158,8 +159,9 @@ private struct InfoCard: View {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(iconTint)
+                    .decorativeAccessibility()
                 Text(title)
-                    .font(.headline)
+                    .font(.appSectionTitle)
             }
 
             VStack(alignment: .leading, spacing: 12) {
@@ -197,7 +199,7 @@ private struct ConsentRow: View {
                     .font(.subheadline.weight(.semibold))
                 Text(detail)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.appSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.trailing, 8)
