@@ -25,6 +25,7 @@ class SecurityRepository(
 
     private val logMutex = Mutex()
     @Volatile private var lastHash: String? = null
+    @Volatile private var writesSinceTrim = 0
 
     suspend fun log(type: String, packageName: String? = null, detail: String? = null) {
         logMutex.withLock {
@@ -42,7 +43,21 @@ class SecurityRepository(
                     rowHash = rowHash
                 )
             )
+            writesSinceTrim++
+            if (writesSinceTrim >= TRIM_CHECK_EVERY_N_WRITES) {
+                writesSinceTrim = 0
+                if (eventDao.totalCount() > MAX_EVENTS) {
+                    eventDao.trimToNewest(MAX_EVENTS)
+                }
+            }
         }
+    }
+
+    companion object {
+        /** Keep the newest 10 000 events; older rows are deleted periodically. */
+        private const val MAX_EVENTS = 10_000
+        /** Trim-check runs every N inserts; keeps the write path cheap. */
+        private const val TRIM_CHECK_EVERY_N_WRITES = 50
     }
 
     suspend fun verifyChain(): Boolean = logMutex.withLock {

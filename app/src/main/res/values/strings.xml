@@ -29,4 +29,7 @@
     <string name="alert_robocall_warn_title">Suspicious caller</string>
 
     <string name="shield_text_running">Shield watermark on. Captures taken now will carry your session code.</string>
+
+    <string name="alert_lockscreen_title">MobileSecurity alert</string>
+    <string name="alert_lockscreen_body">Unlock the phone to see details.</string>
 </resources>

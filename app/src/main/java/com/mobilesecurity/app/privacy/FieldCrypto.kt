@@ -48,21 +48,31 @@ object FieldCrypto {
         return cipher.doFinal(ciphertext).toString(Charsets.UTF_8)
     }
 
-    private fun getOrCreateKey(): SecretKey {
-        val keystore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        (keystore.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+    @Volatile private var cached: SecretKey? = null
+    private val keyLock = Any()
 
-        val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
-        val spec = KeyGenParameterSpec.Builder(
-            KEY_ALIAS,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-        )
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setKeySize(256)
-            .setRandomizedEncryptionRequired(true)
-            .build()
-        generator.init(spec)
-        return generator.generateKey()
+    private fun getOrCreateKey(): SecretKey {
+        cached?.let { return it }
+        return synchronized(keyLock) {
+            cached?.let { return@synchronized it }
+            val keystore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
+            val existing = keystore.getKey(KEY_ALIAS, null) as? SecretKey
+            val key = existing ?: run {
+                val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
+                val spec = KeyGenParameterSpec.Builder(
+                    KEY_ALIAS,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                )
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setKeySize(256)
+                    .setRandomizedEncryptionRequired(true)
+                    .build()
+                generator.init(spec)
+                generator.generateKey()
+            }
+            cached = key
+            key
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.net.Uri
 import com.mobilesecurity.app.MobileSecurityApp
 import com.mobilesecurity.app.data.db.entities.BlockedNumber
 import com.mobilesecurity.app.data.db.entities.SecurityEvent
+import com.mobilesecurity.app.privacy.PhoneUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -61,6 +62,31 @@ object DataExporter {
         events.size + blocked.size
     }
 
-    private fun SecurityEvent.toDto() = EventDto(timestamp, type, packageName, detail)
-    private fun BlockedNumber.toDto() = BlockedDto(number, label, addedAt, blockCalls, blockSms)
+    /**
+     * This export is user-visible: it lands in a SAF location the user chose, which may be
+     * a cloud-synced folder. We therefore redact every phone number before writing.
+     *
+     * If the user needs un-redacted numbers for carrier / law-enforcement escalation, they
+     * use the Evidence pack export instead, which lives next to this one in Settings and is
+     * explicitly labelled for that purpose.
+     */
+    private fun SecurityEvent.toDto(): EventDto = EventDto(
+        timestampMillis = timestamp,
+        type = type,
+        packageName = packageName,
+        detail = detail?.let(::maskNumbersInDetail)
+    )
+
+    private fun BlockedNumber.toDto(): BlockedDto = BlockedDto(
+        number = PhoneUtils.mask(number),
+        label = label,
+        addedAtMillis = addedAt,
+        blockCalls = blockCalls,
+        blockSms = blockSms
+    )
+
+    private val NUMBER_RE = Regex("\\+?\\d{7,}")
+
+    private fun maskNumbersInDetail(detail: String): String =
+        NUMBER_RE.replace(detail) { PhoneUtils.mask(it.value) }
 }

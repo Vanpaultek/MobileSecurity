@@ -35,4 +35,14 @@ interface EventDao {
 
     @Query("SELECT * FROM security_events ORDER BY id DESC LIMIT :limit")
     suspend fun tail(limit: Int): List<SecurityEvent>
+
+    @Query("SELECT COUNT(*) FROM security_events")
+    suspend fun totalCount(): Int
+
+    /** Delete everything older than the newest [keep] rows. */
+    @Query("""
+        DELETE FROM security_events
+        WHERE id NOT IN (SELECT id FROM security_events ORDER BY id DESC LIMIT :keep)
+    """)
+    suspend fun trimToNewest(keep: Int)
 }

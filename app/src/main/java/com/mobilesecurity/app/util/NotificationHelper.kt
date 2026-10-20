@@ -37,6 +37,17 @@ object NotificationHelper {
     }
 
     fun postAlert(context: Context, title: String, body: String, tag: String) {
+        // On the lock screen we show only a generic headline — the real body (which may contain
+        // a caller / sender phone number) is replaced by a redacted public version. The full
+        // body is still visible to the owner once the device is unlocked and they tap through.
+        val publicVersion = NotificationCompat.Builder(context, CHANNEL_ALERTS)
+            .setContentTitle(context.getString(R.string.alert_lockscreen_title))
+            .setContentText(context.getString(R.string.alert_lockscreen_body))
+            .setSmallIcon(R.drawable.ic_shield)
+            .setAutoCancel(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ALERTS)
             .setContentTitle(title)
             .setContentText(body)
@@ -46,6 +57,8 @@ object NotificationHelper {
             .setContentIntent(mainActivityIntent(context))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_LIGHTS)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicVersion)
             .build()
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         manager.notify(tag, NOTIF_ALERT_BASE, notification)
