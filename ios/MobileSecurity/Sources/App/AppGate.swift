@@ -32,6 +32,7 @@ final class AppGate: ObservableObject {
     /// Called by Panic Lock action from any screen.
     func panic() {
         isLocked = true
+        EventStore.shared.append(type: SecurityEventRecord.Kind.panicLock)
     }
 
     var appLockEnabled: Bool {

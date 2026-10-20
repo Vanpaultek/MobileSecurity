@@ -13,10 +13,10 @@ struct MainTabs: View {
             NavigationStack { VaultScreen() }
                 .tabItem { Label("Family", systemImage: "person.2.fill") }
 
-            NavigationStack { EventsPlaceholder() }
+            NavigationStack { EventsScreen() }
                 .tabItem { Label("Events", systemImage: "clock.arrow.circlepath") }
 
-            NavigationStack { BlockedPlaceholder() }
+            NavigationStack { BlockListScreen() }
                 .tabItem { Label("Blocked", systemImage: "nosign") }
 
             NavigationStack { SettingsScreen() }
@@ -121,24 +121,3 @@ private struct HonestLimitsCard: View {
     }
 }
 
-struct EventsPlaceholder: View {
-    var body: some View {
-        ContentUnavailableView(
-            "No events yet",
-            systemImage: "clock.arrow.circlepath",
-            description: Text("Event log arrives with Phase 2 (call screening + SMS filter).")
-        )
-        .navigationTitle("Events")
-    }
-}
-
-struct BlockedPlaceholder: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Blocked numbers",
-            systemImage: "nosign",
-            description: Text("Call Directory Extension arrives with Phase 2.")
-        )
-        .navigationTitle("Blocked")
-    }
-}

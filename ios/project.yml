@@ -11,18 +11,18 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "1"
-    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: "0.2.0"
+    CURRENT_PROJECT_VERSION: "2"
     SWIFT_STRICT_CONCURRENCY: complete
-    GENERATE_INFOPLIST_FILE: YES
-    INFOPLIST_KEY_UILaunchScreen_Generation: YES
-    INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
-    INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
-    INFOPLIST_KEY_NSFaceIDUsageDescription: "MobileSecurity uses Face ID to unlock the app and the family vault."
-    INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity"
+    GENERATE_INFOPLIST_FILE: NO
+    # DEVELOPMENT_TEAM is filled in by the user before building for a real device.
+    # For simulator builds the "-" sign identity + empty team works for the main app,
+    # but Call Directory + MessageFilter extensions still need a real team.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
 
 targets:
+  # --- Main app ----------------------------------------------------------------
   MobileSecurity:
     type: application
     platform: iOS
@@ -31,10 +31,50 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app
-        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Entitlements/MobileSecurity.entitlements
         TARGETED_DEVICE_FAMILY: "1"
-    info:
-      path: MobileSecurity/Info.plist
-      properties:
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
+        INFOPLIST_FILE: MobileSecurity/Info.plist
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_NSFaceIDUsageDescription: "MobileSecurity uses Face ID to unlock the app and the family vault."
+        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity"
+    dependencies:
+      - target: CallDirectoryExtension
+      - target: MessageFilterExtension
+
+  # --- Call Directory Extension ------------------------------------------------
+  CallDirectoryExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: CallDirectoryExtension
+      - path: MobileSecurity/Sources/Shared
+      - path: MobileSecurity/Sources/Vault/PhoneUtils.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app.CallDirectoryExtension
+        CODE_SIGN_ENTITLEMENTS: Entitlements/CallDirectoryExtension.entitlements
+        INFOPLIST_FILE: CallDirectoryExtension/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_NAME: "CallDirectoryExtension"
+        PRODUCT_MODULE_NAME: CallDirectoryExtension
+        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity Call Blocker"
+
+  # --- Message Filter Extension ------------------------------------------------
+  MessageFilterExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: MessageFilterExtension
+      - path: MobileSecurity/Sources/Shared
+      - path: MobileSecurity/Sources/Vault/PhoneUtils.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app.MessageFilterExtension
+        CODE_SIGN_ENTITLEMENTS: Entitlements/MessageFilterExtension.entitlements
+        INFOPLIST_FILE: MessageFilterExtension/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_NAME: "MessageFilterExtension"
+        PRODUCT_MODULE_NAME: MessageFilterExtension
+        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity SMS Filter"

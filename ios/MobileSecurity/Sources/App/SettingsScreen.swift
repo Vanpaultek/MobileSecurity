@@ -10,6 +10,8 @@ struct SettingsScreen: View {
     @State private var appLockToggle = false
     @State private var showLockDeniedAlert = false
     @State private var confirmWipe = false
+    @State private var shareURL: URL?
+    @State private var exportError: String?
 
     private var canUseAuth: Bool {
         var err: NSError?
@@ -34,6 +36,16 @@ struct SettingsScreen: View {
             }
 
             Section("Data") {
+                Button {
+                    runExport { try DataExporter.write() }
+                } label: {
+                    Label("Export my data (JSON)", systemImage: "square.and.arrow.up")
+                }
+                Button {
+                    runExport { try EvidenceExporter.write() }
+                } label: {
+                    Label("Export evidence pack (for carrier / bank / police)", systemImage: "doc.badge.plus")
+                }
                 Button(role: .destructive) {
                     confirmWipe = true
                 } label: {
@@ -67,11 +79,34 @@ struct SettingsScreen: View {
         .confirmationDialog("Wipe everything?", isPresented: $confirmWipe, titleVisibility: .visible) {
             Button("Wipe", role: .destructive) {
                 try? store.wipe()
+                try? BlockListStore.shared.wipe()
+                EventStore.shared.wipe()
+                EventStore.shared.append(type: SecurityEventRecord.Kind.wipe)
                 UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will delete every trusted contact and every setting stored by this app. It cannot be undone.")
+            Text("This will delete every trusted contact, every blocked number, every event, and every setting stored by this app. It cannot be undone.")
+        }
+        .sheet(item: Binding(get: { shareURL.map(IdentifiableURL.init) },
+                             set: { shareURL = $0?.value })) { wrap in
+            ShareSheet(activityItems: [wrap.value])
+        }
+        .alert("Export failed", isPresented: Binding(get: { exportError != nil }, set: { _ in exportError = nil })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(exportError ?? "")
         }
     }
+
+    private func runExport(_ work: () throws -> URL) {
+        do { shareURL = try work() }
+        catch { exportError = String(describing: error) }
+    }
+}
+
+private struct IdentifiableURL: Identifiable {
+    let value: URL
+    var id: URL { value }
+    init(_ value: URL) { self.value = value }
 }
