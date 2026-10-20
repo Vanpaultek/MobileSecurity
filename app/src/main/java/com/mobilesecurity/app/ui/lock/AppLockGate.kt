@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import com.mobilesecurity.app.security.AppLockManager
 
 @Composable
 fun AppLockGate(
@@ -29,11 +30,13 @@ fun AppLockGate(
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
     var attempted by remember { mutableStateOf(false) }
+    val canAuth = remember { BiometricPrompter.canAuthenticate(context) }
 
     LaunchedEffect(Unit) {
         val activity = context as? FragmentActivity ?: return@LaunchedEffect
-        if (!BiometricPrompter.canAuthenticate(activity)) {
-            error = "No biometric or device PIN set up. Add one in system settings to use App Lock."
+        if (!canAuth) {
+            error = "This device no longer has a biometric or PIN set up. You can disable App " +
+                "Lock below to recover, then re-enable it after setting one up in system settings."
             return@LaunchedEffect
         }
         attempted = true
@@ -64,20 +67,33 @@ fun AppLockGate(
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
-        Button(
-            onClick = {
-                val activity = context as? FragmentActivity ?: return@Button
-                error = null
-                attempted = true
-                BiometricPrompter.prompt(
-                    activity = activity,
-                    title = "Unlock MobileSecurity",
-                    subtitle = "Use your biometric or device PIN",
-                    onSuccess = onUnlocked,
-                    onFailure = { error = it }
-                )
-            },
-            modifier = Modifier.padding(top = 24.dp)
-        ) { Text(if (attempted) "Try again" else "Unlock") }
+        if (canAuth) {
+            Button(
+                onClick = {
+                    val activity = context as? FragmentActivity ?: return@Button
+                    error = null
+                    attempted = true
+                    BiometricPrompter.prompt(
+                        activity = activity,
+                        title = "Unlock MobileSecurity",
+                        subtitle = "Use your biometric or device PIN",
+                        onSuccess = onUnlocked,
+                        onFailure = { error = it }
+                    )
+                },
+                modifier = Modifier.padding(top = 24.dp)
+            ) { Text(if (attempted) "Try again" else "Unlock") }
+        } else {
+            // Recovery path: no biometric / PIN enrolled. Let the owner disable App Lock from
+            // the gate itself so they're never stuck out of their own app.
+            Button(
+                onClick = {
+                    AppLockManager.setEnabled(context, false)
+                    AppLockManager.resetUnlock(context)
+                    onUnlocked()
+                },
+                modifier = Modifier.padding(top = 24.dp)
+            ) { Text("Disable App Lock and continue") }
+        }
     }
 }

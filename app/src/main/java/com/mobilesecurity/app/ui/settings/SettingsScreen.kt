@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mobilesecurity.app.MobileSecurityApp
 import com.mobilesecurity.app.export.DataExporter
 import com.mobilesecurity.app.export.EvidenceExporter
+import com.mobilesecurity.app.ui.lock.BiometricPrompter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -121,7 +122,18 @@ fun SettingsScreen(
             title = "App lock",
             subtitle = "Require your biometric or device PIN to open MobileSecurity.",
             checked = state.appLockEnabled,
-            onChange = vm::setAppLock
+            onChange = { enable ->
+                if (enable && !BiometricPrompter.canAuthenticate(context)) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            "Set up a device PIN, pattern, or biometric in system settings first " +
+                                "— otherwise App Lock would permanently lock you out."
+                        )
+                    }
+                    return@SettingToggle
+                }
+                vm.setAppLock(enable)
+            }
         )
 
         Card {
