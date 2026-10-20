@@ -2,7 +2,7 @@
 
 A privacy-focused Android app that gives you visibility and control over who touches your microphone, camera, calls, and texts — with everything stored encrypted on your device.
 
-**A product of 57Million LLC.** © 2026 57Million LLC. All rights reserved. Support: `reddy@vanpaultek.com`.
+**A product of 57Million LLC.** Copyright © 2026 57Million LLC. Licensed under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE). Support: `reddy@vanpaultek.com`.
 
 ## What it does (and what it doesn't)
 
