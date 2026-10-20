@@ -44,13 +44,13 @@ fun AboutScreen() {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Support", style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "Email: support@mobilesecurity.local",
+                    "Email: reddy@vanpaultek.com",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 OutlinedButton(
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:support@mobilesecurity.local")
+                            data = Uri.parse("mailto:reddy@vanpaultek.com")
                             putExtra(Intent.EXTRA_SUBJECT,
                                 "MobileSecurity ${BuildConfig.VERSION_NAME} support")
                         }

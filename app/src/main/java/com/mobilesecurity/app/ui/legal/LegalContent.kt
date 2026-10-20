@@ -83,7 +83,7 @@ If the policy changes, the updated date at the top will change and the full text
 
 ## Contact
 
-Questions, concerns, or data-rights requests: support@mobilesecurity.local (replace with your actual support address before shipping).
+Questions, concerns, or data-rights requests: reddy@vanpaultek.com (57Million LLC).
     """.trimIndent()
 
     val termsOfUse = """
@@ -135,7 +135,7 @@ These terms are governed by the laws of the country where you are resident, to t
 
 ## Contact
 
-support@mobilesecurity.local
+reddy@vanpaultek.com
     """.trimIndent()
 
     val callEncryptionExplainer = """
@@ -229,7 +229,7 @@ These are not aspirations — they are the only ways this app is written to beha
 
 We aim to meet WCAG 2.1 AA for colour contrast, text scaling, and screen-reader labels, and to respect Android's system font size, display size, and high-contrast text settings.
 
-If you find a screen that is hard to use with TalkBack, Switch Access, or a large font size, email support@mobilesecurity.local and we will treat it as a priority fix.
+If you find a screen that is hard to use with TalkBack, Switch Access, or a large font size, email reddy@vanpaultek.com and we will treat it as a priority fix.
     """.trimIndent()
 
     data class LegalSection(val title: String, val body: String)
