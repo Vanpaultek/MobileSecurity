@@ -1,4 +1,4 @@
-# MobileSecurity
+# OnlyTrusted
 
 A privacy-focused Android app that gives you visibility and control over who touches your microphone, camera, calls, and texts — with everything stored encrypted on your device.
 
@@ -40,7 +40,7 @@ A privacy-focused Android app that gives you visibility and control over who tou
 ## Repository layout
 
 ```
-MobileSecurity/
+OnlyTrusted/
 ├── android/   ← Native Android app (Kotlin + Jetpack Compose)
 ├── ios/       ← Native iOS app (Swift + SwiftUI)
 ├── BUG_REPORT.md
@@ -73,7 +73,7 @@ Requires Xcode 26 (or newer) and macOS 14+. XcodeGen is used to generate the Xco
 brew install xcodegen       # one time
 cd ios
 xcodegen generate
-xcodebuild -scheme MobileSecurity \
+xcodebuild -scheme OnlyTrusted \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -configuration Debug \
   -derivedDataPath build \
@@ -88,7 +88,7 @@ The iOS app uses:
 - LocalAuthentication (Face ID / Touch ID / device PIN) for App Lock
 - CallKit `CXCallDirectoryProvider` extension for the user's block list
 - IdentityLookup `ILMessageFilterQueryHandling` extension for unknown-sender SMS
-- App Group `group.com.mobilesecurity.app.shared` to share state with the two extensions
+- App Group `group.com.onlytrusted.app.shared` to share state with the two extensions
 - Deployment target iOS 17
 
 ### iOS status (as of 2026-10-20)
@@ -115,7 +115,7 @@ The in-app "Honest claims" screen states all of these to the user.
 
 On first launch the app requests: `RECORD_AUDIO`, `CAMERA`, `READ_PHONE_STATE`, `READ_CALL_LOG`, `RECEIVE_SMS`, `READ_SMS`, and (on API 33+) `POST_NOTIFICATIONS`.
 
-Call screening also requires the user to pick MobileSecurity as the default **Caller ID & spam** app in system settings — Settings → Apps → Default apps.
+Call screening also requires the user to pick OnlyTrusted as the default **Caller ID & spam** app in system settings — Settings → Apps → Default apps.
 
 ## Notes on honest marketing
 

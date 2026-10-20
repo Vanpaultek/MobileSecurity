@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MobileSecurity</string>
+    <string name="app_name">OnlyTrusted</string>
 
     <string name="monitor_title">Shield is active</string>
     <string name="monitor_text_idle">Watching mic and camera. Nothing suspicious right now.</string>
@@ -30,6 +30,6 @@
 
     <string name="shield_text_running">Shield watermark on. Captures taken now will carry your session code.</string>
 
-    <string name="alert_lockscreen_title">MobileSecurity alert</string>
+    <string name="alert_lockscreen_title">OnlyTrusted alert</string>
     <string name="alert_lockscreen_body">Unlock the phone to see details.</string>
 </resources>

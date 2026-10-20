@@ -1,0 +1,719 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06B64183C02925954AB1C87B /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0393312C797275B88012608 /* AboutScreen.swift */; };
+		10ED513248320061108B30BA /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
+		1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
+		1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
+		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
+		2A8308A8CEF8DEF2DAEC42DE /* MessageFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */; };
+		2C1C57334861C68F1D4697F5 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
+		3099C006611569D587D98E02 /* EventsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */; };
+		3A24CBCD6D895998F3A59B70 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
+		41D922C570BA400222F1ED3A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
+		54F1222A590D224BD05496FB /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */; };
+		6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
+		7A0B31F7B59CC3C0C4FB498F /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490883DF89C527594BD0E0E /* Exporters.swift */; };
+		7CC7A7692C3CBBE641ED3862 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
+		87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */; };
+		9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B875C9E9199F8E854722B33A /* AppLockGate.swift */; };
+		9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E116181529A59548B1AA0523 /* SettingsScreen.swift */; };
+		A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */; };
+		A7E6F5E9928F9E49B31AF961 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
+		B9133CBDCF92C2136AA035CE /* LegalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119AC115F503D46187427F9C /* LegalScreen.swift */; };
+		BD0F5C0ECAF573D0F78D9EE1 /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */; };
+		C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
+		D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */; };
+		D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
+		D86AAE6A5F9830A8315985C8 /* VaultEditScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */; };
+		E77DA326804F1AB7DA39F0A0 /* MessageFilterHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */; };
+		F2CDFE0A3BA4AC9F54C32FAB /* CallDirectoryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */; };
+		F317F03552A6496C0FEC0001 /* CallDirectoryExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F3FC4BEA9BF8AF5BB6F1EE26 /* AppGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA15C620019BB9D395CEDC12 /* AppGate.swift */; };
+		F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB8BB9444909AA0350EAE85 /* LegalContent.swift */; };
+		FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4CF465BA92454E65483F95E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8BDEDABCF6F527BC0163A577 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF064AB733BC7B34A00CE5BD;
+			remoteInfo = CallDirectoryExtension;
+		};
+		9C103D75389FA34D43916991 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8BDEDABCF6F527BC0163A577 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37EECAEEBF66D1A45F624FC9;
+			remoteInfo = MessageFilterExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2B91CBEBBBB34C2A7C46EF68 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F317F03552A6496C0FEC0001 /* CallDirectoryExtension.appex in Embed Foundation Extensions */,
+				2A8308A8CEF8DEF2DAEC42DE /* MessageFilterExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0181DD98D26C9984555D6A90 /* MainTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabs.swift; sourceTree = "<group>"; };
+		0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListScreen.swift; sourceTree = "<group>"; };
+		119AC115F503D46187427F9C /* LegalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalScreen.swift; sourceTree = "<group>"; };
+		4851D38B8F1106FC519D68DD /* OnlyTrusted.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OnlyTrusted.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultEditScreen.swift; sourceTree = "<group>"; };
+		528559BBE2D0AE609BD1D884 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageFilterHandler.swift; sourceTree = "<group>"; };
+		7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultScreen.swift; sourceTree = "<group>"; };
+		7DB8BB9444909AA0350EAE85 /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalContent.swift; sourceTree = "<group>"; };
+		82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
+		83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
+		883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MessageFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDirectoryHandler.swift; sourceTree = "<group>"; };
+		964AB9EDC5C3B076D8F4DBE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A651F201558860B72E2B18EA /* PhoneUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneUtils.swift; sourceTree = "<group>"; };
+		B624AA0E449B364901659D23 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		B875C9E9199F8E854722B33A /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
+		BA15C620019BB9D395CEDC12 /* AppGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGate.swift; sourceTree = "<group>"; };
+		CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyTrustedApp.swift; sourceTree = "<group>"; };
+		D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsScreen.swift; sourceTree = "<group>"; };
+		DD57602976D8C9A69AEB4959 /* BlockListStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListStore.swift; sourceTree = "<group>"; };
+		DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldCrypto.swift; sourceTree = "<group>"; };
+		E116181529A59548B1AA0523 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		E287E737C235F26B6F586928 /* SharedContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedContainer.swift; sourceTree = "<group>"; };
+		E490883DF89C527594BD0E0E /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
+		EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CallDirectoryExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0393312C797275B88012608 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		076E7F510A5D4414D938D183 /* Blocked */ = {
+			isa = PBXGroup;
+			children = (
+				0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */,
+			);
+			path = Blocked;
+			sourceTree = "<group>";
+		};
+		2BA1930925381D100F44B3BB /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				350FA13BD8534EB31A31C2F5 /* About */,
+				3828D607A2083E4850E35012 /* App */,
+				076E7F510A5D4414D938D183 /* Blocked */,
+				8C611D5CC8A6FD33D9C51771 /* Events */,
+				4B2818453D3C9512B067BEE0 /* Export */,
+				BE88C114F01F7FB7F4965C92 /* Legal */,
+				59FC3E7C7CBEEB57ED07CBFB /* Lock */,
+				8B2BAE45A4D64FD531E8626F /* Onboarding */,
+				7B0854CADCA48980A3484FC0 /* Shared */,
+				6090D23C3520BFEAD7394652 /* Vault */,
+			);
+			name = Sources;
+			path = OnlyTrusted/Sources;
+			sourceTree = "<group>";
+		};
+		350FA13BD8534EB31A31C2F5 /* About */ = {
+			isa = PBXGroup;
+			children = (
+				F0393312C797275B88012608 /* AboutScreen.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
+		3828D607A2083E4850E35012 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				BA15C620019BB9D395CEDC12 /* AppGate.swift */,
+				0181DD98D26C9984555D6A90 /* MainTabs.swift */,
+				CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */,
+				E116181529A59548B1AA0523 /* SettingsScreen.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		4A13BEEE0F7BB811858626FA /* MessageFilterExtension */ = {
+			isa = PBXGroup;
+			children = (
+				964AB9EDC5C3B076D8F4DBE7 /* Info.plist */,
+				62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */,
+			);
+			path = MessageFilterExtension;
+			sourceTree = "<group>";
+		};
+		4B2818453D3C9512B067BEE0 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				E490883DF89C527594BD0E0E /* Exporters.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		59FC3E7C7CBEEB57ED07CBFB /* Lock */ = {
+			isa = PBXGroup;
+			children = (
+				B875C9E9199F8E854722B33A /* AppLockGate.swift */,
+			);
+			path = Lock;
+			sourceTree = "<group>";
+		};
+		6090D23C3520BFEAD7394652 /* Vault */ = {
+			isa = PBXGroup;
+			children = (
+				DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */,
+				A651F201558860B72E2B18EA /* PhoneUtils.swift */,
+				48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */,
+				7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */,
+				83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */,
+			);
+			path = Vault;
+			sourceTree = "<group>";
+		};
+		7B0854CADCA48980A3484FC0 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				DD57602976D8C9A69AEB4959 /* BlockListStore.swift */,
+				B624AA0E449B364901659D23 /* EventStore.swift */,
+				E287E737C235F26B6F586928 /* SharedContainer.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		8B2BAE45A4D64FD531E8626F /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		8C611D5CC8A6FD33D9C51771 /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
+		9270F46963D2CD90617BBF13 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */,
+				883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */,
+				4851D38B8F1106FC519D68DD /* OnlyTrusted.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B71B8A8F3A6FB790A5ACCB2D = {
+			isa = PBXGroup;
+			children = (
+				DCA5EB861CF734178216726C /* CallDirectoryExtension */,
+				4A13BEEE0F7BB811858626FA /* MessageFilterExtension */,
+				2BA1930925381D100F44B3BB /* Sources */,
+				9270F46963D2CD90617BBF13 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BE88C114F01F7FB7F4965C92 /* Legal */ = {
+			isa = PBXGroup;
+			children = (
+				7DB8BB9444909AA0350EAE85 /* LegalContent.swift */,
+				119AC115F503D46187427F9C /* LegalScreen.swift */,
+			);
+			path = Legal;
+			sourceTree = "<group>";
+		};
+		DCA5EB861CF734178216726C /* CallDirectoryExtension */ = {
+			isa = PBXGroup;
+			children = (
+				892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */,
+				528559BBE2D0AE609BD1D884 /* Info.plist */,
+			);
+			path = CallDirectoryExtension;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		37EECAEEBF66D1A45F624FC9 /* MessageFilterExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C6AE18D9CD2793ED0887FD5F /* Build configuration list for PBXNativeTarget "MessageFilterExtension" */;
+			buildPhases = (
+				965290603C1C4D36D2521DF2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MessageFilterExtension;
+			packageProductDependencies = (
+			);
+			productName = MessageFilterExtension;
+			productReference = 883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		AF064AB733BC7B34A00CE5BD /* CallDirectoryExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB03D706C7AA33E8061E0CF0 /* Build configuration list for PBXNativeTarget "CallDirectoryExtension" */;
+			buildPhases = (
+				03BEE39BD0E73472DE1AB491 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CallDirectoryExtension;
+			packageProductDependencies = (
+			);
+			productName = CallDirectoryExtension;
+			productReference = EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		BA12AF62105C4B649E55F664 /* OnlyTrusted */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D3A6053DE30849A577EB485 /* Build configuration list for PBXNativeTarget "OnlyTrusted" */;
+			buildPhases = (
+				82931FAEC5F72CCE30A576C0 /* Sources */,
+				2B91CBEBBBB34C2A7C46EF68 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE6A1117BA5F7FE299734B2E /* PBXTargetDependency */,
+				76F6E37EDC44E6CBDDC8CCD1 /* PBXTargetDependency */,
+			);
+			name = OnlyTrusted;
+			packageProductDependencies = (
+			);
+			productName = OnlyTrusted;
+			productReference = 4851D38B8F1106FC519D68DD /* OnlyTrusted.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8BDEDABCF6F527BC0163A577 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					37EECAEEBF66D1A45F624FC9 = {
+						DevelopmentTeam = H86SA2C3S5;
+						ProvisioningStyle = Automatic;
+					};
+					AF064AB733BC7B34A00CE5BD = {
+						DevelopmentTeam = H86SA2C3S5;
+						ProvisioningStyle = Automatic;
+					};
+					BA12AF62105C4B649E55F664 = {
+						DevelopmentTeam = H86SA2C3S5;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A0121FDF1C9588AFFBD49831 /* Build configuration list for PBXProject "OnlyTrusted" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B71B8A8F3A6FB790A5ACCB2D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9270F46963D2CD90617BBF13 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BA12AF62105C4B649E55F664 /* OnlyTrusted */,
+				AF064AB733BC7B34A00CE5BD /* CallDirectoryExtension */,
+				37EECAEEBF66D1A45F624FC9 /* MessageFilterExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03BEE39BD0E73472DE1AB491 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CC7A7692C3CBBE641ED3862 /* BlockListStore.swift in Sources */,
+				F2CDFE0A3BA4AC9F54C32FAB /* CallDirectoryHandler.swift in Sources */,
+				1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */,
+				6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */,
+				2C1C57334861C68F1D4697F5 /* SharedContainer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82931FAEC5F72CCE30A576C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06B64183C02925954AB1C87B /* AboutScreen.swift in Sources */,
+				F3FC4BEA9BF8AF5BB6F1EE26 /* AppGate.swift in Sources */,
+				9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */,
+				A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */,
+				A7E6F5E9928F9E49B31AF961 /* BlockListStore.swift in Sources */,
+				D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */,
+				3099C006611569D587D98E02 /* EventsScreen.swift in Sources */,
+				7A0B31F7B59CC3C0C4FB498F /* Exporters.swift in Sources */,
+				2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */,
+				F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */,
+				B9133CBDCF92C2136AA035CE /* LegalScreen.swift in Sources */,
+				20A426A51D2A267996954721 /* MainTabs.swift in Sources */,
+				BD0F5C0ECAF573D0F78D9EE1 /* OnboardingScreen.swift in Sources */,
+				D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */,
+				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
+				9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */,
+				FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */,
+				D86AAE6A5F9830A8315985C8 /* VaultEditScreen.swift in Sources */,
+				87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */,
+				54F1222A590D224BD05496FB /* VaultStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		965290603C1C4D36D2521DF2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A24CBCD6D895998F3A59B70 /* BlockListStore.swift in Sources */,
+				41D922C570BA400222F1ED3A /* EventStore.swift in Sources */,
+				E77DA326804F1AB7DA39F0A0 /* MessageFilterHandler.swift in Sources */,
+				10ED513248320061108B30BA /* PhoneUtils.swift in Sources */,
+				1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		76F6E37EDC44E6CBDDC8CCD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37EECAEEBF66D1A45F624FC9 /* MessageFilterExtension */;
+			targetProxy = 9C103D75389FA34D43916991 /* PBXContainerItemProxy */;
+		};
+		BE6A1117BA5F7FE299734B2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF064AB733BC7B34A00CE5BD /* CallDirectoryExtension */;
+			targetProxy = 4CF465BA92454E65483F95E8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		07016BA9079F4453EA0E24A8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Entitlements/CallDirectoryExtension.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CallDirectoryExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OnlyTrusted Call Blocker";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app.CallDirectoryExtension;
+				PRODUCT_MODULE_NAME = CallDirectoryExtension;
+				PRODUCT_NAME = CallDirectoryExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		14D9E311237F265E205077D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Entitlements/OnlyTrusted.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = OnlyTrusted/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = OnlyTrusted;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "OnlyTrusted uses Face ID to unlock the app and the family vault.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		278285DF77FBBA2CFB440763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = H86SA2C3S5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.2.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		479576D17F8868870E7DD783 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Entitlements/OnlyTrusted.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = OnlyTrusted/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = OnlyTrusted;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "OnlyTrusted uses Face ID to unlock the app and the family vault.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		58118B7914984BE1CC433B9B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Entitlements/CallDirectoryExtension.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CallDirectoryExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OnlyTrusted Call Blocker";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app.CallDirectoryExtension;
+				PRODUCT_MODULE_NAME = CallDirectoryExtension;
+				PRODUCT_NAME = CallDirectoryExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		671C1688471B48E001164CB1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Entitlements/MessageFilterExtension.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MessageFilterExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OnlyTrusted SMS Filter";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app.MessageFilterExtension;
+				PRODUCT_MODULE_NAME = MessageFilterExtension;
+				PRODUCT_NAME = MessageFilterExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9A72F564E264BE8A4D55DC59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = H86SA2C3S5;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.2.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		DC9BCC54E63A993905E69131 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Entitlements/MessageFilterExtension.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MessageFilterExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OnlyTrusted SMS Filter";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.onlytrusted.app.MessageFilterExtension;
+				PRODUCT_MODULE_NAME = MessageFilterExtension;
+				PRODUCT_NAME = MessageFilterExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8D3A6053DE30849A577EB485 /* Build configuration list for PBXNativeTarget "OnlyTrusted" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				479576D17F8868870E7DD783 /* Debug */,
+				14D9E311237F265E205077D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A0121FDF1C9588AFFBD49831 /* Build configuration list for PBXProject "OnlyTrusted" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A72F564E264BE8A4D55DC59 /* Debug */,
+				278285DF77FBBA2CFB440763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AB03D706C7AA33E8061E0CF0 /* Build configuration list for PBXNativeTarget "CallDirectoryExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07016BA9079F4453EA0E24A8 /* Debug */,
+				58118B7914984BE1CC433B9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C6AE18D9CD2793ED0887FD5F /* Build configuration list for PBXNativeTarget "MessageFilterExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				671C1688471B48E001164CB1 /* Debug */,
+				DC9BCC54E63A993905E69131 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8BDEDABCF6F527BC0163A577 /* Project object */;
+}

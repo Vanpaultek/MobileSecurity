@@ -4,7 +4,7 @@
 <dict>
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.com.mobilesecurity.app.shared</string>
+        <string>group.com.onlytrusted.app.shared</string>
     </array>
 </dict>
 </plist>

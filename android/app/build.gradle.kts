@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mobilesecurity.app"
+    namespace = "com.onlytrusted.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.mobilesecurity.app"
+        applicationId = "com.onlytrusted.app"
         minSdk = 29
         targetSdk = 35
         versionCode = 1

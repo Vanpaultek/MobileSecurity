@@ -1,7 +1,7 @@
-name: MobileSecurity
+name: OnlyTrusted
 options:
   minimumXcodeGenVersion: "2.40.0"
-  bundleIdPrefix: com.mobilesecurity
+  bundleIdPrefix: com.onlytrusted
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -27,22 +27,22 @@ settings:
 
 targets:
   # --- Main app ----------------------------------------------------------------
-  MobileSecurity:
+  OnlyTrusted:
     type: application
     platform: iOS
     sources:
-      - path: MobileSecurity/Sources
+      - path: OnlyTrusted/Sources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app
-        CODE_SIGN_ENTITLEMENTS: Entitlements/MobileSecurity.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.onlytrusted.app
+        CODE_SIGN_ENTITLEMENTS: Entitlements/OnlyTrusted.entitlements
         TARGETED_DEVICE_FAMILY: "1"
-        INFOPLIST_FILE: MobileSecurity/Info.plist
+        INFOPLIST_FILE: OnlyTrusted/Info.plist
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
-        INFOPLIST_KEY_NSFaceIDUsageDescription: "MobileSecurity uses Face ID to unlock the app and the family vault."
-        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity"
+        INFOPLIST_KEY_NSFaceIDUsageDescription: "OnlyTrusted uses Face ID to unlock the app and the family vault."
+        INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted"
     dependencies:
       - target: CallDirectoryExtension
       - target: MessageFilterExtension
@@ -53,17 +53,17 @@ targets:
     platform: iOS
     sources:
       - path: CallDirectoryExtension
-      - path: MobileSecurity/Sources/Shared
-      - path: MobileSecurity/Sources/Vault/PhoneUtils.swift
+      - path: OnlyTrusted/Sources/Shared
+      - path: OnlyTrusted/Sources/Vault/PhoneUtils.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app.CallDirectoryExtension
+        PRODUCT_BUNDLE_IDENTIFIER: com.onlytrusted.app.CallDirectoryExtension
         CODE_SIGN_ENTITLEMENTS: Entitlements/CallDirectoryExtension.entitlements
         INFOPLIST_FILE: CallDirectoryExtension/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         PRODUCT_NAME: "CallDirectoryExtension"
         PRODUCT_MODULE_NAME: CallDirectoryExtension
-        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity Call Blocker"
+        INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted Call Blocker"
 
   # --- Message Filter Extension ------------------------------------------------
   MessageFilterExtension:
@@ -71,14 +71,14 @@ targets:
     platform: iOS
     sources:
       - path: MessageFilterExtension
-      - path: MobileSecurity/Sources/Shared
-      - path: MobileSecurity/Sources/Vault/PhoneUtils.swift
+      - path: OnlyTrusted/Sources/Shared
+      - path: OnlyTrusted/Sources/Vault/PhoneUtils.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mobilesecurity.app.MessageFilterExtension
+        PRODUCT_BUNDLE_IDENTIFIER: com.onlytrusted.app.MessageFilterExtension
         CODE_SIGN_ENTITLEMENTS: Entitlements/MessageFilterExtension.entitlements
         INFOPLIST_FILE: MessageFilterExtension/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         PRODUCT_NAME: "MessageFilterExtension"
         PRODUCT_MODULE_NAME: MessageFilterExtension
-        INFOPLIST_KEY_CFBundleDisplayName: "MobileSecurity SMS Filter"
+        INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted SMS Filter"

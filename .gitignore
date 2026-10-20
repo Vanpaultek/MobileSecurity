@@ -17,4 +17,4 @@ ios/build/
 ios/build-*/
 ios/DerivedData/
 *.xcuserdata/
-ios/MobileSecurity.xcodeproj/xcuserdata/
+ios/OnlyTrusted.xcodeproj/xcuserdata/
