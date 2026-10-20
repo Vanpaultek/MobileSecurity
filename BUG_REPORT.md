@@ -1,7 +1,7 @@
 # MobileSecurity — Bug Report
 
-- **Generated:** 2026-10-19 (first audit). Updated 2026-10-20 with C4 (App Lock lockout) caught during on-device preview.
-- **Scope:** `app/src/main/java/com/mobilesecurity/app/`, `AndroidManifest.xml`, `app/build.gradle.kts`.
+- **Generated:** 2026-10-19 (first audit). Updated 2026-10-20 with C4 (App Lock lockout) + C5 (Panic lock copy) caught during on-device preview, and extended for iOS Phase 2.
+- **Scope:** `android/app/src/main/java/com/mobilesecurity/app/`, `android/app/src/main/AndroidManifest.xml`, `android/app/build.gradle.kts`, `ios/MobileSecurity/Sources/`, `ios/CallDirectoryExtension/`, `ios/MessageFilterExtension/`.
 - **Review state:** All CRITICAL and HIGH items fixed. MEDIUM / LOW are open and tracked for the daily audit agent.
 - **Lint:** `./gradlew :app:lintDebug` → 0 errors, 27 cosmetic warnings (library-version nags, unused-resource `ic_launcher_round`, obsolete `SDK_INT >= O` checks under `minSdk 29`).
 
@@ -114,3 +114,23 @@
 A once-a-day cron (`DailyBugScan` routine) re-runs the audit, appends new findings under a dated heading at the bottom of this file, and leaves the existing content alone.
 
 To stop the agent: `/schedule list` → copy the routine id → `/schedule delete <id>`.
+
+---
+
+## iOS — known Simulator-only behaviours (not bugs)
+
+> Documented so the daily scanner doesn't repeatedly surface these as "problems."
+
+### iS1. `CXCallDirectoryManager.reloadExtension` fails on iOS Simulator
+- **File:** `ios/MobileSecurity/Sources/Blocked/BlockListScreen.swift`
+- **What happens:** Tapping "Reload Call Directory" on the Simulator surfaces a `failed: ...` snackbar in the UI. The underlying error is "The operation couldn't be completed" because the Simulator has no telephony stack to register the extension against.
+- **On a real device** with the signed extension installed and MobileSecurity enabled under Settings → Phone → Call Blocking & Identification: the reload succeeds. Simulator is the limit, not the code.
+
+### iS2. MessageFilter extension cannot be exercised on Simulator
+- **Files:** `ios/MessageFilterExtension/MessageFilterHandler.swift`
+- **What happens:** Simulator does not deliver SMS messages, so iOS never invokes the extension. There is no error — the handler simply never runs.
+- **On a real device:** the extension receives `ILMessageFilterQueryRequest` for every SMS from an unknown sender once the user enables MobileSecurity under Settings → Messages → Unknown & Spam.
+
+### iS3. Call Directory + MessageFilter entitlements fail with free provisioning
+- **Build flag workaround:** `CODE_SIGNING_ALLOWED=NO` for Simulator builds. Real-device builds require a 10-char Apple Developer Team ID set in `ios/project.yml` `DEVELOPMENT_TEAM`, then `xcodegen generate && xcodebuild archive -allowProvisioningUpdates`.
+- **Not a bug.** Apple restricts both `com.apple.developer.callkit` and `com.apple.developer.identitylookup.message-filter` to paid-tier developer accounts by policy.
