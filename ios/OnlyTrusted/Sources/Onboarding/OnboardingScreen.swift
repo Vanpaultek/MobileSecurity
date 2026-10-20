@@ -8,6 +8,7 @@ struct OnboardingScreen: View {
     @State private var isAdult = false
     @State private var ownsDevice = false
     @State private var understandsLimits = false
+    @State private var legalSheetSection: String?
 
     private var canContinue: Bool { isAdult && ownsDevice && understandsLimits }
 
@@ -32,6 +33,20 @@ struct OnboardingScreen: View {
             actionBar
         }
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .sheet(item: Binding(
+            get: { legalSheetSection.map(LegalSheetTarget.init) },
+            set: { legalSheetSection = $0?.title }
+        )) { target in
+            NavigationStack {
+                LegalScreen(initialSectionTitle: target.title)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { legalSheetSection = nil }
+                                .tint(Color.appAccent)
+                        }
+                    }
+            }
+        }
     }
 
     // MARK: - Hero
@@ -121,10 +136,26 @@ struct OnboardingScreen: View {
     }
 
     private var legalFootnote: some View {
-        Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings, under Privacy, terms and honest claims.")
-            .font(.footnote)
-            .foregroundStyle(Color.appTertiaryText)
-            .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings, under Privacy, terms and honest claims.")
+                .font(.footnote)
+                .foregroundStyle(Color.appTertiaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 20) {
+                legalLinkButton("Privacy policy", section: "Privacy policy")
+                legalLinkButton("Terms of use", section: "Terms of use")
+                legalLinkButton("Honest claims", section: "Honest claims")
+            }
+        }
+    }
+
+    private func legalLinkButton(_ label: String, section: String) -> some View {
+        Button(label) {
+            legalSheetSection = section
+        }
+        .font(.footnote.weight(.semibold))
+        .tint(Color.appAccent)
     }
 
     // MARK: - Sticky action bar
@@ -147,6 +178,11 @@ struct OnboardingScreen: View {
         }
         .background(.ultraThinMaterial)
     }
+}
+
+private struct LegalSheetTarget: Identifiable {
+    let title: String
+    var id: String { title }
 }
 
 // MARK: - Reusable row components
