@@ -13,8 +13,8 @@ struct OnboardingScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 28) {
                     hero
                     featuresCard
                     limitsCard
@@ -22,9 +22,12 @@ struct OnboardingScreen: View {
                     legalFootnote
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 48)
+                .padding(.top, 24)
                 .padding(.bottom, 24)
             }
+            // Scroll content starts BELOW the safe area so the top status bar
+            // (Dynamic Island + clock + WiFi) is not under the scroll surface.
+            .safeAreaPadding(.top)
 
             actionBar
         }
@@ -44,7 +47,7 @@ struct OnboardingScreen: View {
             Text("OnlyTrusted")
                 .font(.appLargeTitle)
 
-            Text("A serious privacy tool for you and your family — not an entertainment app. Please read and confirm the following before you continue.")
+            Text("A serious privacy tool for you and your family. This is not an entertainment app. Please read and confirm the following before you continue.")
                 .font(.body)
                 .foregroundStyle(Color.appSecondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -56,13 +59,13 @@ struct OnboardingScreen: View {
     private var featuresCard: some View {
         InfoCard(
             icon: "lock.shield.fill",
-            iconTint: .green,
+            iconTint: Color.appSuccess,
             title: "What this app does on iOS",
             rows: [
                 "Encrypted family vault, unlocked with Face ID or Touch ID.",
-                "Call Directory Extension-based blocking (Phase 2).",
-                "SMS filter for unknown-sender messages (Phase 2).",
-                "Everything stays on this device. No cloud. No ads. No analytics."
+                "Blocks calls and texts from numbers on your block list.",
+                "Filters SMS from unknown senders.",
+                "Keeps every piece of data on this device only. No cloud. No ads. No analytics."
             ]
         )
     }
@@ -70,7 +73,7 @@ struct OnboardingScreen: View {
     private var limitsCard: some View {
         InfoCard(
             icon: "exclamationmark.shield.fill",
-            iconTint: .orange,
+            iconTint: Color.appWarning,
             title: "Honest limits iOS imposes",
             rows: [
                 "iOS does not let any third-party app monitor other apps' mic or camera. Apple's status-bar indicator is the only source.",
@@ -94,13 +97,13 @@ struct OnboardingScreen: View {
             VStack(spacing: 0) {
                 ConsentRow(
                     title: "I'm an adult",
-                    detail: "At least 18 — or the legal age of digital consent in my country.",
+                    detail: "At least 18, or the legal age of digital consent in my country.",
                     isOn: $isAdult
                 )
                 Divider().padding(.leading, 20)
                 ConsentRow(
                     title: "This is my phone",
-                    detail: "I own or administer this device. I'll only block calls on phones I'm authorised to manage.",
+                    detail: "I own or administer this device. I will only block calls on phones I am authorised to manage.",
                     isOn: $ownsDevice
                 )
                 Divider().padding(.leading, 20)
@@ -118,7 +121,7 @@ struct OnboardingScreen: View {
     }
 
     private var legalFootnote: some View {
-        Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings → Privacy, terms & honest claims.")
+        Text("By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. Review them any time in Settings, under Privacy, terms and honest claims.")
             .font(.footnote)
             .foregroundStyle(Color.appTertiaryText)
             .fixedSize(horizontal: false, vertical: true)
@@ -135,6 +138,7 @@ struct OnboardingScreen: View {
                     .frame(maxWidth: .infinity, minHeight: 32)
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color.appAccent)
             .controlSize(.large)
             .disabled(!canContinue)
             .padding(.horizontal, 20)
@@ -168,12 +172,13 @@ private struct InfoCard: View {
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Circle()
-                            .fill(Color(.tertiaryLabel))
-                            .frame(width: 4, height: 4)
+                            .fill(Color.appAccent)
+                            .frame(width: 5, height: 5)
                             .offset(y: -3)
+                            .decorativeAccessibility()
                         Text(row)
                             .font(.subheadline)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color.appPrimaryText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -204,6 +209,7 @@ private struct ConsentRow: View {
             }
             .padding(.trailing, 8)
         }
+        .tint(Color.appAccent)
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
     }
