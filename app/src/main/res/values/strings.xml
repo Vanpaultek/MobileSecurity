@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MobileSecurity</string>
+
+    <string name="monitor_title">Shield is active</string>
+    <string name="monitor_text_idle">Watching mic and camera. Nothing suspicious right now.</string>
+    <string name="pocket_text_running">Pocket-dial protection running.</string>
+
+    <string name="alert_mic_title">Microphone is in use</string>
+    <string name="alert_mic_body_generic">Something on your phone is using the microphone.</string>
+    <string name="alert_mic_body_with_pkg">%1$s is using the microphone.</string>
+
+    <string name="alert_camera_title">Camera is in use</string>
+    <string name="alert_camera_body">Camera %1$s was just opened.</string>
+
+    <string name="alert_call_blocked_title">Call blocked</string>
+    <string name="alert_call_blocked_body">Blocked an incoming call from %1$s.</string>
+
+    <string name="alert_sms_flagged_title">Spam SMS flagged</string>
+    <string name="alert_sms_flagged_body">A message from %1$s matched your block list.</string>
+
+    <string name="alert_untrusted_call_title">Untrusted call silenced</string>
+    <string name="alert_untrusted_call_body">%1$s is not in your family vault. Call was silenced.</string>
+
+    <string name="alert_untrusted_sms_title">Untrusted SMS</string>
+    <string name="alert_untrusted_sms_body">%1$s is not in your family vault.</string>
+
+    <string name="alert_robocall_title">Likely robocall silenced</string>
+    <string name="alert_robocall_warn_title">Suspicious caller</string>
+
+    <string name="shield_text_running">Shield watermark on. Captures taken now will carry your session code.</string>
+</resources>

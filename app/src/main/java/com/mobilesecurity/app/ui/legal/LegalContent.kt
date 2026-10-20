@@ -1,0 +1,247 @@
+package com.mobilesecurity.app.ui.legal
+
+object LegalContent {
+
+    const val LAST_UPDATED = "2026-10-19"
+
+    val audienceStatement = """
+# Who this app is for
+
+MobileSecurity is a serious privacy tool for the phone owner and their immediate family. It is not an entertainment app, a novelty "spy" tool, or a product you install on someone else's device without their consent.
+
+By using it you are confirming:
+
+- You are at least 18 (or your local legal age of digital consent, whichever is higher).
+- You own or administer this phone.
+- You will only block calls and intercept SMS on devices you have the right to manage.
+- You understand that installing this app on someone else's phone without their knowledge may be illegal in your country (stalkerware laws, wiretap laws, GDPR and similar regulations around the world).
+
+If any of those is not true, uninstall now.
+
+## Family data
+
+Any family phone number, address, email or note you add to the Trusted vault is:
+
+- Stored only on this device.
+- Protected by the SQLCipher-encrypted database AND a second layer of AES-256-GCM encryption that uses a key held in Android Keystore, so even a copy of the database file cannot be read on another device.
+- Visible in the UI only after a biometric or device-credential unlock.
+- Deletable individually or wiped entirely from Settings → Data → Wipe everything.
+
+We never upload family data. We cannot — the app has no internet permission.
+    """.trimIndent()
+
+    val privacyPolicy = """
+# Privacy Policy
+
+Last updated: $LAST_UPDATED
+
+MobileSecurity is designed around a single principle: your data stays on your phone.
+
+## What we collect
+
+Nothing is collected by us. The app has no server. It does not use the internet. No account is required.
+
+Inside your device, the app records:
+
+- Timestamps of microphone or camera use detected by Android.
+- Timestamps of calls your block list rejected and SMS senders your block list flagged.
+- The phone numbers you choose to add to your block list.
+- Your in-app settings (which features are turned on).
+
+All of this is stored encrypted on this device only (SQLCipher-encrypted SQLite + AES-256 keys protected by Android Keystore). It is never transmitted off the phone by this app.
+
+## Third parties
+
+We do not share, sell, rent, trade, or disclose your information to any third party. We cannot — the app has no network access. We do not use analytics SDKs, advertising SDKs, crash reporters that transmit data, or tag managers.
+
+## Permissions and how they are used
+
+- Microphone and camera: only to detect when another app starts using them, so we can alert you. The app itself does not record audio or capture images.
+- Phone, call log, call screening: to let your block list reject unwanted incoming calls.
+- SMS: to flag messages from numbers in your block list. The app does not read or forward message content elsewhere.
+- Contacts: not requested.
+- Location: not requested.
+- Internet: not requested.
+
+## Your rights
+
+You have the right to access, correct, export, restrict, and delete your data at any time. Because the data lives on this device, you exercise these rights directly:
+
+- Access: see every event in the Events screen and every blocked number in the Blocked screen.
+- Export: Settings → Export sends an encrypted JSON copy to a location you choose.
+- Delete: Settings → Clear event history, or uninstall the app to remove everything.
+
+These rights apply regardless of where you live. We honour, at minimum, protections required by the EU GDPR, UK GDPR, California CCPA/CPRA, Virginia VCDPA, Colorado CPA, Connecticut CTDPA, Utah UCPA, Brazil LGPD, Canada PIPEDA, Australia Privacy Act, Japan APPI, Singapore PDPA, South Korea PIPA, India DPDP Act 2023, and South Africa POPIA.
+
+## Children
+
+MobileSecurity is not directed at children under 13 (or the relevant minimum age in your jurisdiction, such as 16 under GDPR). We do not knowingly collect information from children. Because we collect nothing, this is already enforced.
+
+## Changes to this policy
+
+If the policy changes, the updated date at the top will change and the full text will be shipped inside a new version of the app. There is no hidden policy, no linked external page that could change without notice, and no "we may update this at any time" clause that lets us modify terms behind your back.
+
+## Contact
+
+Questions, concerns, or data-rights requests: support@mobilesecurity.local (replace with your actual support address before shipping).
+    """.trimIndent()
+
+    val termsOfUse = """
+# Terms of Use
+
+Last updated: $LAST_UPDATED
+
+By installing MobileSecurity you agree to the following plain-language terms.
+
+## What this app is
+
+A privacy and anti-nuisance tool for Android. It alerts you when apps use your microphone or camera, blocks calls and SMS from numbers you add to your block list, warns on likely pocket-dials, and protects its own screens from screenshots.
+
+## What this app is not
+
+- It is not a replacement for the system security features built into Android.
+- It cannot stop a determined attacker, a system app, or a privileged app from using your microphone or camera.
+- It cannot stop the person on the other end of a video call from recording their own screen or photographing it.
+- It cannot block screenshots of other apps.
+- It cannot make your phone untrackable by your carrier, your Internet provider, or any OS vendor telemetry.
+
+If any marketing you see for this app contradicts these points, the marketing is wrong — these terms govern.
+
+## Your responsibilities
+
+- You will only block numbers and intercept calls on devices you own or are authorised to administer.
+- You will keep your device operating system up to date; the app relies on Android's own security model.
+- You will not resell, redistribute, or sublicense the app without written permission.
+
+## Our responsibilities
+
+- The app will not transmit your data off the device.
+- We will clearly disclose every data-handling practice in the Privacy Policy inside the app.
+- We will not ship silent updates that change the data-handling practices without a bumped version and an updated "last updated" date visible to you.
+
+## Pricing
+
+If a price is shown in the store listing, that is the full price. There are no hidden recurring charges, no auto-upgrading tiers, and no features that start free and later become locked unless the store listing says so clearly. A one-time "lifetime" purchase means for the lifetime of the app's active maintenance; if we discontinue the app we will say so and refund where required by law.
+
+## Warranty and limits
+
+The app is provided "as is." We make no promise that it will catch every microphone or camera use (Android does not expose everything), that call screening will reject every unwanted call (that depends on your carrier and Android), or that the app will run uninterrupted on every manufacturer's custom Android build.
+
+To the maximum extent allowed by applicable law, our liability is limited to the amount you paid for the app. Nothing in these terms limits liability we cannot limit by law in your country, such as liability for death, personal injury caused by negligence, fraud, or statutory consumer-protection rights.
+
+## Governing law and disputes
+
+These terms are governed by the laws of the country where you are resident, to the extent your local consumer-protection law applies. Nothing here waives mandatory rights you have under local law.
+
+## Contact
+
+support@mobilesecurity.local
+    """.trimIndent()
+
+    val callEncryptionExplainer = """
+# About call encryption
+
+A lot of apps claim to "encrypt your calls." Most of the time that claim is sloppy or misleading. Here is the honest version.
+
+## Cellular voice/video (your carrier)
+
+When you place a normal call from your phone's dialer, the audio runs through your mobile carrier (GSM / VoLTE / VoNR / 5G). That channel is encrypted *by the carrier*, between your phone and the cell tower, with keys the carrier owns. **No third-party app can add end-to-end encryption to that path.** Any app that says it can is lying — the moment the audio leaves your phone, it is in the carrier's hands.
+
+MobileSecurity does not touch cellular calls. We screen them, we block spam, we silence untrusted callers, we watermark the screen — but we do not and cannot encrypt them.
+
+## Voice / video calls over the internet
+
+For *end-to-end encrypted* calls you need an app whose job it is to carry the audio itself:
+
+- **Signal** — the strongest option. E2E on every call, metadata-minimising, open-source.
+- **WhatsApp** — E2E on every call by default (uses the Signal protocol).
+- **FaceTime** — E2E, Apple-only, so both sides need an Apple device.
+- **iMessage audio/video** — E2E, Apple-only.
+
+Use those for the call. Use MobileSecurity on the same phone for everything around the call: watermark on the screen, Trusted-only filter blocking everyone outside your family while you talk, Shield log recording the session code.
+
+## What MobileSecurity does protect
+
+- **Your family vault**: SQLCipher-encrypted database plus a second AES-256-GCM layer with a key held in Android Keystore.
+- **Your audit log**: SHA-256 hash chain plus the same SQLCipher encryption.
+- **Your evidence pack**: signed with a SHA-256 of the pack contents.
+- **Your screen**: FLAG_SECURE on every screen we own, plus the Shield watermark on top of other apps if you ask for it.
+    """.trimIndent()
+
+    val honestClaims = """
+# Honest claims
+
+A short list of what this app can and cannot do, so you set realistic expectations.
+
+## It can
+
+- Notify you (notification + vibration) when another app begins using the microphone or camera, and log the event locally.
+- Block incoming calls from numbers in your block list, provided you set it as the default call screening app in system settings.
+- Flag incoming SMS from numbers in your block list.
+- Detect likely pocket positions and warn before placing a call.
+- Protect its own on-screen content from screenshots and screen recording.
+- Keep every piece of data on your device only, encrypted at rest.
+
+## It cannot
+
+- Prevent any app from using the microphone or camera at a hardware level without root or a hardened OS.
+- Stop a person on the other side of a video call from recording their own device.
+- Block screenshots of your home screen, other apps, or system UI.
+- Hide your phone from the cellular network, your carrier, or your ISP.
+- Guarantee that every spam call will be caught — some carrier-level call paths bypass Android call screening.
+- Replace security updates, hardened operating systems, or careful app-permission hygiene.
+
+If anything inside this app or in its listing suggests otherwise, treat this page as the source of truth.
+    """.trimIndent()
+
+    val nonInterferencePledge = """
+# What this app will never do
+
+We built MobileSecurity to protect the owner's phone. That means we deliberately refuse to do things that would turn it into the thing it is defending against.
+
+1. **We never change system settings for you.** We only read them (USB-debugging state, lock-screen state, developer options, unknown-sources permission) and show you a page in Android's settings where you flip the switch yourself.
+2. **We never modify, kill, or interfere with other apps.** The services watch sensors and callbacks; they do not stop other apps from running, do not revoke their permissions, do not deny them network, do not inject into them. We refuse Device Admin and Device Owner escalation.
+3. **We never scan or probe anyone else's device, network, or account.** No port scans, no WHOIS, no reverse lookups against third-party reputation services, no OSINT crawls — not even against people who called you.
+4. **We never "hack back."** If an attacker tries to compromise your phone, we observe, record, and alert. We do not attempt to identify them beyond what the phone number or installed-app list already shows locally. If you want someone identified, use the Evidence pack export in Settings and give it to your carrier, your bank, or law enforcement — they have the legal authority to investigate; we do not.
+5. **We never phone home.** The manifest does not request the internet permission. There is no server, no cloud, no analytics, no crash reporter that transmits data.
+6. **We never run on someone else's phone without their knowledge.** The onboarding gate asks you to confirm you own or administer this device; the Audience page restates this. Installing MobileSecurity on another adult's phone without their consent is stalkerware regardless of your relationship to them and is illegal in most countries.
+    """.trimIndent()
+
+    val dataPrinciples = """
+# Our data principles
+
+These are not aspirations — they are the only ways this app is written to behave.
+
+1. Collect nothing we don't need. We only record events needed to show you alerts and keep your block list working.
+2. Keep it on your device. No cloud, no server, no analytics, no ads. The app does not request the internet permission.
+3. Encrypt at rest. The event database and the key passphrase live inside Android Keystore-protected encrypted storage.
+4. Make deletion one tap. "Clear event history" removes the whole log immediately; uninstalling removes everything else.
+5. Make export one tap. You can export your data as JSON to a folder you choose at any time.
+6. Keep policies in the binary. The Privacy Policy and these principles ship inside the app, with a visible "last updated" date — you do not have to trust a webpage that could be edited silently.
+7. Open about limits. The "Honest claims" page lists every protection the app cannot provide, in plain language.
+8. Minimum age. The app is not for children under 13 (or the local minimum, whichever is higher).
+9. No tracking. We don't fingerprint, don't attribute, don't do any kind of cross-app or cross-device tracking.
+10. No dark patterns. No fake urgency, no hidden auto-renewals, no misleading permission prompts.
+    """.trimIndent()
+
+    val accessibilityStatement = """
+# Accessibility
+
+We aim to meet WCAG 2.1 AA for colour contrast, text scaling, and screen-reader labels, and to respect Android's system font size, display size, and high-contrast text settings.
+
+If you find a screen that is hard to use with TalkBack, Switch Access, or a large font size, email support@mobilesecurity.local and we will treat it as a priority fix.
+    """.trimIndent()
+
+    data class LegalSection(val title: String, val body: String)
+
+    val sections = listOf(
+        LegalSection("Audience", audienceStatement),
+        LegalSection("Non-interference", nonInterferencePledge),
+        LegalSection("Call encryption", callEncryptionExplainer),
+        LegalSection("Privacy policy", privacyPolicy),
+        LegalSection("Terms of use", termsOfUse),
+        LegalSection("Honest claims", honestClaims),
+        LegalSection("Data principles", dataPrinciples),
+        LegalSection("Accessibility", accessibilityStatement)
+    )
+}
