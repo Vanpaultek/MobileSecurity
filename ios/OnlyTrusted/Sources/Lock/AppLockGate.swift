@@ -23,7 +23,7 @@ struct AppLockGate: View {
             if let error {
                 Text(error)
                     .font(.footnote)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.appDanger)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
@@ -32,10 +32,13 @@ struct AppLockGate: View {
                 Button {
                     attemptAuth()
                 } label: {
-                    Label("Unlock with Face ID / Passcode", systemImage: "faceid")
-                        .frame(maxWidth: .infinity)
+                    Label("Unlock with Face ID or Passcode", systemImage: "faceid")
+                        .font(.body.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 32)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(Color.appAccent)
+                .controlSize(.large)
                 .padding(.horizontal, 32)
             } else {
                 let lockWasOn = gate.appLockEnabled
@@ -52,9 +55,12 @@ struct AppLockGate: View {
                         onUnlocked()
                     } label: {
                         Text(lockWasOn ? "Disable App Lock and continue" : "Return to app")
-                            .frame(maxWidth: .infinity)
+                            .font(.body.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 32)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(Color.appAccent)
+                    .controlSize(.large)
                     .padding(.horizontal, 32)
                 }
             }

@@ -21,7 +21,8 @@ struct SettingsScreen: View {
     var body: some View {
         Form {
             Section("Privacy") {
-                Toggle("App lock", isOn: $appLockToggle)
+                Toggle("App Lock", isOn: $appLockToggle)
+                    .tint(Color.appAccent)
                     .onChange(of: appLockToggle) { _, now in
                         if now && !canUseAuth {
                             // Prevent the Android-style lockout bug on day one.
@@ -31,21 +32,25 @@ struct SettingsScreen: View {
                         }
                         gate.appLockEnabled = now
                     }
-                Text("Require Face ID / Touch ID / passcode to open OnlyTrusted.")
-                    .font(.caption).foregroundStyle(Color.appSecondaryText)
+                Text("Require Face ID, Touch ID, or your device passcode to open OnlyTrusted.")
+                    .font(.caption)
+                    .foregroundStyle(Color.appSecondaryText)
             }
 
             Section("Data") {
                 Button {
                     runExport { try DataExporter.write() }
                 } label: {
-                    Label("Export my data (JSON)", systemImage: "square.and.arrow.up")
+                    Label("Export my data as JSON", systemImage: "square.and.arrow.up")
                 }
+                .tint(Color.appAccent)
                 Button {
                     runExport { try EvidenceExporter.write() }
                 } label: {
-                    Label("Export evidence pack (for carrier / bank / police)", systemImage: "doc.badge.plus")
+                    Label("Export evidence pack for carrier, bank, or police",
+                          systemImage: "doc.badge.plus")
                 }
+                .tint(Color.appAccent)
                 Button(role: .destructive) {
                     confirmWipe = true
                 } label: {
@@ -54,10 +59,10 @@ struct SettingsScreen: View {
             }
 
             Section("More") {
-                NavigationLink("Privacy, terms & honest claims") {
+                NavigationLink("Privacy, terms, and honest claims") {
                     LegalScreen()
                 }
-                NavigationLink("About & attributions") {
+                NavigationLink("About and attributions") {
                     AboutScreen()
                 }
             }
@@ -74,7 +79,7 @@ struct SettingsScreen: View {
         .alert("Set up a passcode first", isPresented: $showLockDeniedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Set up a device passcode or Face ID / Touch ID in system Settings first — otherwise App Lock would permanently lock you out.")
+            Text("Set up a device passcode, Face ID, or Touch ID in the iOS Settings app first. Otherwise App Lock would permanently lock you out.")
         }
         .confirmationDialog("Wipe everything?", isPresented: $confirmWipe, titleVisibility: .visible) {
             Button("Wipe", role: .destructive) {

@@ -29,11 +29,21 @@ struct AboutScreen: View {
                 } label: {
                     Label("Open email client", systemImage: "envelope")
                 }
+                .tint(Color.appAccent)
             }
 
             Section("Changelog") {
-                Text("0.1.0 — Initial iOS release (Phase 1):\n• Keychain + CryptoKit encrypted family vault.\n• Biometric app lock.\n• Onboarding + legal + settings.\n\nPhase 2 (planned):\n• Call Directory Extension for a static block list.\n• IdentityLookup extension for SMS filtering.\n• Evidence pack export.")
-                    .font(.footnote)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Version \(version)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                    bulletLine("Encrypted family vault with Keychain and CryptoKit.")
+                    bulletLine("Biometric app lock, with safe fallback if no passcode is set.")
+                    bulletLine("Call Directory for a static block list.")
+                    bulletLine("SMS filter for unknown senders.")
+                    bulletLine("Evidence pack export for carrier, bank, or law enforcement.")
+                }
+                .padding(.vertical, 4)
             }
 
             Section("Open-source attributions") {
@@ -43,6 +53,21 @@ struct AboutScreen: View {
         }
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func bulletLine(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Circle()
+                .fill(Color.appAccent)
+                .frame(width: 4, height: 4)
+                .offset(y: -2)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(Color.appPrimaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

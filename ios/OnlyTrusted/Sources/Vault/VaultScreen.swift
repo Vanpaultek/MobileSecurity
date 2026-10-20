@@ -71,7 +71,7 @@ struct VaultScreen: View {
         var err: NSError?
         let can = ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err)
         guard can else {
-            // No biometric or PIN enrolled → reveal anyway (same semantics as Android emulator fallback).
+            // No biometric or PIN enrolled: reveal anyway (same semantics as Android emulator fallback).
             attemptReveal(id)
             return
         }
@@ -118,8 +118,15 @@ private struct ContactRow: View {
                 Text(contact.displayName).font(.headline)
                 Spacer()
                 if contact.isOwner {
-                    Text("Owner").font(.caption).padding(.horizontal, 8).padding(.vertical, 2)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.secondary.opacity(0.2)))
+                    Text("Owner")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(Color.appAccent.opacity(0.15))
+                        )
+                        .foregroundStyle(Color.appAccent)
                 }
             }
             if let relation = contact.relation {

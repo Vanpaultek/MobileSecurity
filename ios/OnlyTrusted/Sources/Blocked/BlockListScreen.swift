@@ -83,8 +83,9 @@ struct BlockListScreen: View {
             } header: {
                 Text("Your block list")
             } footer: {
-                Text("Blocks apply after you tap \"Reload Call Directory\" below and after you have enabled \"OnlyTrusted\" in Settings → Phone → Call Blocking & Identification.")
+                Text("Blocks apply after you tap Reload below and after you have enabled OnlyTrusted inside the iOS Settings app, under Phone, Call Blocking and Identification.")
                     .font(.footnote)
+                    .foregroundStyle(Color.appSecondaryText)
             }
 
             Section {
@@ -112,8 +113,9 @@ struct BlockListScreen: View {
             } header: {
                 Text("iOS activation (one-time)")
             } footer: {
-                Text("iOS requires each user to turn on third-party call blocking + SMS filtering in Settings. We can't flip these switches for you — these links open the right page.")
+                Text("iOS requires each user to turn on third-party call blocking and SMS filtering inside the Settings app. We cannot flip these switches for you. The links above open the correct page.")
                     .font(.footnote)
+                    .foregroundStyle(Color.appSecondaryText)
             }
         }
         .navigationTitle("Blocked")
@@ -201,10 +203,13 @@ private struct AddBlockedSheet: View {
                 }
                 Section {
                     Toggle("Block incoming calls", isOn: $blockCalls)
+                        .tint(Color.appAccent)
                     Toggle("Flag incoming SMS", isOn: $blockSms)
+                        .tint(Color.appAccent)
                 } footer: {
-                    Text("Call blocking takes effect after \"Reload Call Directory\" and after you enable OnlyTrusted in Settings → Phone.")
+                    Text("Call blocking takes effect after you tap Reload and after you enable OnlyTrusted inside the iOS Settings app, under Phone.")
                         .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
                 }
             }
             .navigationTitle("Block a number")

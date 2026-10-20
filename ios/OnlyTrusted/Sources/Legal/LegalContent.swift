@@ -39,7 +39,7 @@ enum LegalContent {
     • Stored only on this device.
     • Protected by Keychain-backed AES-256-GCM encryption via Apple CryptoKit.
     • Visible in the UI only after a Face ID / Touch ID / passcode unlock.
-    • Deletable individually or wiped entirely from Settings → Data.
+    • Deletable individually or wiped entirely from Settings, Data.
 
     We never upload family data. The app has no networking code and no entitlements that would permit it.
     """
@@ -60,14 +60,14 @@ enum LegalContent {
     Cellular voice/video (your carrier)
     When you place a normal call from your phone's dialer, the audio runs through your mobile carrier (GSM / VoLTE / VoNR / 5G). That channel is encrypted by the carrier, between your phone and the cell tower, with keys the carrier owns. No third-party app can add end-to-end encryption to that path. Any app that says it can is lying.
 
-    OnlyTrusted does not touch cellular calls. We will screen them (Phase 2 via Call Directory Extension), we will flag spam, but we do not and cannot encrypt them.
+    OnlyTrusted does not touch cellular calls. We screen them via a Call Directory Extension and flag spam, but we do not and cannot encrypt them.
 
     Voice / video calls over the internet
     For end-to-end encrypted calls use Signal, WhatsApp, FaceTime, or iMessage audio/video. Use those for the call. Use OnlyTrusted on the same phone for everything around the call.
 
     What OnlyTrusted does protect
     • Your family vault: Keychain + AES-256-GCM via CryptoKit.
-    • Your audit log (Phase 2): SHA-256 hash chain.
+    • Your audit log: SHA-256 hash chain.
     """
 
     static let privacyPolicy = """
@@ -81,11 +81,11 @@ enum LegalContent {
     Inside your device, the app records your trusted-contact vault and your in-app settings. All of this is stored encrypted on this device only (Keychain-protected AES-256-GCM keys via Apple CryptoKit). It is never transmitted off the phone by this app.
 
     Third parties
-    We do not share, sell, rent, trade, or disclose your information to any third party. We cannot — the app has no network capability.
+    We do not share, sell, rent, trade, or disclose your information to any third party. We cannot. The app has no network capability.
 
     Permissions and how they are used
     • Face ID / Touch ID / passcode: to unlock the vault and (optionally) the app itself.
-    • Contacts, Location, Microphone, Camera: not requested in Phase 1.
+    • Contacts, Location, Microphone, and Camera: not requested.
 
     Your rights
     You have the right to access, correct, export, restrict, and delete your data at any time. These rights apply regardless of where you live. We honour, at minimum, protections required by the EU GDPR, UK GDPR, California CCPA/CPRA, Virginia VCDPA, Colorado CPA, Connecticut CTDPA, Utah UCPA, Brazil LGPD, Canada PIPEDA, Australia Privacy Act, Japan APPI, Singapore PDPA, South Korea PIPA, India DPDP Act 2023, and South Africa POPIA.
@@ -101,7 +101,7 @@ enum LegalContent {
     Last updated: \(lastUpdated)
 
     What this app is
-    A privacy and anti-nuisance tool for iOS. In Phase 1 it provides an encrypted family contact vault and biometric app lock. Phase 2 adds a Call Directory Extension and SMS filter.
+    A privacy and anti-nuisance tool for iOS. It provides an encrypted family contact vault, a biometric app lock, a Call Directory Extension that blocks numbers you add to your block list, and an SMS filter for unknown senders.
 
     What this app is not
     • It is not a replacement for the system security features built into iOS.
@@ -110,7 +110,7 @@ enum LegalContent {
     • It cannot draw an overlay watermark on top of other apps (iOS does not allow this).
     • It cannot make your phone untrackable by your carrier.
 
-    If any marketing you see for this app contradicts these points, the marketing is wrong — these terms govern.
+    If any marketing you see for this app contradicts these points, the marketing is wrong. These terms govern.
 
     Our responsibilities
     The app will not transmit your data off the device. We will clearly disclose every data-handling practice in the Privacy Policy inside the app.
@@ -145,7 +145,7 @@ enum LegalContent {
     2. Keep it on your device. No cloud, no server, no analytics, no ads. The app has no networking entitlements.
     3. Encrypt at rest with Keychain-held keys.
     4. Make deletion one tap.
-    5. Make export one tap (Phase 2).
+    5. Make export one tap.
     6. Keep policies in the binary. The Privacy Policy and these principles ship inside the app with a visible "last updated" date.
     7. Open about limits.
     8. Minimum age 13 (or local minimum, whichever is higher).
@@ -159,7 +159,7 @@ enum LegalContent {
     What we commit to
 
     • Color contrast ≥ 4.5:1 for normal text and ≥ 3:1 for large text, icons, and dividers. All in-app text tokens have been measured against both light and dark surfaces and against Increase Contrast mode.
-    • Dynamic Type: every text style scales when you change Settings → Display & Brightness → Text Size, up to and including the Accessibility sizes (XXXL and larger). We do not pin text to fixed point sizes.
+    • Dynamic Type: every text style scales when you change Settings, Display & Brightness, Text Size, up to and including the Accessibility sizes (XXXL and larger). We do not pin text to fixed point sizes.
     • VoiceOver: every button has a human-readable label. Decorative icons are hidden from VoiceOver so it doesn't read "shield shield shield" at you.
     • Hit targets ≥ 44×44 points on every tappable control, per Apple HIG.
     • Honors system settings: Reduce Motion, Bold Text, Increase Contrast, and Dark Mode all work without any in-app override needed.
@@ -168,7 +168,7 @@ enum LegalContent {
 
     • Formal Section 508 VPAT certification requires an independent accessibility consultant to audit the shipping build. We have not engaged one. The commitments above are self-measured.
     • Older iOS versions (below our minimum deployment target of iOS 17) are not supported.
-    • Third-party extensions (Call Directory, SMS filter) rely on iOS's own system UI for enablement — those pages are Apple's, not ours.
+    • Third-party extensions (Call Directory, SMS filter) rely on iOS's own system UI for enablement. those pages are Apple's, not ours.
 
     Report an issue
 
