@@ -1,15 +1,23 @@
 # MobileSecurity — Bug Report
 
-- **Generated:** 2026-10-19 (first audit).
+- **Generated:** 2026-10-19 (first audit). Updated 2026-10-20 with C4 (App Lock lockout) caught during on-device preview.
 - **Scope:** `app/src/main/java/com/mobilesecurity/app/`, `AndroidManifest.xml`, `app/build.gradle.kts`.
-- **Review state:** CRITICAL and HIGH items fixed in this commit. MEDIUM / LOW are open and tracked for the daily audit agent.
+- **Review state:** All CRITICAL and HIGH items fixed. MEDIUM / LOW are open and tracked for the daily audit agent.
 - **Lint:** `./gradlew :app:lintDebug` → 0 errors, 27 cosmetic warnings (library-version nags, unused-resource `ic_launcher_round`, obsolete `SDK_INT >= O` checks under `minSdk 29`).
 
 ---
 
 ## CRITICAL — correctness bugs that can misbehave at runtime
 
-> All three are fixed in the same commit as this report.
+> All four are fixed. C1–C3 landed with the first audit; C4 was caught on a Pixel 7 AVD during the first real-device preview and fixed in commit `6560a2f` (2026-10-20).
+
+### C4. App Lock lets the user enable it with no biometric or PIN enrolled → permanent lockout
+- **Files:** `app/src/main/java/com/mobilesecurity/app/ui/settings/SettingsScreen.kt` (toggle), `app/src/main/java/com/mobilesecurity/app/ui/lock/AppLockGate.kt` (gate).
+- **Why it's wrong:** The Settings toggle for App Lock accepted ON without first checking `BiometricPrompter.canAuthenticate()`. On a device with no fingerprint, no face, and no PIN set (common on fresh emulators; also happens if the owner removes their lock screen while App Lock is on), the next launch hits `AppLockGate` → the biometric prompt immediately fails → the only button is "Try again" which fails again, forever. The owner is locked out of their own app with no recovery path short of uninstalling.
+- **Fix:**
+  1. Settings toggle refuses to enable App Lock when `canAuthenticate()` returns false and surfaces a snackbar telling the owner to set up a device PIN first.
+  2. AppLockGate renders a "Disable App Lock and continue" button (instead of "Try again") when `canAuthenticate()` is false. Recovers users who had App Lock on and later lost their device credential.
+- **How the scanner should treat this:** The regex that flagged this would be any call to `AppLockManager.setEnabled(..., true)` not preceded by a `BiometricPrompter.canAuthenticate` check. The fix is in place; do not re-report the pattern at these two file paths unless the guard is removed.
 
 ### C1. CallBlockerService uses `runBlocking` on the binder thread
 - **File:** `app/src/main/java/com/mobilesecurity/app/services/CallBlockerService.kt`
