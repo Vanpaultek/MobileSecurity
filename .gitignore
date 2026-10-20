@@ -14,6 +14,7 @@ captures/
 
 # iOS
 ios/build/
+ios/build-*/
 ios/DerivedData/
 *.xcuserdata/
 ios/MobileSecurity.xcodeproj/xcuserdata/
