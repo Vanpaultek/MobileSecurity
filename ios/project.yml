@@ -15,10 +15,8 @@ settings:
     CURRENT_PROJECT_VERSION: "2"
     SWIFT_STRICT_CONCURRENCY: complete
     GENERATE_INFOPLIST_FILE: NO
-    # DEVELOPMENT_TEAM is filled in by the user before building for a real device.
-    # For simulator builds the "-" sign identity + empty team works for the main app,
-    # but Call Directory + MessageFilter extensions still need a real team.
-    DEVELOPMENT_TEAM: ""
+    # 57Million LLC Apple Developer team.
+    DEVELOPMENT_TEAM: "H86SA2C3S5"
     CODE_SIGN_STYLE: Automatic
 
 targets:

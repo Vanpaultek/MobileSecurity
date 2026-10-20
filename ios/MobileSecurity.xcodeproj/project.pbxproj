@@ -317,15 +317,15 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					121558711C9E2C79C58281EB = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = H86SA2C3S5;
 						ProvisioningStyle = Automatic;
 					};
 					8A5B5183FE0C96A77AC19342 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = H86SA2C3S5;
 						ProvisioningStyle = Automatic;
 					};
 					A3C4FF16A655C278F8B327A4 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = H86SA2C3S5;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -456,7 +456,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H86SA2C3S5;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -607,7 +607,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H86SA2C3S5;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

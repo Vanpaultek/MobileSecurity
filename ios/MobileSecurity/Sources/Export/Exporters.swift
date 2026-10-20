@@ -109,6 +109,7 @@ enum EvidenceExporter {
         }
     }
 
+    @MainActor
     static func write() throws -> URL {
         let events = EventStore.shared.allRecent(limit: 20_000).map { ev in
             DataExporter.EventDto(
