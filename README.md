@@ -65,23 +65,51 @@ The Android app uses:
 - androidx.security.crypto 1.1.0-alpha06
 - `compileSdk` 36, `minSdk` 29
 
-## Build — iOS
+## Build — iOS (Simulator-only, Phase 2)
 
-Requires Xcode 26 (or newer) and macOS 14+.
+Requires Xcode 26 (or newer) and macOS 14+. XcodeGen is used to generate the Xcode project from `ios/project.yml`:
 
 ```
+brew install xcodegen       # one time
 cd ios
-xcodebuild -scheme MobileSecurity -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+xcodegen generate
+xcodebuild -scheme MobileSecurity \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -configuration Debug \
+  -derivedDataPath build \
+  CODE_SIGNING_ALLOWED=NO \
+  build
 ```
 
 The iOS app uses:
 
-- Swift 6, SwiftUI
+- Swift 6, SwiftUI, Swift strict concurrency
 - CryptoKit + Keychain for the trusted-contact vault
 - LocalAuthentication (Face ID / Touch ID / device PIN) for App Lock
+- CallKit `CXCallDirectoryProvider` extension for the user's block list
+- IdentityLookup `ILMessageFilterQueryHandling` extension for unknown-sender SMS
+- App Group `group.com.mobilesecurity.app.shared` to share state with the two extensions
 - Deployment target iOS 17
 
-The iOS version has intentional feature gaps relative to Android (mic/camera monitoring, screen-overlay watermark, and permission audit of other apps are not possible on iOS at all). See the in-app "Honest claims" screen for the full list.
+### iOS status (as of 2026-10-20)
+
+**Simulator-only.** The app and both extensions build and install cleanly on the iPhone 17 Pro simulator. Real-device installation is not pursued today because:
+
+1. `com.apple.developer.callkit` and `com.apple.developer.identitylookup.message-filter` entitlements require a paid Apple Developer Program membership for 57Million LLC.
+2. Signing those entitlements requires an Apple ID signed into Xcode (`Xcode → Settings → Accounts`).
+3. Neither of the above is set up on this machine right now.
+
+To resume real-device work later: sign in to Xcode with the Apple ID that owns the 57Million LLC enrollment, confirm the Team ID in `Xcode → Settings → Accounts`, update `DEVELOPMENT_TEAM` in `ios/project.yml`, `xcodegen generate`, then build without `CODE_SIGNING_ALLOWED=NO`.
+
+### iOS feature gaps vs Android (platform limitations, not TODOs)
+
+- **Mic/camera monitoring** of other apps — iOS does not expose this to any third-party app.
+- **Screen-overlay watermark** — iOS has no `SYSTEM_ALERT_WINDOW` equivalent. Not technically possible, ever.
+- **Permission audit** of other apps — iOS does not expose this.
+- **Call blocking in Simulator** — Simulator has no telephony stack. Extension builds and installs but cannot be exercised until a real-device build.
+- **SMS filtering in Simulator** — Simulator does not deliver SMS. Same as above.
+
+The in-app "Honest claims" screen states all of these to the user.
 
 ## Runtime permissions
 
