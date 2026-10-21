@@ -13,28 +13,32 @@ struct VaultScreen: View {
     var body: some View {
         Group {
             if store.contacts.isEmpty {
-                ContentUnavailableView(
-                    "No trusted contacts yet",
-                    systemImage: "person.2.circle",
-                    description: Text("Start by adding yourself as the owner, then add immediate family. Everything you type on the next screen is encrypted immediately.")
+                PremiumEmptyState(
+                    icon: "person.2.circle.fill",
+                    title: "No trusted contacts yet",
+                    message: "Start by adding yourself as the owner, then your immediate family. Everything you type is encrypted the moment you save it.",
+                    ctaTitle: "Add your first contact",
+                    ctaAction: { showAdd = true }
                 )
             } else {
-                List {
-                    ForEach(store.contacts) { contact in
-                        ContactRow(contact: contact,
-                                   onReveal: { requestReveal(contact.id) },
-                                   onEdit: { editing = contact.id })
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            let id = store.contacts[index].id
-                            try? store.delete(id: id)
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVStack(spacing: 14) {
+                        ForEach(store.contacts) { contact in
+                            ContactCard(
+                                contact: contact,
+                                onReveal: { requestReveal(contact.id) },
+                                onEdit: { editing = contact.id },
+                                onDelete: { try? store.delete(id: contact.id) }
+                            )
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 32)
                 }
-                .listStyle(.insetGrouped)
             }
         }
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Family vault")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -105,53 +109,137 @@ private struct IdentifiableUUID: Identifiable {
 
 extension RevealedContact: Identifiable {}
 
-private struct ContactRow: View {
+private struct ContactCard: View {
     let contact: MaskedContact
     let onReveal: () -> Void
     let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    @State private var showingDeleteConfirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: contact.isOwner ? "shield.lefthalf.filled" : "lock.fill")
-                    .decorativeAccessibility()
-                Text(contact.displayName).font(.headline)
-                Spacer()
-                if contact.isOwner {
-                    Text("Owner")
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(Color.appAccent.opacity(0.15))
-                        )
-                        .foregroundStyle(Color.appAccent)
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
+                    AvatarChip(initials: initials, isOwner: contact.isOwner)
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(contact.displayName)
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(Color.appPrimaryText)
+                            if contact.isOwner {
+                                Text("Owner")
+                                    .font(.caption2.weight(.bold))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(
+                                        Capsule().fill(Color.appAccent.opacity(0.14))
+                                    )
+                                    .foregroundStyle(Color.appAccent)
+                            }
+                        }
+                        if let relation = contact.relation {
+                            Text(relation)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.appSecondaryText)
+                        }
+                    }
+                    Spacer(minLength: 0)
                 }
-            }
-            if let relation = contact.relation {
-                Text(relation).font(.subheadline).foregroundStyle(Color.appSecondaryText)
-            }
-            ForEach(contact.maskedNumbers, id: \.self) { num in
-                Text(num).font(.subheadline).monospaced()
-            }
-            if let email = contact.maskedEmail {
-                Text(email).font(.subheadline).foregroundStyle(Color.appSecondaryText)
-            }
-            HStack {
-                Spacer()
-                Button("Edit", action: onEdit).buttonStyle(.borderless)
-                Button {
-                    onReveal()
-                } label: {
-                    Image(systemName: "eye").decorativeAccessibility()
+
+                if !contact.maskedNumbers.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(contact.maskedNumbers, id: \.self) { num in
+                            HStack(spacing: 10) {
+                                Image(systemName: "phone.fill")
+                                    .font(.footnote)
+                                    .foregroundStyle(Color.appTertiaryText)
+                                    .decorativeAccessibility()
+                                Text(num)
+                                    .font(.subheadline.monospaced())
+                                    .foregroundStyle(Color.appPrimaryText)
+                            }
+                        }
+                        if let email = contact.maskedEmail {
+                            HStack(spacing: 10) {
+                                Image(systemName: "envelope.fill")
+                                    .font(.footnote)
+                                    .foregroundStyle(Color.appTertiaryText)
+                                    .decorativeAccessibility()
+                                Text(email)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appSecondaryText)
+                            }
+                        }
+                    }
                 }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("Reveal \(contact.displayName) with Face ID")
-                .minimumHitTarget()
+
+                HStack(spacing: 10) {
+                    Button(action: onEdit) {
+                        Label("Edit", systemImage: "pencil")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 32)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(Color.appAccent)
+
+                    Button(action: onReveal) {
+                        Label("Reveal", systemImage: "eye.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 32)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appAccent)
+                    .accessibilityLabel("Reveal \(contact.displayName) with Face ID")
+                }
             }
         }
-        .padding(.vertical, 2)
+        .contextMenu {
+            Button(role: .destructive) { showingDeleteConfirm = true } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .confirmationDialog("Delete \(contact.displayName)?",
+                            isPresented: $showingDeleteConfirm,
+                            titleVisibility: .visible) {
+            Button("Delete", role: .destructive, action: onDelete)
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private var initials: String {
+        let parts = contact.displayName.split(separator: " ")
+        let letters = parts.prefix(2).compactMap { $0.first?.uppercased() }
+        return letters.joined()
+    }
+}
+
+private struct AvatarChip: View {
+    let initials: String
+    let isOwner: Bool
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color.appAccent, Color.appAccent.opacity(0.65)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            if initials.isEmpty {
+                Image(systemName: isOwner ? "person.fill" : "person")
+                    .font(.title3)
+                    .foregroundStyle(.white)
+            } else {
+                Text(initials)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .frame(width: 46, height: 46)
+        .decorativeAccessibility()
     }
 }
 
@@ -161,41 +249,91 @@ private struct RevealedSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Identity") {
-                    LabeledContent("Name", value: data.displayName)
-                    if let relation = data.relation {
-                        LabeledContent("Relation", value: relation)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 16) {
+                    PremiumCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            CardHeader(icon: "person.text.rectangle.fill", title: "Identity")
+                            LabeledRow(label: "Name", value: data.displayName)
+                            if let relation = data.relation {
+                                LabeledRow(label: "Relation", value: relation)
+                            }
+                            if data.isOwner {
+                                LabeledRow(label: "Role", value: "Phone owner")
+                            }
+                        }
                     }
-                    if data.isOwner {
-                        LabeledContent("Role", value: "Phone owner")
+
+                    if !data.numbers.isEmpty {
+                        PremiumCard {
+                            VStack(alignment: .leading, spacing: 14) {
+                                CardHeader(icon: "phone.fill", title: "Phone numbers")
+                                ForEach(data.numbers) { n in
+                                    LabeledRow(
+                                        label: n.label ?? "Phone",
+                                        value: n.normalisedNumber,
+                                        monospaced: true
+                                    )
+                                }
+                            }
+                        }
                     }
-                }
-                if !data.numbers.isEmpty {
-                    Section("Phone numbers") {
-                        ForEach(data.numbers) { n in
-                            LabeledContent(n.label ?? "Phone", value: n.normalisedNumber)
-                                .monospaced()
+
+                    if let address = data.addressPlain, !address.isEmpty {
+                        PremiumCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                CardHeader(icon: "mappin.and.ellipse", title: "Address")
+                                Text(address)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appPrimaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+
+                    if let notes = data.notesPlain, !notes.isEmpty {
+                        PremiumCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                CardHeader(icon: "note.text", title: "Notes")
+                                Text(notes)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.appPrimaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
                 }
-                if let address = data.addressPlain, !address.isEmpty {
-                    Section("Address (encrypted at rest)") {
-                        Text(address)
-                    }
-                }
-                if let notes = data.notesPlain, !notes.isEmpty {
-                    Section("Notes (encrypted at rest)") {
-                        Text(notes)
-                    }
-                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle(data.displayName)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Hide") { dismiss() }
+                        .tint(Color.appAccent)
                 }
             }
+        }
+    }
+}
+
+private struct LabeledRow: View {
+    let label: String
+    let value: String
+    var monospaced: Bool = false
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+            Spacer(minLength: 12)
+            Text(value)
+                .font(monospaced ? .subheadline.monospaced() : .subheadline.weight(.medium))
+                .foregroundStyle(Color.appPrimaryText)
+                .multilineTextAlignment(.trailing)
         }
     }
 }

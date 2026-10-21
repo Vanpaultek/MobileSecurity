@@ -19,60 +19,18 @@ struct SettingsScreen: View {
     }
 
     var body: some View {
-        Form {
-            Section("Privacy") {
-                Toggle("App Lock", isOn: $appLockToggle)
-                    .tint(Color.appAccent)
-                    .onChange(of: appLockToggle) { _, now in
-                        if now && !canUseAuth {
-                            // Prevent the Android-style lockout bug on day one.
-                            appLockToggle = false
-                            showLockDeniedAlert = true
-                            return
-                        }
-                        gate.appLockEnabled = now
-                    }
-                Text("Require Face ID, Touch ID, or your device passcode to open OnlyTrusted.")
-                    .font(.caption)
-                    .foregroundStyle(Color.appSecondaryText)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 18) {
+                privacyCard
+                dataCard
+                moreCard
+                footerCard
             }
-
-            Section("Data") {
-                Button {
-                    runExport { try DataExporter.write() }
-                } label: {
-                    Label("Export my data as JSON", systemImage: "square.and.arrow.up")
-                }
-                .tint(Color.appAccent)
-                Button {
-                    runExport { try EvidenceExporter.write() }
-                } label: {
-                    Label("Export evidence pack for carrier, bank, or police",
-                          systemImage: "doc.badge.plus")
-                }
-                .tint(Color.appAccent)
-                Button(role: .destructive) {
-                    confirmWipe = true
-                } label: {
-                    Label("Wipe everything", systemImage: "trash")
-                }
-            }
-
-            Section("More") {
-                NavigationLink("Privacy, terms, and honest claims") {
-                    LegalScreen()
-                }
-                NavigationLink("About and attributions") {
-                    AboutScreen()
-                }
-            }
-
-            Section {
-                Text("© 2026 57Million LLC. Licensed under the GNU Affero General Public License v3.0.\nSupport: reddy@vanpaultek.com")
-                    .font(.caption)
-                    .foregroundStyle(Color.appSecondaryText)
-            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
         }
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { appLockToggle = gate.appLockEnabled }
@@ -102,6 +60,132 @@ struct SettingsScreen: View {
         } message: {
             Text(exportError ?? "")
         }
+    }
+
+    private var privacyCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                CardHeader(icon: "lock.shield.fill", title: "Privacy")
+                VStack(spacing: 0) {
+                    Toggle(isOn: $appLockToggle) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("App Lock").font(.subheadline.weight(.semibold))
+                            Text("Require Face ID, Touch ID, or your device passcode to open OnlyTrusted.")
+                                .font(.caption)
+                                .foregroundStyle(Color.appSecondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .tint(Color.appAccent)
+                    .padding(.vertical, 10)
+                    .onChange(of: appLockToggle) { _, now in
+                        if now && !canUseAuth {
+                            appLockToggle = false
+                            showLockDeniedAlert = true
+                            return
+                        }
+                        gate.appLockEnabled = now
+                    }
+                }
+            }
+        }
+    }
+
+    private var dataCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                CardHeader(icon: "square.and.arrow.up.fill", title: "Data")
+                VStack(spacing: 10) {
+                    SystemLinkRow(icon: "square.and.arrow.up", label: "Export my data as JSON") {
+                        runExport { try DataExporter.write() }
+                    }
+                    SystemLinkRow(icon: "doc.badge.plus", label: "Export evidence pack") {
+                        runExport { try EvidenceExporter.write() }
+                    }
+                    Button {
+                        confirmWipe = true
+                    } label: {
+                        HStack(spacing: 14) {
+                            Image(systemName: "trash.fill")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Color.appDanger)
+                                .frame(width: 28, height: 28)
+                                .decorativeAccessibility()
+                            Text("Wipe everything")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Color.appDanger)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.appDanger.opacity(0.08))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var moreCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                CardHeader(icon: "ellipsis.circle.fill", title: "More")
+                VStack(spacing: 10) {
+                    NavigationLink {
+                        LegalScreen()
+                    } label: {
+                        settingsRow(icon: "doc.text.fill", label: "Privacy, terms, and honest claims")
+                    }
+                    NavigationLink {
+                        AboutScreen()
+                    } label: {
+                        settingsRow(icon: "info.circle.fill", label: "About and attributions")
+                    }
+                }
+            }
+        }
+    }
+
+    private var footerCard: some View {
+        VStack(spacing: 4) {
+            Text("OnlyTrusted")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color.appSecondaryText)
+            Text("© 2026 57Million LLC. GNU AGPL-3.0.")
+                .font(.caption2)
+                .foregroundStyle(Color.appTertiaryText)
+            Text("Support: reddy@vanpaultek.com")
+                .font(.caption2)
+                .foregroundStyle(Color.appTertiaryText)
+        }
+        .padding(.top, 8)
+    }
+
+    private func settingsRow(icon: String, label: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.appAccent)
+                .frame(width: 28, height: 28)
+                .decorativeAccessibility()
+            Text(label)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.appPrimaryText)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color.appTertiaryText)
+                .decorativeAccessibility()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.systemGroupedBackground))
+        )
     }
 
     private func runExport(_ work: () throws -> URL) {

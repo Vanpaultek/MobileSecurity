@@ -9,9 +9,7 @@ final class BlockListViewModel: ObservableObject {
     @Published var reloadStatus: ReloadStatus = .idle
 
     enum ReloadStatus: Equatable {
-        case idle
-        case reloading
-        case ok
+        case idle, reloading, ok
         case failed(String)
     }
 
@@ -22,9 +20,7 @@ final class BlockListViewModel: ObservableObject {
         self.callDirectoryIdentifier = callDirectoryIdentifier
     }
 
-    func load() {
-        entries = store.allRecent()
-    }
+    func load() { entries = store.allRecent() }
 
     func add(raw: String, label: String?, blockCalls: Bool, blockSms: Bool) {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -40,9 +36,6 @@ final class BlockListViewModel: ObservableObject {
         load()
     }
 
-    /// Tell iOS to re-query the Call Directory Extension. The extension is only consulted
-    /// at reload time, not per-call — so every change to the block list must be followed
-    /// by this call for the change to take effect in the dialer.
     func reloadCallDirectory() {
         reloadStatus = .reloading
         CXCallDirectoryManager.sharedInstance.reloadExtension(withIdentifier: callDirectoryIdentifier) { [weak self] error in
@@ -67,57 +60,29 @@ struct BlockListScreen: View {
     @State private var showAdd = false
 
     var body: some View {
-        List {
-            Section {
-                if vm.entries.isEmpty {
-                    Text("No numbers blocked yet. Add one with the + button.")
-                        .foregroundStyle(Color.appSecondaryText)
-                } else {
-                    ForEach(vm.entries) { record in
-                        BlockedRow(record: record)
+        Group {
+            if vm.entries.isEmpty {
+                PremiumEmptyState(
+                    icon: "nosign",
+                    title: "No numbers blocked yet",
+                    message: "Add a number here and OnlyTrusted will silence it on every incoming call and SMS.",
+                    ctaTitle: "Block your first number",
+                    ctaAction: { showAdd = true }
+                )
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 18) {
+                        heroCard
+                        blockedListCard
+                        activationCard
                     }
-                    .onDelete { set in
-                        for i in set { vm.remove(id: vm.entries[i].id) }
-                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 32)
                 }
-            } header: {
-                Text("Your block list")
-            } footer: {
-                Text("Blocks apply after you tap Reload below and after you have enabled OnlyTrusted inside the iOS Settings app, under Phone, Call Blocking and Identification.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.appSecondaryText)
-            }
-
-            Section {
-                Button {
-                    vm.reloadCallDirectory()
-                } label: {
-                    Label("Reload Call Directory", systemImage: "arrow.triangle.2.circlepath")
-                }
-                statusView
-            } header: {
-                Text("Push changes to iOS")
-            }
-
-            Section {
-                Button {
-                    openURL("App-prefs:Phone")
-                } label: {
-                    Label("Enable blocking in Phone settings", systemImage: "phone.badge.waveform")
-                }
-                Button {
-                    openURL("App-prefs:MESSAGES")
-                } label: {
-                    Label("Enable SMS filter in Messages settings", systemImage: "message.badge")
-                }
-            } header: {
-                Text("iOS activation (one-time)")
-            } footer: {
-                Text("iOS requires each user to turn on third-party call blocking and SMS filtering inside the Settings app. We cannot flip these switches for you. The links above open the correct page.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.appSecondaryText)
             }
         }
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Blocked")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -133,22 +98,101 @@ struct BlockListScreen: View {
         .task { vm.load() }
     }
 
+    private var heroCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("\(vm.entries.count)")
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.appPrimaryText)
+                        Text(vm.entries.count == 1 ? "number blocked" : "numbers blocked")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.appSecondaryText)
+                    }
+                    Spacer()
+                    ZStack {
+                        Circle().fill(Color.appAccent.opacity(0.14))
+                        Image(systemName: "nosign")
+                            .font(.title.weight(.semibold))
+                            .foregroundStyle(Color.appAccent)
+                    }
+                    .frame(width: 72, height: 72)
+                    .decorativeAccessibility()
+                }
+
+                Button {
+                    vm.reloadCallDirectory()
+                } label: {
+                    Label("Push changes to iOS", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.body.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.appAccent)
+                .controlSize(.large)
+
+                statusLine
+            }
+        }
+    }
+
     @ViewBuilder
-    private var statusView: some View {
+    private var statusLine: some View {
         switch vm.reloadStatus {
-        case .idle:
-            EmptyView()
+        case .idle: EmptyView()
         case .reloading:
-            HStack {
+            HStack(spacing: 8) {
                 ProgressView().controlSize(.small)
-                Text("Reloading…").font(.footnote).foregroundStyle(Color.appSecondaryText)
+                Text("Reloading…")
+                    .font(.footnote)
+                    .foregroundStyle(Color.appSecondaryText)
             }
         case .ok:
             Label("Changes pushed to iOS.", systemImage: "checkmark.circle.fill")
-                .foregroundStyle(.green).font(.footnote)
-        case .failed(let message):
-            Label("Reload failed: \(message)", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red).font(.footnote)
+                .font(.footnote)
+                .foregroundStyle(Color.appSuccess)
+        case .failed(let m):
+            Label("Reload failed: \(m)", systemImage: "exclamationmark.triangle.fill")
+                .font(.footnote)
+                .foregroundStyle(Color.appDanger)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var blockedListCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                CardHeader(icon: "list.bullet", title: "Your block list")
+                VStack(spacing: 12) {
+                    ForEach(Array(vm.entries.enumerated()), id: \.element.id) { idx, record in
+                        BlockedRow(record: record, onDelete: { vm.remove(id: record.id) })
+                        if idx < vm.entries.count - 1 {
+                            Divider().padding(.leading, 44)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var activationCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 14) {
+                CardHeader(icon: "gearshape.fill", title: "One-time iOS activation", tint: Color.appWarning)
+                Text("iOS requires each user to turn on third-party call blocking and SMS filtering in the Settings app. We cannot flip these switches for you. The links below open the right page.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                VStack(spacing: 10) {
+                    SystemLinkRow(icon: "phone.badge.waveform", label: "Enable blocking in Phone settings") {
+                        openURL("App-prefs:Phone")
+                    }
+                    SystemLinkRow(icon: "message.badge", label: "Enable SMS filter in Messages settings") {
+                        openURL("App-prefs:MESSAGES")
+                    }
+                }
+            }
         }
     }
 
@@ -158,28 +202,72 @@ struct BlockListScreen: View {
     }
 }
 
+// MARK: - Row
+
 private struct BlockedRow: View {
     let record: BlockedNumberRecord
+    let onDelete: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(PhoneUtils.mask(record.normalisedNumber))
-                .font(.headline).monospaced()
-            if let label = record.label {
-                Text(label).font(.subheadline).foregroundStyle(Color.appSecondaryText)
+        HStack(alignment: .top, spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(Color.appDanger.opacity(0.14))
+                Image(systemName: "nosign")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.appDanger)
             }
-            HStack(spacing: 6) {
-                if record.blockCalls {
-                    Label("Calls", systemImage: "phone.down.fill").font(.caption)
+            .frame(width: 32, height: 32)
+            .decorativeAccessibility()
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(PhoneUtils.mask(record.normalisedNumber))
+                    .font(.subheadline.weight(.semibold).monospaced())
+                    .foregroundStyle(Color.appPrimaryText)
+                if let label = record.label {
+                    Text(label)
+                        .font(.caption)
+                        .foregroundStyle(Color.appSecondaryText)
                 }
-                if record.blockSms {
-                    Label("SMS", systemImage: "message.badge.fill").font(.caption)
+                HStack(spacing: 6) {
+                    if record.blockCalls { TagChip(label: "Calls", icon: "phone.down.fill") }
+                    if record.blockSms { TagChip(label: "SMS", icon: "message.fill") }
                 }
+                .padding(.top, 2)
             }
-            .foregroundStyle(Color.appSecondaryText)
+            Spacer()
+            Button(role: .destructive, action: onDelete) {
+                Image(systemName: "trash")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.appDanger)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(Color.appDanger.opacity(0.12)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(record.normalisedNumber) from block list")
+            .minimumHitTarget()
         }
     }
 }
+
+private struct TagChip: View {
+    let label: String
+    let icon: String
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .decorativeAccessibility()
+            Text(label).font(.caption2.weight(.semibold))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(Color.appAccent.opacity(0.12)))
+        .foregroundStyle(Color.appAccent)
+    }
+}
+
+// MARK: - Add sheet
 
 private struct AddBlockedSheet: View {
     @ObservedObject var vm: BlockListViewModel
@@ -192,31 +280,48 @@ private struct AddBlockedSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    TextField("Number", text: Binding(
-                        get: { number },
-                        set: { number = PhoneUtils.sanitiseNumberInput($0) }
-                    ))
-                    .keyboardType(.phonePad)
-                    TextField("Label (optional)", text: $label)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 18) {
+                    PremiumCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            CardHeader(icon: "number", title: "Number")
+                            TextField("Phone number", text: Binding(
+                                get: { number },
+                                set: { number = PhoneUtils.sanitiseNumberInput($0) }
+                            ))
+                            .keyboardType(.phonePad)
+                            .textFieldStyle(.plain)
+                            .padding(.vertical, 8)
+                            Divider()
+                            TextField("Label (optional)", text: $label)
+                                .textFieldStyle(.plain)
+                                .padding(.vertical, 8)
+                        }
+                    }
+
+                    PremiumCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            CardHeader(icon: "slider.horizontal.3", title: "What to block")
+                            Toggle("Block incoming calls", isOn: $blockCalls)
+                                .tint(Color.appAccent)
+                            Toggle("Flag incoming SMS", isOn: $blockSms)
+                                .tint(Color.appAccent)
+                            Text("Call blocking takes effect after you tap Reload and after you enable OnlyTrusted inside the iOS Settings app, under Phone.")
+                                .font(.footnote)
+                                .foregroundStyle(Color.appSecondaryText)
+                                .padding(.top, 4)
+                        }
+                    }
                 }
-                Section {
-                    Toggle("Block incoming calls", isOn: $blockCalls)
-                        .tint(Color.appAccent)
-                    Toggle("Flag incoming SMS", isOn: $blockSms)
-                        .tint(Color.appAccent)
-                } footer: {
-                    Text("Call blocking takes effect after you tap Reload and after you enable OnlyTrusted inside the iOS Settings app, under Phone.")
-                        .font(.footnote)
-                        .foregroundStyle(Color.appSecondaryText)
-                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Block a number")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { dismiss() }.tint(Color.appAccent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
@@ -224,6 +329,7 @@ private struct AddBlockedSheet: View {
                                blockCalls: blockCalls, blockSms: blockSms)
                         dismiss()
                     }
+                    .tint(Color.appAccent)
                     .disabled(number.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
