@@ -31,6 +31,7 @@ import com.onlytrusted.app.ui.blocklist.BlockListScreen
 import com.onlytrusted.app.ui.dashboard.DashboardScreen
 import com.onlytrusted.app.ui.events.EventsScreen
 import com.onlytrusted.app.ui.legal.LegalScreen
+import com.onlytrusted.app.ui.notifications.NotificationsScreen
 import com.onlytrusted.app.ui.permissions.PermissionAuditScreen
 import com.onlytrusted.app.ui.posture.PostureScreen
 import com.onlytrusted.app.ui.settings.SettingsScreen
@@ -49,6 +50,7 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object ShieldLog : Destination("shieldlog", "Shield log", Icons.Filled.Shield)
     data object Legal : Destination("legal", "Legal", Icons.Filled.Security)
     data object About : Destination("about", "About", Icons.Filled.Security)
+    data object Notifications : Destination("notifications", "Notifications", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -135,7 +137,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenPosture = { navController.navigate(Destination.Posture.route) },
                     onOpenShieldLog = { navController.navigate(Destination.ShieldLog.route) },
                     onOpenLegal = { navController.navigate(Destination.Legal.route) },
-                    onOpenAbout = { navController.navigate(Destination.About.route) }
+                    onOpenAbout = { navController.navigate(Destination.About.route) },
+                    onOpenNotifications = { navController.navigate(Destination.Notifications.route) }
                 )
             }
             composable(Destination.Permissions.route) { PermissionAuditScreen() }
@@ -143,6 +146,7 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             composable(Destination.ShieldLog.route) { ShieldLogScreen() }
             composable(Destination.Legal.route) { LegalScreen() }
             composable(Destination.About.route) { AboutScreen() }
+            composable(Destination.Notifications.route) { NotificationsScreen() }
         }
     }
 }

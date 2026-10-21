@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -49,11 +48,20 @@ fun BlockListScreen() {
     var blockCalls by remember { mutableStateOf(true) }
     var blockSms by remember { mutableStateOf(true) }
 
+    val scrollState = androidx.compose.foundation.rememberScrollState()
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Blocked numbers", style = MaterialTheme.typography.headlineMedium)
+        Text("Blocked", style = MaterialTheme.typography.headlineMedium)
+
+        BlockingOptionsSection()
+
+        Text("Your block list", style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = number,
             onValueChange = { number = com.onlytrusted.app.privacy.PhoneUtils.sanitiseNumberInput(it) },
@@ -96,8 +104,8 @@ fun BlockListScreen() {
         if (numbers.isEmpty()) {
             Text("No blocked numbers yet.")
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(numbers, key = { it.number }) { entry ->
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                numbers.forEach { entry ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier

@@ -51,7 +51,8 @@ fun SettingsScreen(
     onOpenPosture: () -> Unit = {},
     onOpenShieldLog: () -> Unit = {},
     onOpenLegal: () -> Unit = {},
-    onOpenAbout: () -> Unit = {}
+    onOpenAbout: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -63,16 +64,17 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmWipe by remember { mutableStateOf(false) }
+    var exportError by remember { mutableStateOf<String?>(null) }
+    var lastExport by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val message = runCatching { DataExporter.exportTo(context, uri) }
-                .map { "Exported $it rows to the file you chose." }
-                .getOrElse { "Export failed: ${it.message ?: "unknown error"}" }
-            snackbarHostState.showSnackbar(message)
+            runCatching { DataExporter.exportTo(context, uri) }
+                .onSuccess { snackbarHostState.showSnackbar("Exported $it rows to the file you chose.") }
+                .onFailure { exportError = it.message ?: "unknown error" }
         }
     }
 
@@ -81,11 +83,23 @@ fun SettingsScreen(
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val message = runCatching { EvidenceExporter.exportTo(context, uri) }
-                .map { "Evidence pack ready. Share only with your carrier, bank, or law enforcement . never with the suspected caller." }
-                .getOrElse { "Evidence export failed: ${it.message ?: "unknown error"}" }
-            snackbarHostState.showSnackbar(message)
+            runCatching { EvidenceExporter.exportTo(context, uri) }
+                .onSuccess {
+                    snackbarHostState.showSnackbar(
+                        "Evidence pack ready. Share only with your carrier, bank, or law enforcement, never with the suspected caller."
+                    )
+                }
+                .onFailure { exportError = it.message ?: "unknown error" }
         }
+    }
+
+    if (exportError != null) {
+        com.onlytrusted.app.ui.common.ErrorStateView(
+            message = "We couldn't complete the export. ${exportError ?: ""}",
+            onTryAgain = lastExport?.let { work -> { exportError = null; work() } },
+            onGoBack = { exportError = null }
+        )
+        return
     }
 
     Scaffold(
@@ -197,17 +211,25 @@ fun SettingsScreen(
                 )
                 OutlinedButton(
                     onClick = {
-                        exportLauncher.launch(
-                            "onlytrusted-${System.currentTimeMillis()}.json"
-                        )
+                        val action = {
+                            exportLauncher.launch(
+                                "onlytrusted-${System.currentTimeMillis()}.json"
+                            )
+                        }
+                        lastExport = action
+                        action()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Export my data (JSON)") }
                 OutlinedButton(
                     onClick = {
-                        evidenceLauncher.launch(
-                            "evidence-${System.currentTimeMillis()}.json"
-                        )
+                        val action = {
+                            evidenceLauncher.launch(
+                                "evidence-${System.currentTimeMillis()}.json"
+                            )
+                        }
+                        lastExport = action
+                        action()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Export evidence pack (for carrier / bank / police)") }
@@ -223,6 +245,10 @@ fun SettingsScreen(
         Card {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("More", style = MaterialTheme.typography.titleLarge)
+                OutlinedButton(
+                    onClick = onOpenNotifications,
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Notifications") }
                 OutlinedButton(
                     onClick = onOpenPermissions,
                     modifier = Modifier.fillMaxWidth()

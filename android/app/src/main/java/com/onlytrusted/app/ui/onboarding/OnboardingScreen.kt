@@ -2,134 +2,196 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.onboarding
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FactCheck
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
-import com.onlytrusted.app.ui.legal.LegalScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.onlytrusted.app.R
 import com.onlytrusted.app.privacy.OnboardingState
+import com.onlytrusted.app.ui.theme.BrandAccentDark
+import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.MidnightCard
+import com.onlytrusted.app.ui.theme.PrimaryTextDark
+import com.onlytrusted.app.ui.theme.SecondaryTextDark
+import com.onlytrusted.app.ui.theme.WarningDark
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OnboardingScreen(onAccepted: () -> Unit) {
+fun OnboardingScreen(onContinue: () -> Unit) {
     val context = LocalContext.current
-    var isAdult by remember { mutableStateOf(false) }
-    var ownsDevice by remember { mutableStateOf(false) }
-    var understandsLimits by remember { mutableStateOf(false) }
-    val canContinue = isAdult && ownsDevice && understandsLimits
-    var legalSheetSection by remember { mutableStateOf<String?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .background(MidnightBackground)
     ) {
-        Text("OnlyTrusted", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            "This app is a serious privacy tool for the phone owner and their immediate family. " +
-                "It is not an entertainment or novelty app. Before you use it, please read and " +
-                "confirm the following."
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(top = 32.dp, bottom = 120.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(136.dp)
+                    .background(BrandAccentDark.copy(alpha = 0.12f), RoundedCornerShape(50))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.brand_logo),
+                    contentDescription = "OnlyTrusted",
+                    modifier = Modifier
+                        .size(92.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            }
 
-        Card {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("What this app does", style = MaterialTheme.typography.titleLarge)
-                Text("• Keeps your microphone and camera for you. Alerts the moment another app uses them.")
-                Text("• Protects your family's phone numbers and addresses with layered encryption.")
-                Text("• Blocks or silences everyone who is not on your trusted list, when you turn Trusted-only on.")
-                Text("• Keeps every piece of data on this device only. No cloud. No ads. No analytics.")
+            Text(
+                "OnlyTrusted",
+                color = PrimaryTextDark,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "A safer, quieter phone starts here.",
+                color = SecondaryTextDark,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(vertical = 4.dp)) {
+                    BenefitRow(Icons.Filled.Groups, "Allow only trusted contacts")
+                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
+                    BenefitRow(Icons.Filled.NotificationsOff, "Silence or block everyone else")
+                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
+                    BenefitRow(Icons.Filled.FactCheck, "Keep a local audit log")
+                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
+                    BenefitRow(Icons.Filled.VerifiedUser, "Your data never leaves this device")
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Filled.VerifiedUser,
+                            contentDescription = null,
+                            tint = WarningDark,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            "Honest limits Android imposes",
+                            color = PrimaryTextDark,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    HonestLimitBullet("A normal Android app cannot hardware-mute the mic or camera; the system toggles in Quick Settings do that.")
+                    HonestLimitBullet("You cannot stop the other side of a call from recording their own device.")
+                    HonestLimitBullet("Full screenshot blocking across the whole phone needs a hardened OS or root.")
+                    HonestLimitBullet("Carrier and network-level tracking is outside any app's control.")
+                }
             }
         }
 
-        Card {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Honest limits", style = MaterialTheme.typography.titleLarge)
-                Text("• An app on normal Android cannot hardware-mute the mic/camera. The system " +
-                    "mic & camera toggles in Quick Settings do that; this app surfaces and complements them.")
-                Text("• You cannot stop the other side of a video call from recording their own device.")
-                Text("• Full screenshot blocking across the whole phone requires a hardened OS or root.")
-                Text("• Carrier/network tracking is outside any app's control.")
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(MidnightCard)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Button(
+                onClick = {
+                    OnboardingState.markOnboarded(context)
+                    onContinue()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Get Started")
             }
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = isAdult, onCheckedChange = { isAdult = it })
-            Text(
-                "I am at least 18 years old (or the legal age of digital consent in my country).",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = ownsDevice, onCheckedChange = { ownsDevice = it })
-            Text(
-                "I own or administer this phone and will only block numbers and intercept calls " +
-                    "on devices I am authorised to manage.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = understandsLimits, onCheckedChange = { understandsLimits = it })
-            Text(
-                "I have read the honest limits above and understand this is a privacy aid, not " +
-                    "a guarantee against determined attackers.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Button(
-            onClick = {
-                OnboardingState.accept(context, isAdult, ownsDevice, understandsLimits)
-                onAccepted()
-            },
-            enabled = canContinue,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("I confirm and continue") }
-
-        Text(
-            "By continuing you also accept the Privacy Policy and Terms of Use shipped inside the app. " +
-                "You can review them any time from Settings, Privacy, terms, and honest claims.",
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { legalSheetSection = "Privacy policy" }) { Text("Privacy policy") }
-            TextButton(onClick = { legalSheetSection = "Terms of use" }) { Text("Terms of use") }
-            TextButton(onClick = { legalSheetSection = "Honest claims" }) { Text("Honest claims") }
         }
     }
+}
 
-    val currentSheetSection = legalSheetSection
-    if (currentSheetSection != null) {
-        ModalBottomSheet(
-            onDismissRequest = { legalSheetSection = null },
-            sheetState = sheetState
+@Composable
+private fun BenefitRow(icon: ImageVector, title: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 14.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(36.dp)
+                .background(BrandAccentDark.copy(alpha = 0.14f), RoundedCornerShape(10.dp))
         ) {
-            LegalScreen(initialSectionTitle = currentSheetSection)
+            Icon(icon, contentDescription = null, tint = BrandAccentDark)
         }
+        Spacer(Modifier.width(14.dp))
+        Text(
+            title,
+            color = PrimaryTextDark,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun HonestLimitBullet(text: String) {
+    Row(verticalAlignment = Alignment.Top) {
+        Box(
+            modifier = Modifier
+                .padding(top = 7.dp, end = 10.dp)
+                .size(5.dp)
+                .background(BrandAccentDark, RoundedCornerShape(50))
+        )
+        Text(
+            text,
+            color = PrimaryTextDark,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }

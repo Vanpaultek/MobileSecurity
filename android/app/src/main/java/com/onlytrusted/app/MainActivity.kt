@@ -26,8 +26,10 @@ import com.onlytrusted.app.services.PocketDetectionService
 import com.onlytrusted.app.services.SensorMonitorService
 import com.onlytrusted.app.ui.lock.AppLockGate
 import com.onlytrusted.app.ui.navigation.AppNavigation
+import com.onlytrusted.app.ui.onboarding.ConsentScreen
 import com.onlytrusted.app.ui.onboarding.OnboardingScreen
 import com.onlytrusted.app.ui.settings.SettingsViewModel
+import com.onlytrusted.app.ui.splash.SplashScreen
 import com.onlytrusted.app.ui.theme.OnlyTrustedTheme
 import com.onlytrusted.app.util.PermissionHelper
 
@@ -43,7 +45,9 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             OnlyTrustedTheme {
-                var onboarded by remember { mutableStateOf(OnboardingState.hasAccepted(this)) }
+                var splashDone by remember { mutableStateOf(false) }
+                var onboarded by remember { mutableStateOf(OnboardingState.hasOnboarded(this)) }
+                var consented by remember { mutableStateOf(OnboardingState.hasAccepted(this)) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 var unlocked by remember { mutableStateOf(!AppLockManager.shouldPrompt(this)) }
 
@@ -60,7 +64,9 @@ class MainActivity : FragmentActivity() {
                 }
 
                 when {
-                    !onboarded -> OnboardingScreen(onAccepted = { onboarded = true })
+                    !splashDone -> SplashScreen(onDone = { splashDone = true })
+                    !onboarded -> OnboardingScreen(onContinue = { onboarded = true })
+                    !consented -> ConsentScreen(onConfirmed = { consented = true })
                     !unlocked -> AppLockGate(onUnlocked = {
                         AppLockManager.markUnlocked(this)
                         unlocked = true

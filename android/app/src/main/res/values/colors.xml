@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_primary">#0F766E</color>
-    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_primary">#54C7BD</color>
+    <color name="brand_on_primary">#06131D</color>
+    <color name="midnight_background">#06131D</color>
+    <color name="midnight_card">#12313A</color>
 </resources>

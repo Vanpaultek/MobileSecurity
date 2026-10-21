@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.OnlyTrusted" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/brand_on_primary</item>
-        <item name="android:statusBarColor">@color/brand_primary</item>
-        <item name="android:navigationBarColor">@color/brand_primary</item>
+    <style name="Theme.OnlyTrusted" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/midnight_background</item>
+        <item name="android:statusBarColor">@color/midnight_background</item>
+        <item name="android:navigationBarColor">@color/midnight_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.OnlyTrusted.Splash" parent="Theme.OnlyTrusted">
+        <item name="android:windowBackground">@color/midnight_background</item>
     </style>
 </resources>
