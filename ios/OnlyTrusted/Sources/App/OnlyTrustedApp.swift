@@ -10,7 +10,11 @@ struct OnlyTrustedApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(gate)
-                .preferredColorScheme(.none)
+                // Midnight dark is OnlyTrusted's primary identity. We force the dark scheme
+                // here so every user sees the brand palette on first open; the matched light
+                // scheme (defined in Color tokens) remains available for future opt-in but is
+                // not currently exposed to users. Change this to .none to let users switch.
+                .preferredColorScheme(.dark)
         }
     }
 }

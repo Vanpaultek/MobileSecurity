@@ -82,7 +82,7 @@ struct BlockListScreen: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Blocked")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -316,7 +316,7 @@ private struct AddBlockedSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .background(Color.appScreenBackground.ignoresSafeArea())
             .navigationTitle("Block a number")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

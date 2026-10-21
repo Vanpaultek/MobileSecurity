@@ -38,7 +38,7 @@ struct VaultScreen: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Family vault")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -306,7 +306,7 @@ private struct RevealedSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .background(Color.appScreenBackground.ignoresSafeArea())
             .navigationTitle(data.displayName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

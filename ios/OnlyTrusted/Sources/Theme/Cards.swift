@@ -19,7 +19,7 @@ struct PremiumCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(.secondarySystemGroupedBackground))
+                    .fill(Color.appCardBackground)
             )
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
     }
@@ -89,7 +89,7 @@ struct SystemLinkRow: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(.systemGroupedBackground))
+                    .fill(Color.appScreenBackground)
             )
         }
         .buttonStyle(.plain)

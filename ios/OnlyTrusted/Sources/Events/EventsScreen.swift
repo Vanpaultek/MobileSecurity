@@ -50,7 +50,7 @@ struct EventsScreen: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Events")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -191,7 +191,7 @@ private struct FilterChip: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 9)
                 .background(
-                    Capsule().fill(isSelected ? Color.appAccent : Color(.secondarySystemGroupedBackground))
+                    Capsule().fill(isSelected ? Color.appAccent : Color.appCardBackground)
                 )
                 .foregroundStyle(isSelected ? Color.white : Color.appPrimaryText)
         }

@@ -61,7 +61,7 @@ struct DashboardScreen: View {
             .padding(.top, 8)
             .padding(.bottom, 32)
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Shield")
         .navigationBarTitleDisplayMode(.inline)
         .task { await vault.reload() }

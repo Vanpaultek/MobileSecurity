@@ -2,51 +2,81 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+// Local Color-literal constants (needed because darkColorScheme/lightColorScheme want
+// androidx.compose.ui.graphics.Color values).
+private val Color003734 = Color(0xFF003734)
+private val Color002B29 = Color(0xFF002B29)
+private val Color003C38 = Color(0xFF003C38)
+private val ColorB2F2EC = Color(0xFFB2F2EC)
+private val Color600000 = Color(0xFF600000)
+
 /**
- * Material 3 color scheme pinned to WCAG 2.1 AA. We deliberately override the roles that
- * Material's defaults would otherwise fill with contrast-fragile dynamic Material You colors.
- *
- * Key fix vs the default scheme: `onSurfaceVariant` (which Material uses for "secondary"
- * body text, caption lines, chip labels) often resolves to a #49454F / #CAC4D0 that only
- * clears ~4.3:1. We pin it to OnSurfaceMuted (7.3:1) so every subhead/caption in the app
- * is safely above the 4.5:1 threshold.
+ * Dark-first OnlyTrusted theme. The midnight palette is the primary identity; a matched light
+ * scheme is provided for completeness but by default we force dark through `useDark = true`.
  */
-private val LightColors = lightColorScheme(
-    primary = BrandPrimary,
-    onPrimary = BrandOnPrimary,
-    secondary = BrandSecondary,
-    onSecondary = BrandOnPrimary,
-    surface = BrandSurface,
-    onSurface = OnSurfaceStrong,
-    onSurfaceVariant = OnSurfaceMuted,
-    outline = OutlineOnSurface,
-    error = BrandError,
-    onError = BrandOnPrimary
+private val DarkColors = darkColorScheme(
+    primary = BrandAccentDark,
+    onPrimary = Color003734,
+    primaryContainer = Color003C38,
+    onPrimaryContainer = ColorB2F2EC,
+
+    secondary = BrandCyanDark,
+    onSecondary = Color002B29,
+
+    background = MidnightBackground,
+    onBackground = PrimaryTextDark,
+
+    surface = MidnightCard,
+    onSurface = PrimaryTextDark,
+    surfaceContainer = MidnightElevated,
+    surfaceContainerHigh = MidnightElevated,
+    surfaceContainerHighest = MidnightElevated,
+    onSurfaceVariant = SecondaryTextDark,
+
+    outline = OutlineDark,
+    outlineVariant = OutlineDark,
+
+    error = DangerDark,
+    onError = Color600000,
 )
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF54C7BD),                // mirror of iOS appAccent dark
-    onPrimary = Color(0xFF003734),
-    secondary = Color(0xFFA7F3D0),
-    onSecondary = Color(0xFF003734),
-    surface = Color(0xFF1C1C1E),
-    onSurface = Color(0xFFF2F2F7),              // 16.8:1
-    onSurfaceVariant = Color(0xFFC7C7CC),       // 10.9:1 on #1C1C1E
-    outline = Color(0xFF545458),
-    error = Color(0xFFFF8A80),
-    onError = Color(0xFF4D0000)
+private val LightColors = lightColorScheme(
+    primary = BrandAccentLight,
+    onPrimary = Color.White,
+    primaryContainer = ColorB2F2EC,
+    onPrimaryContainer = Color003C38,
+
+    secondary = BrandCyanLight,
+    onSecondary = Color.White,
+
+    background = LightBackground,
+    onBackground = PrimaryTextLight,
+
+    surface = LightCard,
+    onSurface = PrimaryTextLight,
+    surfaceContainer = LightElevated,
+    surfaceContainerHigh = LightElevated,
+    surfaceContainerHighest = LightElevated,
+    onSurfaceVariant = SecondaryTextLight,
+
+    outline = OutlineLight,
+    outlineVariant = OutlineLight,
+
+    error = DangerLight,
+    onError = Color.White,
 )
 
 @Composable
 fun OnlyTrustedTheme(
-    useDark: Boolean = isSystemInDarkTheme(),
+    // Dark is the default so the OnlyTrusted brand lands first. Pass `useDark = false` to
+    // opt into the matched light scheme (e.g. for a future user setting).
+    useDark: Boolean = true,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

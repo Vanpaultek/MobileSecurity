@@ -66,7 +66,7 @@ struct AppLockGate: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
+        .background(Color.appScreenBackground)
         .onAppear(perform: setup)
     }
 

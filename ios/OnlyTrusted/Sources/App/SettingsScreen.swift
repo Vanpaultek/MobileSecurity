@@ -30,7 +30,7 @@ struct SettingsScreen: View {
             .padding(.top, 12)
             .padding(.bottom, 32)
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { appLockToggle = gate.appLockEnabled }
@@ -184,7 +184,7 @@ struct SettingsScreen: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.systemGroupedBackground))
+                .fill(Color.appScreenBackground)
         )
     }
 

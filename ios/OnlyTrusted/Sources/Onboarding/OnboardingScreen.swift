@@ -32,7 +32,7 @@ struct OnboardingScreen: View {
 
             actionBar
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .background(Color.appScreenBackground.ignoresSafeArea())
         .sheet(item: Binding(
             get: { legalSheetSection.map(LegalSheetTarget.init) },
             set: { legalSheetSection = $0?.title }
@@ -130,7 +130,7 @@ struct OnboardingScreen: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color(.secondarySystemGroupedBackground))
+                    .fill(Color.appCardBackground)
             )
         }
     }
@@ -223,7 +223,7 @@ private struct InfoCard: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .fill(Color.appCardBackground)
         )
     }
 }
