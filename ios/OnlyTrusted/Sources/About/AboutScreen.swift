@@ -31,7 +31,7 @@ struct AboutScreen: View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(spacing: 14) {
-                    Image("BrandLogo")
+                    Image("BrandArtwork")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 72, height: 72)

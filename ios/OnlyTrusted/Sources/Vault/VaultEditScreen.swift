@@ -112,7 +112,8 @@ struct VaultEditScreen: View {
         let ctx = LAContext()
         var err: NSError?
         guard ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err) else {
-            authorised = true
+            authorised = false
+            authError = "Set a device passcode, Face ID, or Touch ID in iOS Settings before editing a vault entry."
             return
         }
         ctx.evaluatePolicy(.deviceOwnerAuthentication,
