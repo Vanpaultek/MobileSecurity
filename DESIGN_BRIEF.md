@@ -1,9 +1,9 @@
 # OnlyTrusted — Design Brief
 
-**For:** external designers / design agencies evaluating or redesigning the OnlyTrusted UI.
+**For:** external designers / design agencies evaluating or polishing the OnlyTrusted UI.
 **App owner:** 57Million LLC. Contact: `reddy@vanpaultek.com`.
 **Platforms:** native Android (Jetpack Compose + Material 3) and native iOS (SwiftUI).
-**Status:** functional product, both platforms building green, awaiting a professional visual pass.
+**Status:** functional product, both platforms building green. In-house visual pass complete: Midnight Cybersecurity palette + 14-screen mockup conformance. External designers are now engaged for incremental polish, custom glyph work, and illustrations — not a wholesale redesign.
 **Repository:** https://github.com/Vanpaultek/OnlyTrusted (public, AGPL-3.0).
 
 ---
@@ -33,11 +33,32 @@ Adults who need a quiet phone and strong privacy guarantees — small business o
 | **Legal owner** | 57Million LLC |
 | **Support email** | reddy@vanpaultek.com |
 | **License** | GNU AGPL-3.0 (visible footer in About + README) |
-| **Primary color token** | `appAccent` — teal, currently `#0F6A66` light / `#54C7BD` dark. WCAG AA 4.65:1 on white. Open to shade adjustment but it must remain a teal/green family and clear 4.5:1 for text on primary surfaces. |
-| **Semantic colors** | `appSuccess` (green), `appWarning` (amber), `appDanger` (red). All WCAG AA-measured. |
+| **Brand mark** | `BrandLogo` — glowing teal shield + checkmark + "OnlyTrusted" wordmark. Shipped as the launcher icon on both platforms (iOS AppIcon 1024² + Android adaptive icon + legacy mipmaps) and as the hero image on Splash + About. Source PNG at `ios/OnlyTrusted/Assets.xcassets/BrandLogo.imageset/BrandLogo@3x.png` (1254²) and `android/app/src/main/res/drawable-xxxhdpi/brand_logo.png`. |
+| **Design identity** | "Midnight Cybersecurity" — dark-first, teal accent, minimal chrome, high-contrast glass cards. See §2.1 for the full palette. |
 | **Font (iOS)** | Apple SF Pro (system default). Must stay. |
 | **Font (Android)** | Inter 4.x (SIL OFL licensed, bundled in `android/app/src/main/res/font/`). Open to replacement as long as the new font is SIL OFL / Apache 2.0 licensed and matches SF Pro's rhythm within reason. |
 | **Icon set** | Apple SF Symbols (iOS) + Material Symbols (Android). Open to a custom glyph pack if designer provides it as an SVG set. |
+
+### 2.1 Midnight Cybersecurity palette (locked)
+
+Dark is the primary identity. The matched light palette exists but is not user-toggleable yet (iOS forces `.preferredColorScheme(.dark)`; Android defaults to the dark Material 3 scheme).
+
+| Role | Dark | Light | WCAG notes |
+|---|---|---|---|
+| Screen background | `#06131D` | `#F7FAFC` | — |
+| Elevated surface | `#0D2431` | `#F0F4F7` | — |
+| Card surface | `#12313A` | `#FFFFFF` | — |
+| Primary text | `#F4FAFC` | `#0A1419` | 11.1:1 on dark card — AAA |
+| Secondary text | `#B6C9D2` | `#4A5F6B` | 7.5:1 on dark card — AAA |
+| Tertiary text | `#8FA5B2` | `#6B8290` | — |
+| Brand accent | `#54C7BD` | `#0F6A66` | 7.1:1 on dark card — AAA |
+| Bright cyan (decorative) | `#00D9D0` | `#00A6A0` | Decorative only; not for text |
+| Success | `#22C55E` | `#1B8542` | 7.0:1 on dark card — AAA |
+| Warning | `#F5A524` | `#BA6B00` | 8.6:1 on dark card — AAA |
+| Danger | `#F04452` | `#B91C1C` | 4.9:1 on dark card — AA |
+| Outline / divider | `#1F3B47` | `#D1D1D6` | — |
+
+Any redesign must keep every text/background pair above 4.5:1 (body) or 3:1 (large text + icons). Current tokens are measured and passing; replacements must come with measured values.
 
 **Do not propose:** dark-pattern UX, "upgrade to Pro" cross-sell screens, onboarding carousels that gate features behind account creation, splash-screen videos, Lottie animations in the critical path. These will be rejected.
 
@@ -68,25 +89,43 @@ These are copy and layout decisions, not optional:
 
 ## 5. Screen inventory
 
-Every screen the user can reach, in approximate reading order. For each: purpose, what data it shows, what the user can do, states to design for, accessibility notes.
+Every screen the user can reach, in approximate reading order. Numbering follows the 14-screen reference mockup ("Futuristic Dark Cybersecurity"). For each: purpose, what data it shows, what the user can do, states to design for, accessibility notes.
+
+### 5.0 Splash (first app launch after cold start)
+
+- **Purpose.** Branded intro. Hands off from the Android 12+ `windowSplashScreenBackground` / iOS `UILaunchScreen` to the first Compose/SwiftUI frame without a visual seam.
+- **Shows.** Centered `BrandLogo` (shield + wordmark) on midnight navy, "OnlyTrusted" title, "A quieter, safer phone for the people who matter." tagline, 180pt loading bar that fills over ~1.4s, "Loading…" subtitle.
+- **Duration.** Fixed 1.4s then auto-advances to the next gated screen. No skip button, no interaction.
+- **Honest limit.** No analytics or network calls happen here. It is purely cosmetic.
+- **Do not.** Add a Lottie animation, a video, a countdown number, or a "Tap to continue" affordance.
 
 ### 5.1 Onboarding (first-launch only)
 
-- **Purpose.** Serious-user consent gate. Explain honestly what the app is and is not before any protection is enabled.
+- **Purpose.** Explain in one scroll what the app does and what Android/iOS *won't* let it do.
 - **Shows.**
-  - Hero: brand icon + "OnlyTrusted" + one-sentence subtitle.
-  - "What this app does" card — 4 feature bullets.
-  - "Honest limits" card — 4 platform-limitation bullets.
-  - 3 consent toggles with inline sub-labels: adult, device-owner, understood-limits.
-  - "I confirm and continue" CTA.
-  - Legal footnote + 3 tappable links (Privacy policy / Terms of use / Honest claims) opening a sheet with the LegalScreen content pre-selected.
-- **States.**
-  - Default (all toggles off, CTA disabled).
-  - Partial (1 or 2 toggles on, CTA still disabled).
-  - Complete (all 3 toggles on, CTA enabled with brand tint).
-  - Legal sheet open (modal bottom-sheet style on both platforms).
-- **Accessibility.** Toggles must have VoiceOver / TalkBack labels combining the title AND sub-label. Hero icon is decorative (hidden from screen readers). CTA must be reachable at Dynamic Type XXXL (currently handled by a sticky bottom action bar on iOS).
+  - Hero: `BrandLogo` in a 136dp circle + "OnlyTrusted" + "A safer, quieter phone starts here." subtitle.
+  - **Benefits card** — 4 icon+label rows: "Allow only trusted contacts", "Silence or block everyone else", "Keep a local audit log", "Your data never leaves this device".
+  - **Honest limits card** — amber-tinted header + 4 platform-limitation bullets.
+  - Sticky bottom action bar: "Get Started" button (always enabled; this screen no longer gates consent — that moved to §5.1b).
+- **States.** Single state. Users can scroll but cannot proceed without tapping Get Started.
+- **Accessibility.** Hero image uses `accessibilityLabel = "OnlyTrusted"`. CTA remains tappable at Dynamic Type XXXL.
 - **Do not.** Add a carousel, add a video, hide the limits card behind a "Learn more" toggle, add a "Skip" button.
+
+### 5.1b Consent ("Please confirm")
+
+- **Purpose.** Dedicated serious-user consent gate. Separate from §5.1 so users can read benefits without pressure from toggles.
+- **Shows.**
+  - Centered teal shield icon in an 80dp halo.
+  - "Please confirm" headline + "This app is for people who need strong privacy and safety." subtitle.
+  - 3 toggle rows in a single card:
+    - "I am an adult" / "I am 18 years or older."
+    - "I am the device owner" / "This is my personal device."
+    - "I have read and understood the honest limits" / "I understand what this app can and cannot do."
+  - Legal link row: `Privacy Policy | Terms of Use | Honest Claims` — each opens a bottom-sheet with LegalScreen pre-selected to that section.
+  - Sticky bottom action bar: "I confirm and continue" button, disabled until all 3 toggles are ON.
+- **States.** Default (all off, CTA disabled), partial (1–2 on, CTA disabled), complete (all on, CTA enabled with brand tint), legal sheet open.
+- **Accessibility.** Toggles combine title + sub-label into a single VoiceOver / TalkBack announcement. CTA announces its disabled state until all three are flipped.
+- **Do not.** Pre-check any toggle. Remember consent state across reinstalls (it must be re-affirmed after a wipe).
 
 ### 5.2 Dashboard (Shield tab)
 
@@ -133,14 +172,19 @@ Every screen the user can reach, in approximate reading order. For each: purpose
 
 ### 5.5 Blocked (Blocked tab)
 
-- **Purpose.** Manage the per-number block list. Reload it to iOS when it changes.
-- **Shows.**
+- **Purpose.** Two things stacked on one scroll: (a) global blocking preferences, (b) the per-number block list. The preferences card is prepended per the mockup; the manual list stays underneath.
+- **Shows (preferences card, top).**
+  - "Blocking & Unknown" section header.
+  - 3 toggle rows: "Block unknown callers" / "Silence unknown texts" / "Spam protection", each with icon chip + title + 1-line explanation.
+  - "Call handling" section header.
+  - 3-way radio group: Silence (recommended) / Send to voicemail / Block completely.
+- **Shows (block list card, below).**
   - "+" button to add a number.
+  - Hero count card ("N numbers blocked") with "Push changes to iOS" CTA on iOS.
   - List: masked number, optional label, chips for "Calls" / "SMS" block scope. Swipe-to-delete.
-  - "Reload Call Directory" button (iOS) with status (idle / spinning / ok / failed message).
-  - Deep-link buttons: "Enable blocking in Phone settings" + "Enable SMS filter in Messages settings."
+  - Activation card (iOS only): "Enable blocking in Phone settings" + "Enable SMS filter in Messages settings" deep-link rows.
   - Add-blocked bottom-sheet: Number field (numeric keyboard), Label field, Block incoming calls toggle, Flag incoming SMS toggle, Add / Cancel.
-- **States.** Empty, with entries, after reload success, after reload failure (red footer).
+- **States.** Empty block list (shows "No numbers added yet" inside list card, preferences card stays visible), with entries, after reload success, after reload failure (red footer on hero card).
 
 ### 5.6 Settings (Settings tab)
 
@@ -152,6 +196,16 @@ Every screen the user can reach, in approximate reading order. For each: purpose
   - **More** group: Permission audit (Android only), Device posture check (Android only), Privacy / terms / honest claims, About + attributions, Shield session log (Android only).
   - **Footer.** © 2026 57Million LLC. AGPL-3.0. Support email.
 - **State for App Lock toggle.** Must refuse to enable when the device has no biometric or passcode set, and show a snackbar explaining why. Already implemented; redesign must preserve.
+
+### 5.6b Notifications preferences (reached from Settings → More → Notifications)
+
+- **Purpose.** Granular control over which categories of local notification the app may post. The app has zero push-notification channel; everything shown here is strictly local.
+- **Shows.**
+  - 3 toggle rows: "Protection Alerts" / "Daily Summary" / "Trusted Contact Activity", each with icon chip, title, 1-line explanation.
+  - Disabled "New Features" row with sub-label "Updates and improvements (never marketing)." — toggle is permanently off; present only to make the ethic visible.
+  - "You're all set!" success banner shown only when at least one toggle is on.
+- **States.** All off (success banner hidden), 1+ on (banner shown).
+- **Do not.** Expose a channel for marketing or growth. The "never marketing" line is a brand promise, not a product variant.
 
 ### 5.7 Legal (reached from Settings → "Privacy, terms, and honest claims")
 
@@ -198,6 +252,13 @@ Every screen the user can reach, in approximate reading order. For each: purpose
 - **Purpose.** Read-only health check of the device.
 - **Shows.** USB debugging status, developer options, lock screen set, root status, unknown-sources permission. "Apps holding both mic and camera" list. Each with a Fix button that deep-links to the right system page.
 
+### 5.13b Error state (full-screen overlay)
+
+- **Purpose.** Shared full-screen error view for any irrecoverable action failure. Currently fires on evidence-pack and data-export failures from Settings → Data. Reusable from any other failure site.
+- **Shows.** Soft cloud icon on a red-tinted halo, "Something went wrong" headline, explanatory message (passed in by caller), two sticky bottom buttons: "Try Again" (primary tint, only shown if a retry closure was passed) and "Go Back" (outlined).
+- **States.** With retry (both buttons), without retry (Go Back only).
+- **Do not.** Show stack traces or technical error codes. Message must be plain-English and actionable.
+
 ### 5.14 Shield session log (Android only, reached from Settings)
 
 - **Purpose.** Match a leaked screenshot's watermark code to the session that produced it.
@@ -224,7 +285,9 @@ Dark mode and Dynamic Type XXXL designs are required for every screen.
 
 ```
 App launch
-├─ Onboarding (first launch only)
+├─ Splash (every cold start, 1.4s fixed)
+├─ Onboarding (first launch only — benefits + Get Started)
+├─ Consent (first launch only — "Please confirm" + 3 toggles)
 │   └─ Legal sheet (pre-selected tab)
 ├─ AppLockGate (if App Lock enabled, every cold start)
 │   └─ (recovery) Disable App Lock button
@@ -237,14 +300,19 @@ App launch
     │   └─ Reveal contact (bottom-sheet, biometric-gated)
     ├─ Events
     ├─ Blocked
-    │   └─ Add blocked number (sheet)
+    │   ├─ Blocking preferences (inline, top of tab)
+    │   ├─ Add blocked number (sheet)
     │   └─ (external) iOS Phone / Messages settings
     └─ Settings
+        ├─ Notifications → NotificationsScreen
         ├─ Permission audit (Android only)
         ├─ Device posture (Android only)
         ├─ Shield session log (Android only)
         ├─ Privacy / terms / honest claims → LegalScreen
         └─ About → AboutScreen
+
+Shared overlays:
+└─ ErrorStateView (full-screen, fired on export failures)
 ```
 
 ---
@@ -253,16 +321,24 @@ App launch
 
 | Screen | iOS source | Android source |
 |---|---|---|
-| Onboarding | `ios/OnlyTrusted/Sources/Onboarding/OnboardingScreen.swift` | `android/app/src/main/java/com/onlytrusted/app/ui/onboarding/OnboardingScreen.kt` |
+| Splash | `ios/OnlyTrusted/Sources/App/SplashScreen.swift` | `android/.../ui/splash/SplashScreen.kt` |
+| Onboarding | `ios/OnlyTrusted/Sources/Onboarding/OnboardingScreen.swift` | `android/.../ui/onboarding/OnboardingScreen.kt` |
+| Consent | `ios/OnlyTrusted/Sources/App/ConsentScreen.swift` | `android/.../ui/onboarding/ConsentScreen.kt` |
 | Dashboard | `ios/OnlyTrusted/Sources/App/MainTabs.swift` → `DashboardScreen` | `android/.../ui/dashboard/DashboardScreen.kt` |
 | Vault | `ios/.../Vault/VaultScreen.swift` + `VaultEditScreen.swift` | `android/.../ui/vault/VaultScreen.kt` + `VaultEditScreen.kt` |
 | Events | `ios/.../Events/EventsScreen.swift` | `android/.../ui/events/EventsScreen.kt` |
-| Blocked | `ios/.../Blocked/BlockListScreen.swift` | `android/.../ui/blocklist/BlockListScreen.kt` |
+| Blocked (list) | `ios/.../Blocked/BlockListScreen.swift` | `android/.../ui/blocklist/BlockListScreen.kt` |
+| Blocking Options (card) | `ios/.../Blocked/BlockingPreferences.swift` | `android/.../ui/blocklist/BlockingOptions.kt` |
 | Settings | `ios/.../App/SettingsScreen.swift` | `android/.../ui/settings/SettingsScreen.kt` |
+| Notifications | `ios/.../App/NotificationsScreen.swift` | `android/.../ui/notifications/NotificationsScreen.kt` |
 | Legal | `ios/.../Legal/LegalScreen.swift` + `LegalContent.swift` | `android/.../ui/legal/LegalScreen.kt` + `LegalContent.kt` |
 | About | `ios/.../About/AboutScreen.swift` | `android/.../ui/about/AboutScreen.kt` |
+| Error State | `ios/.../App/ErrorStateView.swift` | `android/.../ui/common/ErrorStateView.kt` |
 | AppLockGate | `ios/.../Lock/AppLockGate.swift` | `android/.../ui/lock/AppLockGate.kt` |
 | Shield watermark | (not possible on iOS) | `android/.../services/WatermarkOverlayService.kt` + `WatermarkView.kt` |
+| Theme / tokens | `ios/.../Theme/Theme.swift` + `Theme/Cards.swift` | `android/.../ui/theme/Color.kt` + `Theme.kt` |
+| Launcher icon | `ios/OnlyTrusted/Assets.xcassets/AppIcon.appiconset/` | `android/app/src/main/res/mipmap-*/ic_launcher.png` + `drawable/ic_launcher_foreground.xml` |
+| Brand mark (in-app) | `ios/.../Assets.xcassets/BrandLogo.imageset/` | `android/.../res/drawable-xxxhdpi/brand_logo.png` |
 
 Current screenshots (iOS simulator, light mode, default text size) can be reproduced via:
 
@@ -282,25 +358,28 @@ Current Android screenshots can be captured on a windowed AVD.
 
 ## 9. What we want from a designer
 
+> **Status.** The wholesale visual pass has been done in-house (Midnight Cybersecurity palette + 14-screen mockup conformance). The current chrome ships. This section describes the *remaining* polish work.
+
 ### Minimum deliverables (fixed-price project)
 
-1. **Launcher icon** (Android adaptive icon 108×108 + iOS App Icon full matrix). Must respect the trademark concept of "trust / shield" without being a cliché padlock.
-2. **Splash / launch screen** for both platforms. No animation — iOS defaults to a UILaunchScreen storyboard-equivalent, Android to windowBackground.
-3. **Figma file** with every screen listed in §5 at default size + XXXL text + dark mode = **3 × 14 = 42 artboards** minimum.
-4. **Color system** proposal — can keep the current teal `appAccent` or propose a replacement that meets WCAG AA. Must include semantic colors (success / warning / danger / neutral tiers).
-5. **Typography scale** — can keep Inter on Android + SF Pro on iOS, or propose a licensed replacement. Must map to the current Material 3 / Apple HIG type slots (see `ui/theme/Type.kt` and iOS `Theme/Theme.swift` → `Font` extension).
-6. **Illustration pack** for the 3 empty states (empty vault, no events, no blocked numbers). Must not look like generic SaaS vector art.
-7. **Micro-copy pass** on all labels (checkbox labels, section headers, button text). Must preserve the honesty principles in §3.
-8. **Deliver as:** Figma file with components / variants / tokens, exported SVG icon set, PNG @1x/2x/3x for anything that must be rasterised, a 1-page PDF design-system summary.
+1. **Custom glyph pack** replacing the ~30 Material/SF system icons we currently use. Must come as an SVG set with consistent stroke weight and corner treatment, importable as Android `vector drawable` and iOS `Image(systemName:)`-compatible symbols. Priority icons: shield, phone-blocked, text-blocked, vault, event-log, panic-lock, keyhole, biometric, radio-selected, radio-unselected.
+2. **Illustration pack** for 3 empty states (empty vault, no events, no blocked numbers) + 1 error state (currently a generic cloud icon in `ErrorStateView`). Must match the Midnight Cybersecurity aesthetic — teal + cyan highlights on dark navy — and not look like generic SaaS vector art.
+3. **Brand mark refinement.** The current `BrandLogo` is an AI-generated shield + wordmark PNG. Deliver a crisp vector master in SVG with layered components (shield, checkmark, wordmark separable), so we can produce an unlimited-density launcher icon and a glyph-only launcher variant for small sizes where the wordmark is unreadable.
+4. **Figma file** mirroring §5 with every screen in default + Dynamic Type XXXL = **2 × 14 = 28 artboards** minimum (dark only is fine; the matched light scheme is engineering's responsibility).
+5. **Micro-copy pass** on all labels. Must preserve the honesty principles in §3; no persuasion language.
 
 ### Stretch deliverables (negotiable)
 
-- Motion specification for the Panic Lock transition and Shield watermark fade-in.
-- Haptic specification for the "chain tampered" alert.
+- Motion specification for the Splash → Onboarding handoff and the Panic Lock transition.
+- Light-mode token proposal (we have tokens but no user-facing toggle yet; a designer-reviewed light scheme would unlock it).
+- Haptic specification for the "chain tampered" alert and the Panic Lock engage.
 - Localization-ready copy pass for Spanish, Hindi, French (strings externalisation already in place on Android via `strings.xml`; iOS currently has strings inline — would need `.strings` extraction).
 
 ### Explicitly out of scope
 
+- Rebuilding the launcher icon from scratch (unless point 3 above surfaces a reason to).
+- Changing the Midnight Cybersecurity palette (see §2.1 — it is locked and WCAG-validated).
+- Changing the font families (SF Pro on iOS, Inter on Android are locked unless a licensed replacement is proposed with clear reasoning).
 - Marketing website.
 - Play Store / App Store listing graphics (handled separately by 57Million).
 - Logo for 57Million LLC itself.
@@ -339,8 +418,8 @@ When redesign artwork is delivered, engineering needs:
 
 Suggested one-paragraph briefing when posting on Dribbble / Fiverr / Behance:
 
-> I'm looking for a native-mobile designer (iOS + Android) to redesign OnlyTrusted, a privacy-first phone-security app targeting serious adult users. The app has ~14 screens per platform, is fully functional, and needs a professional visual pass without compromising honesty-of-copy or WCAG 2.1 AA accessibility. Deliverables: Figma file with every screen in default + XXXL text + dark mode, color + typography system, launcher icons, 3 empty-state illustrations, SVG icon set. Honest-UX required — no dark patterns, no engagement maximisation. Fixed-price work. Full brief at https://github.com/Vanpaultek/OnlyTrusted/blob/main/DESIGN_BRIEF.md.
+> I'm looking for a native-mobile designer (iOS + Android) to polish OnlyTrusted, a privacy-first phone-security app for serious adult users. The visual pass is complete (Midnight Cybersecurity dark palette, 14 screens per platform conforming to a fixed mockup). I need: a custom SVG glyph pack (~30 icons) to replace Material/SF defaults, 4 illustrations (3 empty states + 1 error state) in the midnight-navy + teal/cyan aesthetic, and a vector master for the brand mark. WCAG 2.1 AA is non-negotiable and no dark patterns are allowed. Fixed-price work. Full brief at https://github.com/Vanpaultek/OnlyTrusted/blob/main/DESIGN_BRIEF.md.
 
 ---
 
-*Last updated: 2026-10-20. Owner approval required for any change to §2 (brand constraints) or §3 (honesty principles).*
+*Last updated: 2026-10-20. Owner approval required for any change to §2 (brand constraints), §2.1 (palette), or §3 (honesty principles).*
