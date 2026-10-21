@@ -3,11 +3,7 @@
 package com.onlytrusted.app.ui.splash
 
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,16 +56,7 @@ fun SplashScreen(onDone: () -> Unit) {
         label = "splash-progress"
     )
 
-    val infinite = rememberInfiniteTransition(label = "splash-glow")
-    val glow by infinite.animateFloat(
-        initialValue = 0.10f,
-        targetValue = 0.28f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1400, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "splash-glow-value"
-    )
+    val glow = 0.18f
 
     LaunchedEffect(Unit) {
         progressTarget = 1f
@@ -80,12 +67,7 @@ fun SplashScreen(onDone: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(Color(0xFF112F38), MidnightBackground),
-                    radius = 1200f
-                )
-            ),
+            .background(MidnightBackground),
         contentAlignment = Alignment.Center
     ) {
         Column(
