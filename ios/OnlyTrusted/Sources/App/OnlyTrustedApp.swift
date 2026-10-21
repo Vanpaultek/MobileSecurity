@@ -24,15 +24,21 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if !gate.onboardingComplete {
+            if !gate.splashDone {
+                SplashScreen { gate.markSplashDone() }
+            } else if !gate.onboardingComplete {
                 OnboardingScreen { gate.markOnboardingComplete() }
+            } else if !gate.consentComplete {
+                ConsentScreen { gate.markConsentComplete() }
             } else if gate.isLocked {
                 AppLockGate(onUnlocked: { gate.markUnlocked() })
             } else {
                 MainTabs()
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: gate.splashDone)
         .animation(.easeInOut(duration: 0.2), value: gate.isLocked)
         .animation(.easeInOut(duration: 0.2), value: gate.onboardingComplete)
+        .animation(.easeInOut(duration: 0.2), value: gate.consentComplete)
     }
 }

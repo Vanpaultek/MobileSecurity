@@ -57,30 +57,24 @@ final class BlockListViewModel: ObservableObject {
 
 struct BlockListScreen: View {
     @StateObject private var vm = BlockListViewModel()
+    @StateObject private var prefs = BlockingPreferences.shared
     @State private var showAdd = false
 
     var body: some View {
-        Group {
-            if vm.entries.isEmpty {
-                PremiumEmptyState(
-                    icon: "nosign",
-                    title: "No numbers blocked yet",
-                    message: "Add a number here and OnlyTrusted will silence it on every incoming call and SMS.",
-                    ctaTitle: "Block your first number",
-                    ctaAction: { showAdd = true }
-                )
-            } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 18) {
-                        heroCard
-                        blockedListCard
-                        activationCard
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 32)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 18) {
+                BlockingOptionsCard(prefs: prefs)
+                heroCard
+                if vm.entries.isEmpty {
+                    emptyListCard
+                } else {
+                    blockedListCard
                 }
+                activationCard
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
         }
         .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationTitle("Blocked")
@@ -172,6 +166,18 @@ struct BlockListScreen: View {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private var emptyListCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 10) {
+                CardHeader(icon: "list.bullet", title: "Your block list")
+                Text("No numbers added yet. Tap + above to block a specific number on this device.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

@@ -12,6 +12,7 @@ struct SettingsScreen: View {
     @State private var confirmWipe = false
     @State private var shareURL: URL?
     @State private var exportError: String?
+    @State private var lastExport: (() throws -> URL)?
 
     private var canUseAuth: Bool {
         var err: NSError?
@@ -55,10 +56,16 @@ struct SettingsScreen: View {
                              set: { shareURL = $0?.value })) { wrap in
             ShareSheet(activityItems: [wrap.value])
         }
-        .alert("Export failed", isPresented: Binding(get: { exportError != nil }, set: { _ in exportError = nil })) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(exportError ?? "")
+        .fullScreenCover(isPresented: Binding(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            ErrorStateView(
+                title: "Something went wrong",
+                message: "We couldn't complete the export. " + (exportError ?? ""),
+                onTryAgain: lastExport.map { work in { exportError = nil; runExport(work) } },
+                onGoBack: { exportError = nil }
+            )
         }
     }
 
@@ -135,6 +142,11 @@ struct SettingsScreen: View {
                 CardHeader(icon: "ellipsis.circle.fill", title: "More")
                 VStack(spacing: 10) {
                     NavigationLink {
+                        NotificationsScreen()
+                    } label: {
+                        settingsRow(icon: "bell.badge.fill", label: "Notifications")
+                    }
+                    NavigationLink {
                         LegalScreen()
                     } label: {
                         settingsRow(icon: "doc.text.fill", label: "Privacy, terms, and honest claims")
@@ -188,7 +200,8 @@ struct SettingsScreen: View {
         )
     }
 
-    private func runExport(_ work: () throws -> URL) {
+    private func runExport(_ work: @escaping () throws -> URL) {
+        lastExport = work
         do { shareURL = try work() }
         catch { exportError = String(describing: error) }
     }

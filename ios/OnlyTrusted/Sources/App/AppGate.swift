@@ -7,22 +7,32 @@ import SwiftUI
 /// chooses between: not-onboarded, locked, or in-app.
 @MainActor
 final class AppGate: ObservableObject {
+    @Published private(set) var splashDone: Bool = false
     @Published private(set) var onboardingComplete: Bool
+    @Published private(set) var consentComplete: Bool
     @Published private(set) var isLocked: Bool
 
     private let onboardingKey = "onboarding.v1.accepted"
+    private let consentKey = "consent.v1.accepted"
     private let appLockEnabledKey = "applock.enabled"
 
     init() {
         let defaults = UserDefaults.standard
         self.onboardingComplete = defaults.bool(forKey: onboardingKey)
-        // On every cold start, treat the app as locked IF app lock is enabled.
+        self.consentComplete = defaults.bool(forKey: consentKey)
         self.isLocked = defaults.bool(forKey: appLockEnabledKey)
     }
+
+    func markSplashDone() { splashDone = true }
 
     func markOnboardingComplete() {
         UserDefaults.standard.set(true, forKey: onboardingKey)
         onboardingComplete = true
+    }
+
+    func markConsentComplete() {
+        UserDefaults.standard.set(true, forKey: consentKey)
+        consentComplete = true
     }
 
     func markUnlocked() {
