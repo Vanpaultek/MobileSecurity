@@ -31,21 +31,12 @@ struct AboutScreen: View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.appAccent, Color.appAccent.opacity(0.65)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                        Image(systemName: "shield.lefthalf.filled")
-                            .font(.title.weight(.semibold))
-                            .foregroundStyle(.white)
-                    }
-                    .frame(width: 56, height: 56)
-                    .decorativeAccessibility()
+                    Image("BrandLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 72, height: 72)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .accessibilityLabel("OnlyTrusted brand mark")
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("OnlyTrusted")

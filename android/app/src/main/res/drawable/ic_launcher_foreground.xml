@@ -1,9 +1,7 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,24L30,34v22c0,17 11,30 24,34c13,-4 24,-17 24,-34V34L54,24z" />
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-icon foreground. Points at the full OnlyTrusted brand bitmap in
+     drawable-xxxhdpi. The OS will mask to the launcher's current shape; parts of
+     the outer glow frame will be clipped. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher_foreground_src"
+    android:gravity="center"/>
