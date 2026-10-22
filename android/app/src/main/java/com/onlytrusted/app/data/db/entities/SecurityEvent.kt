@@ -39,5 +39,7 @@ data class SecurityEvent(
         const val TYPE_WIPE = "WIPE"
         /** Encrypted vault backup (Elite) was restored from a `.ot2bak` file. */
         const val TYPE_BACKUP_RESTORED = "BACKUP_RESTORED"
+        /** Geo-fence Auto-Lock (Elite): device exited every trusted region. */
+        const val TYPE_GEOFENCE_EXIT = "GEOFENCE_EXIT"
     }
 }

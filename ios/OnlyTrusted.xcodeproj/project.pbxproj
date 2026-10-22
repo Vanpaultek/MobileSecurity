@@ -23,6 +23,7 @@
 		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
 		22313F1408F73C4FFD65B90B /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F8C52E1A8099780F21613E /* Cards.swift */; };
 		2684C20B6C66EC750384154D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFF4754051354FB2E3F10DA /* Theme.swift */; };
+		2A354125918CB0473F1B02D1 /* BorderModeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8881F1B53DE849BEEA079AC3 /* BorderModeState.swift */; };
 		2A8308A8CEF8DEF2DAEC42DE /* MessageFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */; };
 		2B729C872B9FAF9CA2B9FFE8 /* SmartLinkGuardExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FE0DB6AA778E2CCDC147DAD3 /* SmartLinkGuardExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -45,6 +46,7 @@
 		6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
 		6BF24298F1FCC081CE0F460B /* SafetyFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1728B07C771A9794B257D74 /* SafetyFeatures.swift */; };
 		751BD6FC052CDABEF855688F /* BillingSubscriptionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */; };
+		78142086E58528C47A90B3DD /* GeofenceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF4E39ABA84E2C395182096 /* GeofenceState.swift */; };
 		782ED76F5759146EE96DB6E9 /* WangiriEventKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2F158C36AD593B1896D652 /* WangiriEventKind.swift */; };
 		7A0B31F7B59CC3C0C4FB498F /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490883DF89C527594BD0E0E /* Exporters.swift */; };
 		7CC7A7692C3CBBE641ED3862 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
@@ -53,17 +55,22 @@
 		87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */; };
 		8881302824C22C64A3C00996 /* NotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86321B3D7ECFD06EC4746E3 /* NotificationsScreen.swift */; };
 		8E03206240ADB93E1C3A766F /* DuressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A3DD6F80CD20416A036060 /* DuressState.swift */; };
+		8FEB8945420C183742F79416 /* BorderModeSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A62D69894E411B41A3CACF /* BorderModeSetupScreen.swift */; };
 		9002D9397880C727477AA9C3 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F918CD93F698EE6CF0B95BC /* ShareViewController.swift */; };
 		95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8990FFD2A86A59C606EA58A8 /* ConsentScreen.swift */; };
+		97BE974DB4719B74799CAD39 /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */; };
 		97C2DA4D3DDD60D9BA9301BA /* SmartLinkGuardRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E7C544A79123DD3E8F7D11 /* SmartLinkGuardRules.swift */; };
+		9900BF9584D373B4CBC0CD22 /* FaceLockEmbeddingBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D26A68D8D2D1ECD9CD57DB /* FaceLockEmbeddingBridge.swift */; };
 		9B5924F2D9A005A736056B0F /* HardwareKeySetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E76DA3F7913747A56B51D1 /* HardwareKeySetupScreen.swift */; };
 		9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B875C9E9199F8E854722B33A /* AppLockGate.swift */; };
 		9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E116181529A59548B1AA0523 /* SettingsScreen.swift */; };
+		9F7A1840EF5FC66F71635709 /* GeofenceSMSComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6124EF4DBF39E34ECD1B6178 /* GeofenceSMSComposer.swift */; };
 		A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */; };
 		A7D804FF40A8CB965BDB9055 /* DuressSMSComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB948A2AA60E02745F417204 /* DuressSMSComposer.swift */; };
 		A7E6F5E9928F9E49B31AF961 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
 		B2AD3CD9C0FEB54C48DDD780 /* SIMSwapUpsellSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EC3A09CF6923084AFBFF92 /* SIMSwapUpsellSheet.swift */; };
 		B6886A083BF35B9D0435BCEE /* ErrorStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D54D38BF141DB14E7F2838 /* ErrorStateView.swift */; };
+		B8FE477ED7465279810CF711 /* FaceLockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F192E38BF3AC823EDDE762 /* FaceLockState.swift */; };
 		B9133CBDCF92C2136AA035CE /* LegalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119AC115F503D46187427F9C /* LegalScreen.swift */; };
 		B9665F5233049CA2A7EC37CE /* PermissionWatchdogScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0332FF701392245643B56D6F /* PermissionWatchdogScreen.swift */; };
 		BB0E07BD1982FB98B607DE36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 501D17326F04F78A780C80B5 /* Assets.xcassets */; };
@@ -74,10 +81,13 @@
 		CACA4B7B43A751F97854D2F5 /* TrackerFinderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C07EA52904EFEE798C4433 /* TrackerFinderStore.swift */; };
 		CD8C946BB50B198244A009A4 /* SIMSwapSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1348106552A74211B95AAB8E /* SIMSwapSetupScreen.swift */; };
 		D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */; };
+		D2032631209A17EBA1224990 /* FaceLockOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9E0815ECA5FC1889487F31 /* FaceLockOverlay.swift */; };
 		D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
 		D466AA2ED7AB32D50121415D /* SmartLinkGuardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17D8B6259C1EA39AC85C7EA /* SmartLinkGuardState.swift */; };
 		D86AAE6A5F9830A8315985C8 /* VaultEditScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */; };
+		D8FC97BBA8D7954807F26FC1 /* GeofenceSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839A2FFD07A1C195FDB5AF71 /* GeofenceSetupScreen.swift */; };
 		E21E9DF964E0A7F510A78D7C /* SafetyCheckInScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B0DC08C2C3C5A31D857A53 /* SafetyCheckInScreen.swift */; };
+		E54D411BBEF24B9AFAFC6C81 /* FaceLockMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDBDF9D8A581BFB083F95F5 /* FaceLockMonitor.swift */; };
 		E77DA326804F1AB7DA39F0A0 /* MessageFilterHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */; };
 		EF3EAF433350B67717744C43 /* BackupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7801804192FBD47DF25876 /* BackupManager.swift */; };
 		F2CDFE0A3BA4AC9F54C32FAB /* CallDirectoryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */; };
@@ -91,6 +101,7 @@
 		F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB8BB9444909AA0350EAE85 /* LegalContent.swift */; };
 		FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		FD52E2394CD39132E36205A0 /* WangiriWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB2DE5D1EA1E4544CE34095 /* WangiriWatcher.swift */; };
+		FF0615F6A18BFD1FEFCAB079 /* FaceLockSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE85676BC803BEF67D8BA05 /* FaceLockSetupScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -144,7 +155,9 @@
 		20D6B7365CC1BA9B45116B88 /* BackupPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupPayload.swift; sourceTree = "<group>"; };
 		21AF37DFA82F8F6BE5071EC2 /* CheckInSMSComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInSMSComposer.swift; sourceTree = "<group>"; };
 		22D54D38BF141DB14E7F2838 /* ErrorStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorStateView.swift; sourceTree = "<group>"; };
+		249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceManager.swift; sourceTree = "<group>"; };
 		2D777DC4D2E54F023773654C /* HardwareKeyGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareKeyGate.swift; sourceTree = "<group>"; };
+		2D9E0815ECA5FC1889487F31 /* FaceLockOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockOverlay.swift; sourceTree = "<group>"; };
 		2FB2DE5D1EA1E4544CE34095 /* WangiriWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriWatcher.swift; sourceTree = "<group>"; };
 		3BA4D28EB9A8DA24BCA4B8C3 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
 		3F2F158C36AD593B1896D652 /* WangiriEventKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriEventKind.swift; sourceTree = "<group>"; };
@@ -159,7 +172,9 @@
 		5A0B69E090510598F6837D15 /* SIMSwapState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIMSwapState.swift; sourceTree = "<group>"; };
 		5B53C61D78638526477C6C53 /* BlockingPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingPreferences.swift; sourceTree = "<group>"; };
 		5F918CD93F698EE6CF0B95BC /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		6124EF4DBF39E34ECD1B6178 /* GeofenceSMSComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceSMSComposer.swift; sourceTree = "<group>"; };
 		62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageFilterHandler.swift; sourceTree = "<group>"; };
+		63D26A68D8D2D1ECD9CD57DB /* FaceLockEmbeddingBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockEmbeddingBridge.swift; sourceTree = "<group>"; };
 		66F8C52E1A8099780F21613E /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		690FF04A249CFEC95BE62E11 /* DeadmanWipeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadmanWipeState.swift; sourceTree = "<group>"; };
 		717BCF03CA3B26910A355618 /* TrackerFinderScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerFinderScanner.swift; sourceTree = "<group>"; };
@@ -171,8 +186,10 @@
 		7B7801804192FBD47DF25876 /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
 		7DB8BB9444909AA0350EAE85 /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalContent.swift; sourceTree = "<group>"; };
 		82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
+		839A2FFD07A1C195FDB5AF71 /* GeofenceSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceSetupScreen.swift; sourceTree = "<group>"; };
 		83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
 		883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MessageFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8881F1B53DE849BEEA079AC3 /* BorderModeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderModeState.swift; sourceTree = "<group>"; };
 		892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDirectoryHandler.swift; sourceTree = "<group>"; };
 		8990FFD2A86A59C606EA58A8 /* ConsentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentScreen.swift; sourceTree = "<group>"; };
 		8A66FFC76D02EA4B8E5AABFD /* ReportsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsScreen.swift; sourceTree = "<group>"; };
@@ -193,7 +210,9 @@
 		C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberComponents.swift; sourceTree = "<group>"; };
 		C66099C7EE48ABCF66D354FD /* TrackerFinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerFinderScreen.swift; sourceTree = "<group>"; };
 		C6C07EA52904EFEE798C4433 /* TrackerFinderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerFinderStore.swift; sourceTree = "<group>"; };
+		C7A62D69894E411B41A3CACF /* BorderModeSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderModeSetupScreen.swift; sourceTree = "<group>"; };
 		CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyTrustedApp.swift; sourceTree = "<group>"; };
+		CCDBDF9D8A581BFB083F95F5 /* FaceLockMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockMonitor.swift; sourceTree = "<group>"; };
 		D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeToPremiumScreen.swift; sourceTree = "<group>"; };
 		D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsScreen.swift; sourceTree = "<group>"; };
 		D6EC3A09CF6923084AFBFF92 /* SIMSwapUpsellSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIMSwapUpsellSheet.swift; sourceTree = "<group>"; };
@@ -201,10 +220,12 @@
 		DD57602976D8C9A69AEB4959 /* BlockListStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListStore.swift; sourceTree = "<group>"; };
 		DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldCrypto.swift; sourceTree = "<group>"; };
 		E116181529A59548B1AA0523 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		E1F192E38BF3AC823EDDE762 /* FaceLockState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockState.swift; sourceTree = "<group>"; };
 		E287E737C235F26B6F586928 /* SharedContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedContainer.swift; sourceTree = "<group>"; };
 		E490883DF89C527594BD0E0E /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
 		E6F45B80EDAAA7B50465F2E0 /* DeadmanWipeSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadmanWipeSetupScreen.swift; sourceTree = "<group>"; };
 		E9C26378948D69C41DC6EFEA /* BackupRestoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreScreen.swift; sourceTree = "<group>"; };
+		EAF4E39ABA84E2C395182096 /* GeofenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceState.swift; sourceTree = "<group>"; };
 		EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CallDirectoryExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEFF4754051354FB2E3F10DA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F0393312C797275B88012608 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
@@ -213,6 +234,7 @@
 		F86321B3D7ECFD06EC4746E3 /* NotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsScreen.swift; sourceTree = "<group>"; };
 		F8D8237C800B6BE3D6B1B5FA /* SmartLinkGuardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartLinkGuardScreen.swift; sourceTree = "<group>"; };
 		FE0DB6AA778E2CCDC147DAD3 /* SmartLinkGuardExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SmartLinkGuardExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEE85676BC803BEF67D8BA05 /* FaceLockSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockSetupScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -223,6 +245,18 @@
 				0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */,
 			);
 			path = Blocked;
+			sourceTree = "<group>";
+		};
+		1ADC02C146AF9BB4346F4B30 /* FaceLock */ = {
+			isa = PBXGroup;
+			children = (
+				63D26A68D8D2D1ECD9CD57DB /* FaceLockEmbeddingBridge.swift */,
+				CCDBDF9D8A581BFB083F95F5 /* FaceLockMonitor.swift */,
+				2D9E0815ECA5FC1889487F31 /* FaceLockOverlay.swift */,
+				FEE85676BC803BEF67D8BA05 /* FaceLockSetupScreen.swift */,
+				E1F192E38BF3AC823EDDE762 /* FaceLockState.swift */,
+			);
+			path = FaceLock;
 			sourceTree = "<group>";
 		};
 		2797CB6C9550BAA22F04740C /* Safety */ = {
@@ -249,11 +283,14 @@
 				3828D607A2083E4850E35012 /* App */,
 				7D5987A87ABB1061D6C6EC56 /* Backup */,
 				076E7F510A5D4414D938D183 /* Blocked */,
+				E7B7F85AC213BF48CEDEBFCC /* BorderMode */,
 				34250A565EA44B0CF4414182 /* CheckIn */,
 				3603D6214065B6B236E3E0B4 /* DeadmanWipe */,
 				BC0A016966A74D0D19E991FC /* Duress */,
 				8C611D5CC8A6FD33D9C51771 /* Events */,
 				4B2818453D3C9512B067BEE0 /* Export */,
+				1ADC02C146AF9BB4346F4B30 /* FaceLock */,
+				865807B86013A831ADF0A495 /* Geofence */,
 				564C8681F6FEEFCF4CA6B6B7 /* HardwareKey */,
 				BE88C114F01F7FB7F4965C92 /* Legal */,
 				59FC3E7C7CBEEB57ED07CBFB /* Lock */,
@@ -427,6 +464,17 @@
 			path = SIMSwap;
 			sourceTree = "<group>";
 		};
+		865807B86013A831ADF0A495 /* Geofence */ = {
+			isa = PBXGroup;
+			children = (
+				249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */,
+				839A2FFD07A1C195FDB5AF71 /* GeofenceSetupScreen.swift */,
+				6124EF4DBF39E34ECD1B6178 /* GeofenceSMSComposer.swift */,
+				EAF4E39ABA84E2C395182096 /* GeofenceState.swift */,
+			);
+			path = Geofence;
+			sourceTree = "<group>";
+		};
 		8B2BAE45A4D64FD531E8626F /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
@@ -521,6 +569,15 @@
 				A17D8B6259C1EA39AC85C7EA /* SmartLinkGuardState.swift */,
 			);
 			path = SmartLinkGuard;
+			sourceTree = "<group>";
+		};
+		E7B7F85AC213BF48CEDEBFCC /* BorderMode */ = {
+			isa = PBXGroup;
+			children = (
+				C7A62D69894E411B41A3CACF /* BorderModeSetupScreen.swift */,
+				8881F1B53DE849BEEA079AC3 /* BorderModeState.swift */,
+			);
+			path = BorderMode;
 			sourceTree = "<group>";
 		};
 		FF9A0805C0F7AD6BBAAF478A /* PermissionWatchdog */ = {
@@ -707,6 +764,8 @@
 				A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */,
 				A7E6F5E9928F9E49B31AF961 /* BlockListStore.swift in Sources */,
 				09B4425B6994A813383A2F9B /* BlockingPreferences.swift in Sources */,
+				8FEB8945420C183742F79416 /* BorderModeSetupScreen.swift in Sources */,
+				2A354125918CB0473F1B02D1 /* BorderModeState.swift in Sources */,
 				02F54BAE6260F6C6D3EF5DB3 /* CSVExporter.swift in Sources */,
 				22313F1408F73C4FFD65B90B /* Cards.swift in Sources */,
 				127BB6F634006652CE0D4D99 /* CheckInSMSComposer.swift in Sources */,
@@ -725,7 +784,16 @@
 				D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */,
 				3099C006611569D587D98E02 /* EventsScreen.swift in Sources */,
 				7A0B31F7B59CC3C0C4FB498F /* Exporters.swift in Sources */,
+				9900BF9584D373B4CBC0CD22 /* FaceLockEmbeddingBridge.swift in Sources */,
+				E54D411BBEF24B9AFAFC6C81 /* FaceLockMonitor.swift in Sources */,
+				D2032631209A17EBA1224990 /* FaceLockOverlay.swift in Sources */,
+				FF0615F6A18BFD1FEFCAB079 /* FaceLockSetupScreen.swift in Sources */,
+				B8FE477ED7465279810CF711 /* FaceLockState.swift in Sources */,
 				2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */,
+				97BE974DB4719B74799CAD39 /* GeofenceManager.swift in Sources */,
+				9F7A1840EF5FC66F71635709 /* GeofenceSMSComposer.swift in Sources */,
+				D8FC97BBA8D7954807F26FC1 /* GeofenceSetupScreen.swift in Sources */,
+				78142086E58528C47A90B3DD /* GeofenceState.swift in Sources */,
 				810CFBAF25DEB421D58DE806 /* HardwareKeyGate.swift in Sources */,
 				9B5924F2D9A005A736056B0F /* HardwareKeySetupScreen.swift in Sources */,
 				68C1782A2C3E52DE72EF04A4 /* HardwareKeyState.swift in Sources */,

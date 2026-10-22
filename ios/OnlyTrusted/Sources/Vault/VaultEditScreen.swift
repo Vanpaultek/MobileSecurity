@@ -95,6 +95,7 @@ struct VaultEditScreen: View {
             }
         }
         .appBackdrop()
+        .faceLockShield()
         .navigationTitle(contactId == nil ? "Add Trusted Contact" : "Edit Trusted Contact")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.appScreenBackground, for: .navigationBar)

@@ -40,8 +40,15 @@
          location. We request it at runtime from the Tracker Finder screen on those
          releases only. Omitted on 12+ via maxSdkVersion so Play Store listing scope
          stays tight. -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
-        android:maxSdkVersion="30" />
+    <!-- Geo-fence Auto-Lock (Elite). Required to register CLCircularRegion-style
+         geofences via GeofencingClient. ACCESS_FINE_LOCATION is requested at runtime
+         from the Geofence setup screen on all API levels; also used by Tracker Finder
+         on Android 11 and below (12+ uses BLUETOOTH_SCAN w/ neverForLocation instead).
+         ACCESS_BACKGROUND_LOCATION lets exit events fire while the app is in the
+         background — without it the GeofencingClient callbacks drop. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -210,6 +217,13 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.OnlyTrusted" />
+
+        <!-- Geo-fence Auto-Lock (Elite): GeofencingClient delivers transition events
+             (we only register the EXIT transition) to this receiver via a PendingIntent.
+             exported=false — only Play Services sends to it. -->
+        <receiver
+            android:name=".geofence.GeofenceBroadcastReceiver"
+            android:exported="false" />
 
     </application>
 

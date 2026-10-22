@@ -6,6 +6,7 @@ import SwiftUI
 struct OnlyTrustedApp: App {
     @StateObject private var gate = AppGate()
     @StateObject private var simswap = SIMSwapState.shared
+    @StateObject private var geofenceAlerts = GeofenceAlertCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -19,6 +20,11 @@ struct OnlyTrustedApp: App {
             if state.shouldWipeNow() {
                 state.performWipe()
             }
+            // Geo-fence Auto-Lock (Elite). Re-register the user's trusted regions with
+            // CoreLocation on every launch. If `isEnabled` is false the manager is a no-op.
+            if GeofenceState.shared.isEnabled {
+                GeofenceManager.shared.startMonitoring()
+            }
         }
     }
 
@@ -27,6 +33,14 @@ struct OnlyTrustedApp: App {
             RootView()
                 .environmentObject(gate)
                 .environmentObject(simswap)
+                .environmentObject(geofenceAlerts)
+                .onAppear {
+                    // Geo-fence Auto-Lock (Elite): the `GeofenceManager` runs outside the
+                    // SwiftUI graph (CoreLocation delegate callbacks come in from a
+                    // non-UI thread) so we expose the live `AppGate` through a bridge that
+                    // lets the manager fire `panic()` on exit.
+                    AppLockBridge.shared.register(gate: gate)
+                }
                 // Midnight dark is OnlyTrusted's primary identity. We force the dark scheme
                 // here so every user sees the brand palette on first open; the matched light
                 // scheme (defined in Color tokens) remains available for future opt-in but is
@@ -56,6 +70,7 @@ struct OnlyTrustedApp: App {
 struct RootView: View {
     @EnvironmentObject private var gate: AppGate
     @EnvironmentObject private var simswap: SIMSwapState
+    @EnvironmentObject private var geofenceAlerts: GeofenceAlertCoordinator
 
     var body: some View {
         ZStack {
@@ -98,5 +113,26 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: simswap.pendingAlarm)
+        // Geo-fence Auto-Lock (Elite) SMS composer. We present it from the root so it
+        // overlays whichever screen the user ends up on (post-lock the user re-authenticates
+        // and lands on their last tab — the composer stays queued until that happens).
+        .sheet(item: $geofenceAlerts.pendingAlert) { alert in
+            if GeofenceSMSComposer.canSendText {
+                GeofenceSMSComposer(
+                    recipients: [alert.recipient],
+                    body: alert.body,
+                    onFinish: { _ in geofenceAlerts.dismiss() }
+                )
+            } else {
+                VStack(spacing: 16) {
+                    Text("This device cannot send SMS.")
+                        .font(.body)
+                    Button("Close") { geofenceAlerts.dismiss() }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.appAccent)
+                }
+                .padding(24)
+            }
+        }
     }
 }

@@ -25,6 +25,7 @@ struct VaultScreen: View {
             }
         }
         .appBackdrop()
+        .faceLockShield()
         .navigationTitle("Trusted Contacts")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.appScreenBackground, for: .navigationBar)

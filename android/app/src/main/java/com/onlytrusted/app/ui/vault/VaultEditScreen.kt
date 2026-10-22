@@ -131,13 +131,15 @@ fun VaultEditScreen(
         return
     }
 
-    EditForm(
-        contactId = contactId,
-        onLoad = { id -> vm.loadForEdit(id) },
-        onSave = { draft -> vm.save(draft) { onDone() } },
-        onDelete = { id -> vm.delete(id); onDone() },
-        onCancel = onDone
-    )
+    com.onlytrusted.app.ui.facelock.FaceLockShield {
+        EditForm(
+            contactId = contactId,
+            onLoad = { id -> vm.loadForEdit(id) },
+            onSave = { draft -> vm.save(draft) { onDone() } },
+            onDelete = { id -> vm.delete(id); onDone() },
+            onCancel = onDone
+        )
+    }
 }
 
 @Composable

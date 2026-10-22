@@ -25,7 +25,25 @@
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>OnlyTrusted scans nearby Bluetooth trackers to flag any device that may be following you.</string>
     <key>NSCameraUsageDescription</key>
-    <string>OnlyTrusted uses the camera to scan QR codes so Smart Link Guard can check them for safety before you open the link.</string>
+    <string>Elite checks faces only in-memory to detect if someone else is looking at your screen. No images are stored. The camera is also used to scan QR codes for Smart Link Guard.</string>
+    <!-- Geo-fence Auto-Lock (Elite). Background region monitoring requires the "Always"
+         authorization — "While using the app" would silently drop didExitRegion when the
+         scene is in the background, which defeats the entire feature. -->
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Elite uses your location only to detect when your phone leaves all trusted locations — nothing is sent to any server.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Elite uses your location only to detect when your phone leaves all trusted locations — nothing is sent to any server.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Elite uses your location only to detect when your phone leaves all trusted locations — nothing is sent to any server.</string>
+    <!-- Required for Geo-fence Auto-Lock (Elite) to receive didExitRegion callbacks while
+         the app is in the background. Trade-off: iOS shows the Always location prompt and
+         may occasionally wake the app in the background to deliver the exit event. We never
+         run a continuous background location session; CoreLocation only wakes us for region
+         crossings. -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+    </array>
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>callerid</string>

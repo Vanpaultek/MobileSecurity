@@ -28,11 +28,14 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.FaceRetouchingNatural
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
@@ -138,7 +141,10 @@ fun SettingsScreen(
     onOpenHardwareKey: () -> Unit = {},
     onOpenDeadmanWipe: () -> Unit = {},
     onOpenEncryptedBackup: () -> Unit = {},
-    onOpenBackupRestore: () -> Unit = {}
+    onOpenBackupRestore: () -> Unit = {},
+    onOpenBorderMode: () -> Unit = {},
+    onOpenFaceLock: () -> Unit = {},
+    onOpenGeofence: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -167,6 +173,13 @@ fun SettingsScreen(
     var deadmanUpsellOpen by remember { mutableStateOf(false) }
     var encryptedBackupUpsellOpen by remember { mutableStateOf(false) }
     var backupRestoreUpsellOpen by remember { mutableStateOf(false) }
+    var borderModeUpsellOpen by remember { mutableStateOf(false) }
+    var faceLockUpsellOpen by remember { mutableStateOf(false) }
+    var geofenceUpsellOpen by remember { mutableStateOf(false) }
+    val geofenceEnabled = remember { com.onlytrusted.app.geofence.GeofenceState.isEnabled(context) }
+    val geofenceCount = remember { com.onlytrusted.app.geofence.GeofenceState.geofences(context).size }
+    val faceLockEnrolled = remember { com.onlytrusted.app.ui.facelock.FaceLockState.isEnrolled(context) }
+    val borderModeArmed = remember { com.onlytrusted.app.ui.bordermode.BorderModeState.isArmed(context) }
     val deadmanEnabled = remember { com.onlytrusted.app.deadmanwipe.DeadmanWipeState.isEnabled(context) }
     val deadmanInterval = remember { com.onlytrusted.app.deadmanwipe.DeadmanWipeState.intervalDays(context) }
     val duressEnabled = remember { DuressState.isEnabled(context) }
@@ -603,6 +616,29 @@ fun SettingsScreen(
                     }
                 )
 
+                // Border Mode (Elite) — one-tap preset for high-risk crossings. Placed at
+                // the top of Elite rows per the brief. Toggles every defensive layer at
+                // once (Dead-Man Wipe 7d, Duress active, biometric off, screenshot + shield
+                // on, pocket-dial on, auto-lock 30s, cover identity swap).
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.FlightTakeoff,
+                    tint = when {
+                        borderModeArmed -> DangerDark
+                        SubscriptionState.hasElite(context) -> BrandAccentDark
+                        else -> subGold
+                    },
+                    title = "Border Mode (Elite)",
+                    value = if (borderModeArmed) "Armed" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenBorderMode()
+                        } else {
+                            borderModeUpsellOpen = true
+                        }
+                    }
+                )
+
                 // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
                 // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
                 // backup export, Dead-Man Wipe disable) behind a physical key tap.
@@ -617,6 +653,47 @@ fun SettingsScreen(
                             onOpenHardwareKey()
                         } else {
                             hardwareKeyUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Face-Change Shoulder-Surfing Lock (Elite) — front camera watches for faces
+                // while sensitive screens are open. Blurs when the owner walks away; locks
+                // instantly if a stranger / extra face appears.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.FaceRetouchingNatural,
+                    tint = when {
+                        SubscriptionState.hasElite(context) && faceLockEnrolled -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> BrandAccentDark
+                        else -> subGold
+                    },
+                    title = "Face-Change Lock (Elite)",
+                    value = if (SubscriptionState.hasElite(context) && faceLockEnrolled) "On" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenFaceLock()
+                        } else {
+                            faceLockUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Geo-fence Auto-Lock (Elite) — up to 5 trusted locations. The app
+                // auto-locks + sends a silent SMS alert when the device exits every
+                // trusted zone. Requires ACCESS_BACKGROUND_LOCATION for exit events
+                // to fire while the app is in the background.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.LocationOn,
+                    tint = if (geofenceEnabled) BrandAccentDark else subGold,
+                    title = "Geo-fence Auto-Lock (Elite)",
+                    value = if (geofenceEnabled) "On · $geofenceCount" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenGeofence()
+                        } else {
+                            geofenceUpsellOpen = true
                         }
                     }
                 )
@@ -852,6 +929,63 @@ fun SettingsScreen(
             )
         }
 
+        if (faceLockUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { faceLockUpsellOpen = false },
+                title = {
+                    Text(
+                        "Face-Change Lock is an Elite feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "The front camera watches for faces while you're on sensitive screens. " +
+                            "It blurs when you walk away and locks the moment someone else looks " +
+                            "at your phone. All processing happens on-device; no images are stored " +
+                            "or uploaded. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        faceLockUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { faceLockUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (borderModeUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { borderModeUpsellOpen = false },
+                title = { Text("Border Mode is an Elite feature", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "One tap. Every defensive layer at maximum. Dead-Man Wipe to 7 days, " +
+                            "Duress active, biometric off, screenshot & shield on, pocket-dial on, " +
+                            "cover identity on your Dashboard. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        borderModeUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { borderModeUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
         if (deadmanUpsellOpen) {
             AlertDialog(
                 onDismissRequest = { deadmanUpsellOpen = false },
@@ -874,6 +1008,16 @@ fun SettingsScreen(
                     TextButton(onClick = { deadmanUpsellOpen = false }) { Text("Not now") }
                 },
                 containerColor = MidnightCard
+            )
+        }
+
+        if (geofenceUpsellOpen) {
+            com.onlytrusted.app.ui.geofence.GeofenceUpsellDialog(
+                onDismiss = { geofenceUpsellOpen = false },
+                onUpgrade = {
+                    geofenceUpsellOpen = false
+                    onOpenUpgrade()
+                }
             )
         }
 

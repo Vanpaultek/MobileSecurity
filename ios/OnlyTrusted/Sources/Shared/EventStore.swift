@@ -25,6 +25,9 @@ struct SecurityEventRecord: Codable, Identifiable {
         /// Fired when the SIM-Swap Alarm detects a different carrier identity than the
         /// baseline captured on Pro activation. Pro-tier.
         static let simSwap = "SIM_SWAP"
+        /// Fired by the Geo-fence Auto-Lock (Elite) when the device exits every trusted
+        /// region. Triggers an auto-lock and a prepared SMS to the chosen contact.
+        static let geofenceExit = "GEOFENCE_EXIT"
     }
 }
 

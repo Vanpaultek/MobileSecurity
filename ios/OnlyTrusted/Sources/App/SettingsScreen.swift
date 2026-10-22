@@ -42,9 +42,21 @@ struct SettingsScreen: View {
     @State private var showHardwareKeyUpsell = false
     @State private var showHardwareKeySetup = false
     @State private var hardwareKeyGateError: String?
+    // Border Mode (Elite)
+    @State private var showBorderModeUpsell = false
+    @State private var showBorderModeSetup = false
+    @StateObject private var borderMode = BorderModeState.shared
     // Dead-Man Wipe (Elite)
     @State private var showDeadmanWipeUpsell = false
     @State private var showDeadmanWipeSetup = false
+    // Geo-fence Auto-Lock (Elite)
+    @State private var showGeofenceUpsell = false
+    @State private var showGeofenceSetup = false
+    @StateObject private var geofence = GeofenceState.shared
+    // Face-Change Shoulder-Surfing Lock (Elite)
+    @State private var showFaceLockUpsell = false
+    @State private var showFaceLockSetup = false
+    @StateObject private var faceLock = FaceLockState.shared
     // Encrypted Vault Backup (Elite)
     @State private var showEncryptedBackupUpsell = false
     @State private var showEncryptedBackupSetup = false
@@ -261,6 +273,20 @@ struct SettingsScreen: View {
             )
             .presentationDetents([.medium])
         }
+        // Border Mode (Elite)
+        .sheet(isPresented: $showBorderModeSetup) {
+            NavigationStack { BorderModeSetupScreen() }
+        }
+        .sheet(isPresented: $showBorderModeUpsell) {
+            BorderModeUpsellSheet(
+                onUpgrade: {
+                    showBorderModeUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showBorderModeUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
         // Dead-Man Wipe (Elite)
         .sheet(isPresented: $showDeadmanWipeSetup) {
             NavigationStack { DeadmanWipeSetupScreen() }
@@ -272,6 +298,34 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showDeadmanWipeUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Geo-fence Auto-Lock (Elite)
+        .sheet(isPresented: $showGeofenceSetup) {
+            NavigationStack { GeofenceSetupScreen() }
+        }
+        .sheet(isPresented: $showGeofenceUpsell) {
+            GeofenceUpsellSheet(
+                onUpgrade: {
+                    showGeofenceUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showGeofenceUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Face-Change Shoulder-Surfing Lock (Elite)
+        .sheet(isPresented: $showFaceLockSetup) {
+            NavigationStack { FaceLockSetupScreen() }
+        }
+        .sheet(isPresented: $showFaceLockUpsell) {
+            FaceLockUpsellSheet(
+                onUpgrade: {
+                    showFaceLockUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showFaceLockUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -668,6 +722,27 @@ struct SettingsScreen: View {
                 }
                 .buttonStyle(.plain)
 
+                // Border Mode (Elite) — one-tap preset for high-risk crossings. Placed at
+                // the top of Elite rows per the brief. Toggles every defensive layer at once
+                // (Dead-Man Wipe 7d, Duress active, biometric off, screenshot + shield on,
+                // auto-lock 30s, cover identity swap).
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showBorderModeSetup = true
+                    } else {
+                        showBorderModeUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "airplane.departure",
+                        iconTint: borderMode.isArmed ? Color.appDanger : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Border Mode (Elite)",
+                        value: borderMode.isArmed ? "Armed" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
                 // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
                 // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
                 // backup export, Dead-Man Wipe disable) behind a physical key tap.
@@ -684,6 +759,47 @@ struct SettingsScreen: View {
                         iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
                         label: "Hardware Security Key (Elite)",
                         value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Face-Change Shoulder-Surfing Lock (Elite) — front camera watches for faces
+                // while sensitive screens are open. Blurs when the owner walks away; locks
+                // instantly if a stranger or additional face appears.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showFaceLockSetup = true
+                    } else {
+                        showFaceLockUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "face.dashed",
+                        iconTint: sub.hasElite && faceLock.isEnrolled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Face-Change Lock (Elite)",
+                        value: sub.hasElite && faceLock.isEnrolled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Geo-fence Auto-Lock (Elite) — up to 5 trusted locations. The device
+                // auto-locks and (optionally) sends an SMS alert when it leaves every
+                // trusted zone. iOS requires "Always" location authorization to fire the
+                // background region monitor; the setup screen surfaces that caveat.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showGeofenceSetup = true
+                    } else {
+                        showGeofenceUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.circle.fill",
+                        iconTint: geofence.isEnabled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Geo-fence Auto-Lock (Elite)",
+                        value: geofence.isEnabled ? "On · \(geofence.geofences.count)" : nil
                     )
                 }
                 .buttonStyle(.plain)

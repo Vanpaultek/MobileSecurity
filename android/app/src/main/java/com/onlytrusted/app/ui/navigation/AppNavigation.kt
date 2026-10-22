@@ -77,6 +77,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object TrackerFinder : Destination("tracker_finder", "Tracker", Icons.Filled.Security)
     data object HardwareKey : Destination("hardware_key", "Security key", Icons.Filled.Security)
     data object DeadmanWipe : Destination("deadman_wipe", "Dead-Man", Icons.Filled.Security)
+    data object Geofence : Destination("geofence_setup", "Geo-fence", Icons.Filled.Security)
+    data object BorderMode : Destination("border_mode", "Border", Icons.Filled.Security)
+    data object FaceLock : Destination("face_lock", "Face lock", Icons.Filled.Security)
     data object EncryptedBackup : Destination("encrypted_backup", "Backup", Icons.Filled.Security)
     data object BackupRestore : Destination("backup_restore", "Restore", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
@@ -206,7 +209,10 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenHardwareKey = { navController.navigate(Destination.HardwareKey.route) },
                     onOpenDeadmanWipe = { navController.navigate(Destination.DeadmanWipe.route) },
                     onOpenEncryptedBackup = { navController.navigate(Destination.EncryptedBackup.route) },
-                    onOpenBackupRestore = { navController.navigate(Destination.BackupRestore.route) }
+                    onOpenBackupRestore = { navController.navigate(Destination.BackupRestore.route) },
+                    onOpenBorderMode = { navController.navigate(Destination.BorderMode.route) },
+                    onOpenFaceLock = { navController.navigate(Destination.FaceLock.route) },
+                    onOpenGeofence = { navController.navigate(Destination.Geofence.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -251,6 +257,21 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.BackupRestore.route) {
                 com.onlytrusted.app.ui.backup.BackupRestoreScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.BorderMode.route) {
+                com.onlytrusted.app.ui.bordermode.BorderModeSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.FaceLock.route) {
+                com.onlytrusted.app.ui.facelock.FaceLockSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.Geofence.route) {
+                com.onlytrusted.app.ui.geofence.GeofenceSetupScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

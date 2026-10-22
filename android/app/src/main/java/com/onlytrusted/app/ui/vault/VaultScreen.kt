@@ -124,6 +124,7 @@ fun VaultScreen(
     var tab by rememberSaveable { mutableStateOf(ContactTab.All) }
     var pendingDelete by remember { mutableStateOf<MaskedContact?>(null) }
 
+    com.onlytrusted.app.ui.facelock.FaceLockShield {
     Scaffold(
         containerColor = MidnightBackground,
         topBar = {
@@ -251,6 +252,7 @@ fun VaultScreen(
             }
         )
     }
+    } // close FaceLockShield
 }
 
 private fun filter(

@@ -120,6 +120,19 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
 
+    // --- Geo-fence Auto-Lock (Elite) -----------------------------------------
+    // Google Play Services Location — provides GeofencingClient and the Geofence
+    // builder. The feature is Elite-gated and self-disables on devices without
+    // Google Play Services installed.
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    // --- Face-Change Shoulder-Surfing Lock (Elite) ---------------------------
+    // ML Kit's bundled on-device face detector drives both the one-time enrollment
+    // flow and the runtime monitor. Zero network traffic — the model ships inside
+    // the APK. Classifications + landmarks are needed so we can derive the owner
+    // embedding from the 2D landmark geometry.
+    implementation("com.google.mlkit:face-detection:16.1.6")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

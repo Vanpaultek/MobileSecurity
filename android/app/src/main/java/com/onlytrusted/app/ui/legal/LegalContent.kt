@@ -285,6 +285,39 @@ Before you enable Duress Mode, check what your local law actually permits. If yo
 - We will not change the behaviour of Duress Mode in a silent update. If the mechanism changes, the "last updated" date above moves and the full text ships inside the new version of the app.
     """.trimIndent()
 
+    val borderModeAndLaw = """
+# Border Mode & law
+
+Border Mode is an Elite preset designed for high-risk crossings — international borders, airports where you may be pulled aside, protests where a device could be seized, hostile territory. One tap stacks every defensive layer OnlyTrusted ships: Dead-Man Wipe forced to 7 days, Duress Mode active, biometric unlock disabled (PIN-only), screenshot blocking and shield watermark on, pocket-dial protection on, auto-lock at 30 seconds, and — if you set one up — a plausible "cover identity" shown on the Dashboard and Vault.
+
+## Why PIN-only matters (US courts)
+
+In most United States federal and state cases, courts have treated unlocking a device by passcode as "testimonial" — potentially protected by the Fifth Amendment right against self-incrimination — while unlocking by face, fingerprint or similar biometric has been treated as a physical act and compelled routinely. The case law is not uniform (Minnesota, Vermont, Virginia and the Ninth Circuit have gone different ways over the past decade), and it keeps evolving. Border Mode's PIN-only switch exists so you have the stronger argument available at the moment it matters. It is not legal advice and it does not guarantee any specific outcome.
+
+## What Border Mode is NOT for
+
+- Evading a lawful search, border inspection, or court order. In many jurisdictions, lying to a border officer, destroying evidence after a subpoena, or obstructing an investigation is itself a crime. OnlyTrusted does not advise you on when any of those apply.
+- Hiding activity from a victim or a court-ordered monitor.
+- Running on a device you don't own, or on behalf of another person.
+
+## Jurisdictional reality
+
+- US — border officers have broad authority to inspect electronic devices at the border. Refusing to unlock can lead to device seizure for forensic examination. Fifth Amendment protection for passcodes is case-law-dependent and not universal.
+- UK — Schedule 7 of the Terrorism Act and RIPA s.49 can require you to disclose a passphrase; refusal is itself an offence.
+- EU — member states vary. Some require disclosure, some don't.
+- Many other jurisdictions — unknown or hostile. Research your destination before you travel.
+
+## Practical reality
+
+Border Mode will not stop a determined forensic lab from imaging your device if your hardware is unlocked or if the authorities have the time and tools. What it does is raise the per-incident cost for a casual search: biometric compulsion is off the table, screenshots and shoulder-surfing are harder, and if the device sits in evidence lockup for more than a week it wipes itself.
+
+## What this app will NOT do
+
+- We will not help someone cross a border fraudulently or evade a lawful warrant.
+- We will not add network callbacks that would phone home when Border Mode is armed. Everything stays on device.
+- We will not change the behaviour of Border Mode in a silent update. If the mechanism changes, the "last updated" date above moves and the full text ships inside the new version of the app.
+    """.trimIndent()
+
     val sections = listOf(
         LegalSection("Audience", audienceStatement),
         LegalSection("Non-interference", nonInterferencePledge),
@@ -294,6 +327,7 @@ Before you enable Duress Mode, check what your local law actually permits. If yo
         LegalSection("Honest claims", honestClaims),
         LegalSection("Data principles", dataPrinciples),
         LegalSection("Accessibility", accessibilityStatement),
-        LegalSection("Duress Mode & law", duressAndLaw)
+        LegalSection("Duress Mode & law", duressAndLaw),
+        LegalSection("Border Mode & law", borderModeAndLaw)
     )
 }
