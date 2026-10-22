@@ -299,6 +299,7 @@ struct SettingsScreen: View {
                 .font(.caption2)
                 .foregroundStyle(Color.appTertiaryText)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.top, 8)
     }
 
