@@ -17,11 +17,25 @@ import java.util.Locale
  * All reads/writes go through [SubscriptionState.get] so the Billing and Upgrade screens
  * share the same source of truth.
  */
+/** Tier ladder — mirrors iOS `SubscriptionTier`. HighPremium (Pro) unlocks everything. */
+enum class SubscriptionTier(val displayName: String, val rank: Int) {
+    FREE("Free", 0),
+    PREMIUM("Premium", 1),
+    FAMILY("Family", 2),
+    HIGH_PREMIUM("Pro (High Premium)", 3);
+
+    companion object {
+        fun fromKey(key: String?): SubscriptionTier =
+            entries.firstOrNull { it.name.equals(key, ignoreCase = true) } ?: FREE
+    }
+}
+
 object SubscriptionState {
     private const val PREFS = "subscription_prefs_v1"
 
     // Keys match the iOS UserDefaults keys so the strings stay recognisable.
     private const val KEY_ACTIVE = "subscription.v1.active"
+    private const val KEY_TIER = "subscription.v1.tier"
     private const val KEY_PLAN_NAME = "subscription.v1.plan_name"
     private const val KEY_PRICING = "subscription.v1.pricing"
     private const val KEY_NEXT_BILLING = "subscription.v1.next_billing"
@@ -40,6 +54,17 @@ object SubscriptionState {
     fun setActive(ctx: Context, value: Boolean) {
         prefs(ctx).edit().putBoolean(KEY_ACTIVE, value).apply()
     }
+
+    fun tier(ctx: Context): SubscriptionTier =
+        SubscriptionTier.fromKey(prefs(ctx).getString(KEY_TIER, null))
+
+    /** True if the user is on Premium / Family / HighPremium. */
+    fun hasPremium(ctx: Context): Boolean =
+        isActive(ctx) && tier(ctx).rank >= SubscriptionTier.PREMIUM.rank
+
+    /** True only if the user is on HighPremium (Pro). Gates the batch-1 security features. */
+    fun hasHighPremium(ctx: Context): Boolean =
+        isActive(ctx) && tier(ctx).rank >= SubscriptionTier.HIGH_PREMIUM.rank
 
     fun planName(ctx: Context): String =
         prefs(ctx).getString(KEY_PLAN_NAME, null) ?: "Premium"
@@ -84,12 +109,14 @@ object SubscriptionState {
      */
     fun markPurchased(
         ctx: Context,
+        tier: SubscriptionTier,
         plan: String,
         pricing: String,
         nextDate: Date
     ) {
         prefs(ctx).edit()
-            .putBoolean(KEY_ACTIVE, true)
+            .putBoolean(KEY_ACTIVE, tier != SubscriptionTier.FREE)
+            .putString(KEY_TIER, tier.name)
             .putString(KEY_PLAN_NAME, plan)
             .putString(KEY_PRICING, pricing)
             .putLong(KEY_NEXT_BILLING, nextDate.time)

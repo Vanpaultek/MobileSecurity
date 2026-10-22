@@ -15,7 +15,7 @@ struct UpgradeToPremiumScreen: View {
     @State private var showRestoreNotice: String?
 
     enum BillingCadence: Hashable { case monthly, yearly }
-    enum Plan: Hashable { case free, premium, family }
+    enum Plan: Hashable { case free, premium, family, highPremium }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -149,10 +149,15 @@ struct UpgradeToPremiumScreen: View {
     // MARK: - Plans grid
 
     private var plansGrid: some View {
-        HStack(alignment: .top, spacing: 10) {
-            planCard(.free)
-            planCard(.premium)
-            planCard(.family)
+        VStack(spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                planCard(.free)
+                planCard(.premium)
+            }
+            HStack(alignment: .top, spacing: 10) {
+                planCard(.family)
+                planCard(.highPremium)
+            }
         }
     }
 
@@ -172,23 +177,29 @@ struct UpgradeToPremiumScreen: View {
                 Text(plan.cadenceSuffix(for: billingCadence))
                     .font(.system(size: 12))
                     .foregroundStyle(Color.appSecondaryText)
-                if plan == .premium {
+                switch plan {
+                case .free:
+                    Text("Basic protection")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.appSecondaryText)
+                case .premium:
                     Text("Most Popular")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Color.appBrightCyan)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(
-                            Capsule().stroke(Color.appBrightCyan, lineWidth: 1)
-                        )
-                } else if plan == .free {
-                    Text("Basic protection")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.appSecondaryText)
-                } else {
+                        .background(Capsule().stroke(Color.appBrightCyan, lineWidth: 1))
+                case .family:
                     Text("Up to 5 devices")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.appSecondaryText)
+                case .highPremium:
+                    Text("All Protection")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Color.aboutOrange)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Capsule().stroke(Color.aboutOrange, lineWidth: 1))
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -259,6 +270,7 @@ struct UpgradeToPremiumScreen: View {
         case .free: return "Keep Free Plan"
         case .premium: return "Subscribe to Premium"
         case .family: return "Subscribe to Family"
+        case .highPremium: return "Subscribe to Pro"
         }
     }
 
@@ -270,6 +282,7 @@ struct UpgradeToPremiumScreen: View {
         let nextCycleDays = billingCadence == .monthly ? 30 : 365
         let nextDate = Calendar.current.date(byAdding: .day, value: nextCycleDays, to: Date()) ?? Date()
         sub.markPurchased(
+            tier: selectedPlan.tier,
             plan: selectedPlan.name,
             pricing: selectedPlan.priceLabel(for: billingCadence) + " \(selectedPlan.cadenceSuffix(for: billingCadence))",
             nextDate: nextDate
@@ -306,6 +319,16 @@ extension UpgradeToPremiumScreen.Plan {
         case .free: return "Free"
         case .premium: return "Premium"
         case .family: return "Family"
+        case .highPremium: return "Pro"
+        }
+    }
+
+    var tier: SubscriptionTier {
+        switch self {
+        case .free: return .free
+        case .premium: return .premium
+        case .family: return .family
+        case .highPremium: return .highPremium
         }
     }
 
@@ -313,18 +336,18 @@ extension UpgradeToPremiumScreen.Plan {
         switch self {
         case .free: return "$0"
         case .premium:
-            // Yearly is the headline price ($4.99/year). Monthly is cheaper per-equivalent
-            // to make the Yearly value obvious.
             return cadence == .monthly ? "$0.99" : "$4.99"
         case .family:
             return cadence == .monthly ? "$1.99" : "$9.99"
+        case .highPremium:
+            return cadence == .monthly ? "$2.99" : "$19.99"
         }
     }
 
     func cadenceSuffix(for cadence: UpgradeToPremiumScreen.BillingCadence) -> String {
         switch self {
         case .free: return ""
-        case .premium, .family:
+        case .premium, .family, .highPremium:
             return cadence == .monthly ? "per month" : "per year"
         }
     }
@@ -354,6 +377,16 @@ extension UpgradeToPremiumScreen.Plan {
                 .foregroundStyle(Color.settingsBlue)
                 .frame(width: 46, height: 46)
                 .background(Circle().fill(Color.settingsBlue.opacity(0.18)))
+        case .highPremium:
+            Image(systemName: "shield.checkerboard")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Color.aboutOrange)
+                .frame(width: 46, height: 46)
+                .background(
+                    Circle()
+                        .stroke(Color.aboutOrange, lineWidth: 1.5)
+                        .shadow(color: Color.aboutOrange.opacity(0.6), radius: 10)
+                )
         }
     }
 
@@ -377,6 +410,15 @@ extension UpgradeToPremiumScreen.Plan {
             .init(text: "Family sharing", included: true),
             .init(text: "Usage reports", included: true),
             .init(text: "Priority support", included: true)
+        ]
+        case .highPremium: return [
+            .init(text: "All Family features", included: true),
+            .init(text: "Duress Mode + decoy vault", included: true),
+            .init(text: "SIM-Swap Alarm", included: true),
+            .init(text: "App Permission Watchdog", included: true),
+            .init(text: "Tracker Finder (AirTag, Tile…)", included: true),
+            .init(text: "Smart Link Guard (SMS + QR)", included: true),
+            .init(text: "Wangiri + Safety Check-In", included: true)
         ]
         }
     }

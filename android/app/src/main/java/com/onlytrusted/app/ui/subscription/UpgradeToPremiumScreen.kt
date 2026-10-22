@@ -61,7 +61,7 @@ import java.util.Date
 private val settingsBlue = Color(0xFF2266F0)
 
 private enum class BillingCadence { Monthly, Yearly }
-private enum class Plan { Free, Premium, Family }
+private enum class Plan { Free, Premium, Family, HighPremium }
 
 private data class PlanFeature(val text: String, val included: Boolean)
 
@@ -69,19 +69,27 @@ private fun Plan.displayName(): String = when (this) {
     Plan.Free -> "Free"
     Plan.Premium -> "Premium"
     Plan.Family -> "Family"
+    Plan.HighPremium -> "Pro"
+}
+
+private fun Plan.tier(): SubscriptionTier = when (this) {
+    Plan.Free -> SubscriptionTier.FREE
+    Plan.Premium -> SubscriptionTier.PREMIUM
+    Plan.Family -> SubscriptionTier.FAMILY
+    Plan.HighPremium -> SubscriptionTier.HIGH_PREMIUM
 }
 
 private fun Plan.priceLabel(cadence: BillingCadence): String = when (this) {
     Plan.Free -> "$0"
-    // Yearly is the headline price ($4.99/year). Monthly is cheaper per-equivalent so
-    // the Yearly value is obvious.
     Plan.Premium -> if (cadence == BillingCadence.Monthly) "$0.99" else "$4.99"
     Plan.Family -> if (cadence == BillingCadence.Monthly) "$1.99" else "$9.99"
+    Plan.HighPremium -> if (cadence == BillingCadence.Monthly) "$2.99" else "$19.99"
 }
 
 private fun Plan.cadenceSuffix(cadence: BillingCadence): String = when (this) {
     Plan.Free -> ""
-    Plan.Premium, Plan.Family -> if (cadence == BillingCadence.Monthly) "per month" else "per year"
+    Plan.Premium, Plan.Family, Plan.HighPremium ->
+        if (cadence == BillingCadence.Monthly) "per month" else "per year"
 }
 
 private fun Plan.features(): List<PlanFeature> = when (this) {
@@ -101,6 +109,15 @@ private fun Plan.features(): List<PlanFeature> = when (this) {
         PlanFeature("Family sharing", true),
         PlanFeature("Usage reports", true),
         PlanFeature("Priority support", true)
+    )
+    Plan.HighPremium -> listOf(
+        PlanFeature("All Family features", true),
+        PlanFeature("Duress Mode + decoy vault", true),
+        PlanFeature("SIM-Swap Alarm", true),
+        PlanFeature("App Permission Watchdog", true),
+        PlanFeature("Tracker Finder (AirTag, Tile…)", true),
+        PlanFeature("Smart Link Guard (SMS + QR)", true),
+        PlanFeature("Wangiri + Safety Check-In", true)
     )
 }
 
@@ -157,6 +174,7 @@ fun UpgradeToPremiumScreen(onBack: () -> Unit = {}) {
                 Plan.Free -> "Keep Free Plan"
                 Plan.Premium -> "Subscribe to Premium"
                 Plan.Family -> "Subscribe to Family"
+                Plan.HighPremium -> "Subscribe to Pro"
             }
             CtaButton(label = ctaLabel, onClick = { showPurchaseConfirmation = true })
             RestoreButton(
@@ -195,6 +213,7 @@ fun UpgradeToPremiumScreen(onBack: () -> Unit = {}) {
                         val suffixText = if (suffix.isNotEmpty()) " $suffix" else ""
                         SubscriptionState.markPurchased(
                             ctx = context,
+                            tier = selectedPlan.tier(),
                             plan = selectedPlan.displayName(),
                             pricing = "$priceLabel$suffixText",
                             nextDate = nextDate
@@ -396,13 +415,21 @@ private fun PlansGrid(
     selectedPlan: Plan,
     onSelect: (Plan) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        PlanCard(Plan.Free, cadence, selectedPlan == Plan.Free, onSelect, Modifier.weight(1f))
-        PlanCard(Plan.Premium, cadence, selectedPlan == Plan.Premium, onSelect, Modifier.weight(1f))
-        PlanCard(Plan.Family, cadence, selectedPlan == Plan.Family, onSelect, Modifier.weight(1f))
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            PlanCard(Plan.Free, cadence, selectedPlan == Plan.Free, onSelect, Modifier.weight(1f))
+            PlanCard(Plan.Premium, cadence, selectedPlan == Plan.Premium, onSelect, Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            PlanCard(Plan.Family, cadence, selectedPlan == Plan.Family, onSelect, Modifier.weight(1f))
+            PlanCard(Plan.HighPremium, cadence, selectedPlan == Plan.HighPremium, onSelect, Modifier.weight(1f))
+        }
     }
 }
 
@@ -479,6 +506,7 @@ private fun PlanCard(
                     color = SecondaryTextDark,
                     textAlign = TextAlign.Center
                 )
+                Plan.HighPremium -> AllProtectionPill()
             }
 
             Spacer(Modifier.size(2.dp))
@@ -544,8 +572,24 @@ private fun PlanChip(plan: Plan) {
                 modifier = Modifier.size(22.dp)
             )
         }
+        Plan.HighPremium -> Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(size)
+                .border(1.5.dp, aboutOrange, CircleShape)
+                .shadow(10.dp, CircleShape, ambientColor = aboutOrange, spotColor = aboutOrange)
+        ) {
+            Icon(
+                Icons.Filled.Shield,
+                contentDescription = null,
+                tint = aboutOrange,
+                modifier = Modifier.size(22.dp)
+            )
+        }
     }
 }
+
+private val aboutOrange = Color(0xFFF59E0B)
 
 @Composable
 private fun MostPopularPill() {
@@ -560,6 +604,23 @@ private fun MostPopularPill() {
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = BrandCyanDark
+        )
+    }
+}
+
+@Composable
+private fun AllProtectionPill() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .border(1.dp, aboutOrange, RoundedCornerShape(999.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            "All Protection",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = aboutOrange
         )
     }
 }

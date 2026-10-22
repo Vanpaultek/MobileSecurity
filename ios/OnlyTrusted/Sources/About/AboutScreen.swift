@@ -278,9 +278,9 @@ private struct AboutRowContent: View {
     }
 }
 
-// MARK: - Icon-chip tints used only by About
+// MARK: - Icon-chip tints shared across About + Upgrade (Pro tier highlight)
 
-private extension Color {
+extension Color {
     static let aboutGreen  = Color(red:  34.0/255.0, green: 197.0/255.0, blue:  94.0/255.0)
     static let aboutOrange = Color(red: 245.0/255.0, green: 158.0/255.0, blue:  11.0/255.0)
     static let aboutPink   = Color(red: 236.0/255.0, green:  72.0/255.0, blue: 153.0/255.0)

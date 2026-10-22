@@ -321,12 +321,40 @@ private struct BillingHistorySheet: View {
 
 // MARK: - Subscription state (local for now; swap for StoreKit entitlements)
 
+/// Tier ladder. Features gate against this instead of a boolean so new tiers slot in cleanly.
+enum SubscriptionTier: String, CaseIterable, Codable {
+    case free, premium, family, highPremium
+
+    var displayName: String {
+        switch self {
+        case .free:         return "Free"
+        case .premium:      return "Premium"
+        case .family:       return "Family"
+        case .highPremium:  return "Pro (High Premium)"
+        }
+    }
+
+    /// Numeric rank for `>=` checks. Family and HighPremium are both "above" Premium; HighPremium
+    /// is the top tier and unlocks everything.
+    var rank: Int {
+        switch self {
+        case .free:        return 0
+        case .premium:     return 1
+        case .family:      return 2
+        case .highPremium: return 3
+        }
+    }
+}
+
 @MainActor
 final class SubscriptionState: ObservableObject {
     static let shared = SubscriptionState()
 
     @Published var isActive: Bool {
         didSet { d.set(isActive, forKey: Keys.isActive) }
+    }
+    @Published var tier: SubscriptionTier {
+        didSet { d.set(tier.rawValue, forKey: Keys.tier) }
     }
     @Published var planName: String {
         didSet { d.set(planName, forKey: Keys.planName) }
@@ -341,6 +369,11 @@ final class SubscriptionState: ObservableObject {
         didSet { d.set(lastFour, forKey: Keys.lastFour) }
     }
 
+    /// Convenience: does the current tier include Premium-level perks?
+    var hasPremium: Bool { isActive && tier.rank >= SubscriptionTier.premium.rank }
+    /// Convenience: does the current tier include every High Premium / Pro feature?
+    var hasHighPremium: Bool { isActive && tier.rank >= SubscriptionTier.highPremium.rank }
+
     let invoiceHistory: [InvoiceEntry] = [
         .init(date: Date().addingTimeInterval(-365 * 86400), description: "Premium yearly", amountCents: 499),
         .init(date: Date().addingTimeInterval(-730 * 86400), description: "Premium yearly", amountCents: 499)
@@ -349,6 +382,7 @@ final class SubscriptionState: ObservableObject {
     private let d = UserDefaults.standard
     private enum Keys {
         static let isActive = "subscription.v1.active"
+        static let tier = "subscription.v1.tier"
         static let planName = "subscription.v1.plan_name"
         static let pricingSummary = "subscription.v1.pricing"
         static let nextBillingDate = "subscription.v1.next_billing"
@@ -357,6 +391,7 @@ final class SubscriptionState: ObservableObject {
 
     private init() {
         isActive = d.object(forKey: Keys.isActive) as? Bool ?? false
+        tier = (d.string(forKey: Keys.tier).flatMap(SubscriptionTier.init(rawValue:))) ?? .free
         planName = d.string(forKey: Keys.planName) ?? "Premium"
         pricingSummary = d.string(forKey: Keys.pricingSummary) ?? "$4.99 per year"
         let timestamp = d.object(forKey: Keys.nextBillingDate) as? Double
@@ -366,8 +401,9 @@ final class SubscriptionState: ObservableObject {
     }
 
     /// Called when a successful purchase is confirmed by StoreKit (future wire-up).
-    func markPurchased(plan: String, pricing: String, nextDate: Date) {
-        isActive = true
+    func markPurchased(tier: SubscriptionTier, plan: String, pricing: String, nextDate: Date) {
+        isActive = tier != .free
+        self.tier = tier
         planName = plan
         pricingSummary = pricing
         nextBillingDate = nextDate
