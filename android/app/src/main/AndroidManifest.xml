@@ -36,6 +36,12 @@
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="31" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Shamir Split + Trusted Witness (Elite): both features advertise over BLE so another
+         OnlyTrusted device can discover this phone during share distribution or witness
+         approval. BLUETOOTH_ADVERTISE is paired with BLUETOOTH_SCAN+CONNECT above; the
+         features are opt-in and never run until the user starts the setup wizard. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"
+        tools:targetApi="31" />
     <!-- Pre-S fallback: BLE scans on Android 11 and below return nothing without fine
          location. We request it at runtime from the Tracker Finder screen on those
          releases only. Omitted on 12+ via maxSdkVersion so Play Store listing scope

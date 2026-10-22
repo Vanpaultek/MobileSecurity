@@ -63,6 +63,14 @@ struct SettingsScreen: View {
     @State private var showBackupRestoreUpsell = false
     @State private var showBackupRestore = false
     @StateObject private var deadman = DeadmanWipeState.shared
+    // Shamir Split (Elite) — vault master-key split over BLE.
+    @State private var showShamirUpsell = false
+    @State private var showShamirSetup = false
+    // Trusted Witness (Elite) — proximity-approved sensitive actions.
+    @State private var showTrustedWitnessUpsell = false
+    @State private var showTrustedWitnessSetup = false
+    @State private var trustedWitnessError: String?
+    @StateObject private var trustedWitness = TrustedWitnessState.shared
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -145,24 +153,36 @@ struct SettingsScreen: View {
         }
         .confirmationDialog("Wipe everything?", isPresented: $confirmWipe, titleVisibility: .visible) {
             Button("Wipe", role: .destructive) {
-                // Elite-tier gate: if the user has enrolled a hardware security key, "Wipe
-                // everything" requires a physical key tap. No key enrolled → the gate is a
-                // no-op and the wipe runs immediately.
-                HardwareKeyGate.requireAssertion(
-                    reason: "Confirm wipe with your security key."
-                ) { outcome in
-                    switch outcome {
+                // Elite-tier gate stack: Trusted Witness (if armed) first, then the Hardware
+                // Security Key tap (if enrolled). Both gates are opt-in — if the user hasn't
+                // enabled them this collapses to the pre-Elite behaviour.
+                TrustedWitnessGate.require(
+                    action: .wipeEverything,
+                    reason: "Have your witness approve the wipe."
+                ) { tw in
+                    switch tw {
                     case .success:
-                        try? store.wipe()
-                        try? BlockListStore.shared.wipe()
-                        EventStore.shared.wipe()
-                        EventStore.shared.append(type: SecurityEventRecord.Kind.wipe)
-                        HardwareKeyState.shared.clearAll()
-                        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
+                        HardwareKeyGate.requireAssertion(
+                            reason: "Confirm wipe with your security key."
+                        ) { outcome in
+                            switch outcome {
+                            case .success:
+                                try? store.wipe()
+                                try? BlockListStore.shared.wipe()
+                                EventStore.shared.wipe()
+                                EventStore.shared.append(type: SecurityEventRecord.Kind.wipe)
+                                HardwareKeyState.shared.clearAll()
+                                UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
+                            case .cancelled:
+                                hardwareKeyGateError = "Wipe cancelled — security key tap missing."
+                            case .failed(let msg):
+                                hardwareKeyGateError = "Hardware key required: \(msg)"
+                            }
+                        }
                     case .cancelled:
-                        hardwareKeyGateError = "Wipe cancelled — security key tap missing."
+                        trustedWitnessError = "Wipe cancelled — witness did not approve."
                     case .failed(let msg):
-                        hardwareKeyGateError = "Hardware key required: \(msg)"
+                        trustedWitnessError = "Witness required: \(msg)"
                     }
                 }
             }
@@ -356,6 +376,48 @@ struct SettingsScreen: View {
                 onDismiss: { showBackupRestoreUpsell = false }
             )
             .presentationDetents([.medium])
+        }
+        // Shamir Split (Elite)
+        .sheet(isPresented: $showShamirSetup) {
+            NavigationStack { ShamirSetupScreen() }
+        }
+        .sheet(isPresented: $showShamirUpsell) {
+            ShamirUpsellSheet(
+                onUpgrade: {
+                    showShamirUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showShamirUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Trusted Witness (Elite)
+        .sheet(isPresented: $showTrustedWitnessSetup) {
+            NavigationStack { TrustedWitnessSetupScreen() }
+        }
+        .sheet(isPresented: $showTrustedWitnessUpsell) {
+            TrustedWitnessUpsellSheet(
+                onUpgrade: {
+                    showTrustedWitnessUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showTrustedWitnessUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: Binding(
+            get: { TrustedWitnessApprovalPresenter.shared.isActive },
+            set: { _ in }
+        )) {
+            TrustedWitnessApprovalOverlay()
+        }
+        .alert("Trusted Witness required", isPresented: Binding(
+            get: { trustedWitnessError != nil },
+            set: { if !$0 { trustedWitnessError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(trustedWitnessError ?? "")
         }
         .sheet(isPresented: $showCheckInUpsell) {
             CheckInUpsellSheet(
@@ -857,6 +919,49 @@ struct SettingsScreen: View {
                         icon: "arrow.down.doc",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
                         label: "Restore from backup (Elite)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Shamir Split (Elite) — split the vault master key K-of-N across trusted
+                // contacts via short-range Bluetooth. If the user loses access they gather
+                // K contacts in person to reconstruct the key.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showShamirSetup = true
+                    } else {
+                        showShamirUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "rectangle.split.3x1",
+                        iconTint: ShamirState.shared.mySplit != nil ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Shamir Split (Elite)",
+                        value: ShamirState.shared.mySplit.map { "\($0.threshold)-of-\($0.total)" }
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Trusted Witness (Elite) — require a trusted contact's physical proximity +
+                // explicit approval before the most dangerous actions (Wipe, Disarm Duress,
+                // Disable Dead-Man Wipe, Vault export, Change master PIN). Wired into the
+                // Wipe confirmation above.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showTrustedWitnessSetup = true
+                    } else {
+                        showTrustedWitnessUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "person.2.wave.2",
+                        iconTint: trustedWitness.featureEnabled ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Trusted Witness (Elite)",
+                        value: trustedWitness.featureEnabled ? "On · \(trustedWitness.witnesses.count)" : nil
                     )
                 }
                 .buttonStyle(.plain)

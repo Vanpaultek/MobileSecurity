@@ -65,6 +65,7 @@ import java.util.Locale
 @Composable
 fun DeadmanWipeSetupScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     var enabled by remember { mutableStateOf(DeadmanWipeState.isEnabled(context)) }
     var interval by remember { mutableIntStateOf(DeadmanWipeState.intervalDays(context)) }
@@ -128,9 +129,20 @@ fun DeadmanWipeSetupScreen(onBack: () -> Unit) {
                                 if (newValue && !enabled) {
                                     showEnableDialog = true
                                 } else if (!newValue) {
-                                    DeadmanWipeState.disable(context)
-                                    enabled = false
-                                    refreshStatus()
+                                    // Elite Trusted Witness gate — disabling the Dead-Man Wipe
+                                    // is on the gated-action list. No witness armed → no-op.
+                                    com.onlytrusted.app.ui.p2p.TrustedWitnessGate.require(
+                                        context = context,
+                                        action = com.onlytrusted.app.ui.p2p.TrustedWitnessState.GatedAction.DISABLE_DEADMAN_WIPE,
+                                        reason = "Have your witness approve disabling Dead-Man Wipe.",
+                                        scope = scope,
+                                        onSuccess = {
+                                            DeadmanWipeState.disable(context)
+                                            enabled = false
+                                            refreshStatus()
+                                        },
+                                        onCancel = { /* keep toggle on */ }
+                                    )
                                 }
                             },
                             colors = SwitchDefaults.colors(
@@ -241,6 +253,10 @@ fun DeadmanWipeSetupScreen(onBack: () -> Unit) {
             )
         }
     }
+
+    // Elite Trusted Witness approval overlay — fires when disabling the Dead-Man Wipe
+    // requires witness approval.
+    com.onlytrusted.app.ui.p2p.TrustedWitnessApprovalOverlay()
 }
 
 @Composable

@@ -85,6 +85,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
+    // Shamir Split + Trusted Witness (Elite) — P2P-driven setup screens.
+    data object ShamirSplit : Destination("shamir_split", "Shamir", Icons.Filled.Security)
+    data object TrustedWitness : Destination("trusted_witness", "Witness", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -212,7 +215,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenBackupRestore = { navController.navigate(Destination.BackupRestore.route) },
                     onOpenBorderMode = { navController.navigate(Destination.BorderMode.route) },
                     onOpenFaceLock = { navController.navigate(Destination.FaceLock.route) },
-                    onOpenGeofence = { navController.navigate(Destination.Geofence.route) }
+                    onOpenGeofence = { navController.navigate(Destination.Geofence.route) },
+                    onOpenShamirSplit = { navController.navigate(Destination.ShamirSplit.route) },
+                    onOpenTrustedWitness = { navController.navigate(Destination.TrustedWitness.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -272,6 +277,16 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.Geofence.route) {
                 com.onlytrusted.app.ui.geofence.GeofenceSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.ShamirSplit.route) {
+                com.onlytrusted.app.ui.p2p.ShamirSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.TrustedWitness.route) {
+                com.onlytrusted.app.ui.p2p.TrustedWitnessSetupScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

@@ -31,7 +31,14 @@ struct DeadmanWipeSetupScreen: View {
                                 if newValue && !state.isEnabled {
                                     confirmEnable = true
                                 } else if !newValue {
-                                    state.disable()
+                                    // Elite Trusted Witness gate — disabling the Dead-Man Wipe
+                                    // is on the gated-action list. No witness armed → no-op.
+                                    TrustedWitnessGate.require(
+                                        action: .disableDeadmanWipe,
+                                        reason: "Have your witness approve disabling Dead-Man Wipe."
+                                    ) { tw in
+                                        if case .success = tw { state.disable() }
+                                    }
                                 }
                             }
                         )) {

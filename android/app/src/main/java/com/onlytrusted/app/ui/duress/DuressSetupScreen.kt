@@ -179,19 +179,32 @@ fun DuressSetupScreen(onDone: () -> Unit = {}) {
                         enabled = true
                         DuressState.setEnabled(context, true)
                     } else {
-                        // Elite hardware-key gate: disarming Duress Mode requires a FIDO2
-                        // tap when at least one key is enrolled. No key → gate is a no-op.
-                        HardwareKeyGate.requireAssertion(
+                        // Elite gate stack: Trusted Witness (if armed) → Hardware Key (if
+                        // enrolled). Both are opt-in; if neither is configured this collapses
+                        // to the pre-Elite behaviour.
+                        com.onlytrusted.app.ui.p2p.TrustedWitnessGate.require(
                             context = context,
-                            reason = "Confirm Duress disarm with your security key.",
+                            action = com.onlytrusted.app.ui.p2p.TrustedWitnessState.GatedAction.DISARM_DURESS,
+                            reason = "Have your witness approve the Duress disarm.",
                             scope = gateScope,
                             onSuccess = {
-                                enabled = false
-                                DuressState.setEnabled(context, false)
+                                HardwareKeyGate.requireAssertion(
+                                    context = context,
+                                    reason = "Confirm Duress disarm with your security key.",
+                                    scope = gateScope,
+                                    onSuccess = {
+                                        enabled = false
+                                        DuressState.setEnabled(context, false)
+                                    },
+                                    onCancel = { msg ->
+                                        hardwareKeyGateError = msg
+                                            ?: "Disarm cancelled — security key tap missing."
+                                    }
+                                )
                             },
                             onCancel = { msg ->
                                 hardwareKeyGateError = msg
-                                    ?: "Disarm cancelled — security key tap missing."
+                                    ?: "Disarm cancelled — witness did not approve."
                             }
                         )
                     }

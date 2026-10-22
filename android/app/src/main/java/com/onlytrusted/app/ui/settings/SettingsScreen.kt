@@ -41,7 +41,9 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.PhoneDisabled
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Shield
@@ -144,7 +146,9 @@ fun SettingsScreen(
     onOpenBackupRestore: () -> Unit = {},
     onOpenBorderMode: () -> Unit = {},
     onOpenFaceLock: () -> Unit = {},
-    onOpenGeofence: () -> Unit = {}
+    onOpenGeofence: () -> Unit = {},
+    onOpenShamirSplit: () -> Unit = {},
+    onOpenTrustedWitness: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -173,6 +177,18 @@ fun SettingsScreen(
     var deadmanUpsellOpen by remember { mutableStateOf(false) }
     var encryptedBackupUpsellOpen by remember { mutableStateOf(false) }
     var backupRestoreUpsellOpen by remember { mutableStateOf(false) }
+    var shamirUpsellOpen by remember { mutableStateOf(false) }
+    var trustedWitnessUpsellOpen by remember { mutableStateOf(false) }
+    var trustedWitnessGateError by remember { mutableStateOf<String?>(null) }
+    val shamirSplitStatus = remember {
+        com.onlytrusted.app.ui.p2p.ShamirState.mySplit(context)
+    }
+    val trustedWitnessEnabled = remember {
+        com.onlytrusted.app.ui.p2p.TrustedWitnessState.isFeatureEnabled(context)
+    }
+    val trustedWitnessCount = remember {
+        com.onlytrusted.app.ui.p2p.TrustedWitnessState.witnesses(context).size
+    }
     var borderModeUpsellOpen by remember { mutableStateOf(false) }
     var faceLockUpsellOpen by remember { mutableStateOf(false) }
     var geofenceUpsellOpen by remember { mutableStateOf(false) }
@@ -744,6 +760,46 @@ fun SettingsScreen(
                         }
                     }
                 )
+
+                // Shamir Split (Elite) — vault master-key K-of-N split via BLE.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Share,
+                    tint = when {
+                        shamirSplitStatus != null -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> BrandAccentDark
+                        else -> subGold
+                    },
+                    title = "Shamir Split (Elite)",
+                    value = shamirSplitStatus?.let { "${it.threshold}-of-${it.total}" },
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenShamirSplit()
+                        } else {
+                            shamirUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Trusted Witness (Elite) — proximity-approved sensitive actions.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.PeopleAlt,
+                    tint = when {
+                        trustedWitnessEnabled -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> BrandAccentDark
+                        else -> subGold
+                    },
+                    title = "Trusted Witness (Elite)",
+                    value = if (trustedWitnessEnabled) "On · $trustedWitnessCount" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenTrustedWitness()
+                        } else {
+                            trustedWitnessUpsellOpen = true
+                        }
+                    }
+                )
             }
 
             // --- Shield watermark (Android-only feature) ---
@@ -850,21 +906,33 @@ fun SettingsScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         confirmWipe = false
-                        // Elite-tier gate: if the user has enrolled a hardware security key,
-                        // the wipe only runs after a FIDO2 tap. No key enrolled → the gate
-                        // is a no-op and the wipe fires immediately.
-                        HardwareKeyGate.requireAssertion(
+                        // Elite gate stack: Trusted Witness (if armed) → Hardware Security Key
+                        // (if enrolled). Both are opt-in; if neither is configured this
+                        // collapses to the pre-Elite behaviour.
+                        com.onlytrusted.app.ui.p2p.TrustedWitnessGate.require(
                             context = context,
-                            reason = "Confirm wipe with your security key.",
+                            action = com.onlytrusted.app.ui.p2p.TrustedWitnessState.GatedAction.WIPE_EVERYTHING,
+                            reason = "Have your witness approve the wipe.",
                             scope = scope,
                             onSuccess = {
-                                vm.wipeEverything()
-                                HardwareKeyState.clearAll(context)
-                                scope.launch { snackbarHostState.showSnackbar("Everything wiped.") }
+                                HardwareKeyGate.requireAssertion(
+                                    context = context,
+                                    reason = "Confirm wipe with your security key.",
+                                    scope = scope,
+                                    onSuccess = {
+                                        vm.wipeEverything()
+                                        HardwareKeyState.clearAll(context)
+                                        scope.launch { snackbarHostState.showSnackbar("Everything wiped.") }
+                                    },
+                                    onCancel = { msg ->
+                                        hardwareKeyGateError = msg
+                                            ?: "Wipe cancelled — security key tap missing."
+                                    }
+                                )
                             },
                             onCancel = { msg ->
-                                hardwareKeyGateError = msg
-                                    ?: "Wipe cancelled — security key tap missing."
+                                trustedWitnessGateError = msg
+                                    ?: "Wipe cancelled — witness did not approve."
                             }
                         )
                     }) { Text("Wipe") }
@@ -1045,6 +1113,42 @@ fun SettingsScreen(
                 containerColor = MidnightCard
             )
         }
+
+        if (shamirUpsellOpen) {
+            com.onlytrusted.app.ui.p2p.ShamirUpsellDialog(
+                onUpgrade = {
+                    shamirUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { shamirUpsellOpen = false }
+            )
+        }
+
+        if (trustedWitnessUpsellOpen) {
+            com.onlytrusted.app.ui.p2p.TrustedWitnessUpsellDialog(
+                onUpgrade = {
+                    trustedWitnessUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { trustedWitnessUpsellOpen = false }
+            )
+        }
+
+        if (trustedWitnessGateError != null) {
+            AlertDialog(
+                onDismissRequest = { trustedWitnessGateError = null },
+                title = { Text("Trusted Witness required", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = { Text(trustedWitnessGateError.orEmpty(), color = SecondaryTextDark) },
+                confirmButton = {
+                    TextButton(onClick = { trustedWitnessGateError = null }) { Text("OK", color = BrandAccentDark) }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        // Trusted Witness approval overlay — kicks in while a gated action is waiting on
+        // the witness's phone.
+        com.onlytrusted.app.ui.p2p.TrustedWitnessApprovalOverlay()
 
         if (backupRestoreUpsellOpen) {
             AlertDialog(

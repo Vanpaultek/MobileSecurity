@@ -254,19 +254,31 @@ struct DuressSetupScreen: View {
                         if enable {
                             armWithDecoy()
                         } else {
-                            // Elite hardware-key gate: when at least one key is enrolled,
-                            // disarming Duress Mode requires a FIDO2 tap. No key enrolled =>
-                            // the gate is a no-op and this path matches the pre-Elite behavior.
-                            HardwareKeyGate.requireAssertion(
-                                reason: "Confirm Duress disarm with your security key."
-                            ) { outcome in
-                                switch outcome {
+                            // Elite gate stack: Trusted Witness (if armed) → Hardware key (if
+                            // enrolled). Both are opt-in — this collapses to the pre-Elite
+                            // behaviour when neither is configured.
+                            TrustedWitnessGate.require(
+                                action: .disarmDuress,
+                                reason: "Have your witness approve the Duress disarm."
+                            ) { tw in
+                                switch tw {
                                 case .success:
-                                    state.isEnabled = false
+                                    HardwareKeyGate.requireAssertion(
+                                        reason: "Confirm Duress disarm with your security key."
+                                    ) { outcome in
+                                        switch outcome {
+                                        case .success:
+                                            state.isEnabled = false
+                                        case .cancelled:
+                                            hardwareKeyError = "Disarm cancelled — security key tap missing."
+                                        case .failed(let msg):
+                                            hardwareKeyError = "Hardware key required: \(msg)"
+                                        }
+                                    }
                                 case .cancelled:
-                                    hardwareKeyError = "Disarm cancelled — security key tap missing."
+                                    hardwareKeyError = "Disarm cancelled — witness did not approve."
                                 case .failed(let msg):
-                                    hardwareKeyError = "Hardware key required: \(msg)"
+                                    hardwareKeyError = "Trusted witness required: \(msg)"
                                 }
                             }
                         }
