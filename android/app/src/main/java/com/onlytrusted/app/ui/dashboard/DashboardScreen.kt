@@ -395,25 +395,12 @@ private fun QuickActionsSection(
     onViewLog: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "Quick Actions",
-                color = PrimaryTextDark,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.weight(1f))
-            TextButton(onClick = { }, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                Text("See All", color = BrandAccentDark, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    Icons.Outlined.ChevronRight,
-                    contentDescription = null,
-                    tint = BrandAccentDark,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
+        Text(
+            "Quick Actions",
+            color = PrimaryTextDark,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             QuickActionCard(

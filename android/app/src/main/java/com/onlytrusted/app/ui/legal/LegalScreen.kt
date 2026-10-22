@@ -6,7 +6,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,8 +27,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -128,19 +132,63 @@ fun LegalScreen(
                 )
             }
 
-            // Horizontally scrollable section chips (pinned)
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp, horizontal = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                sections.forEachIndexed { index, section ->
-                    LegalSectionChip(
-                        title = titleCase(section.title),
-                        selected = index == selected,
-                        onClick = { selected = index }
+            // Dropdown: tap to pick a section — mirrors iOS Menu for consistency.
+            Box(modifier = Modifier.fillMaxWidth()) {
+                var dropdownOpen by remember { mutableStateOf(false) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MidnightElevated)
+                        .border(1.dp, BrandCyanDark.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .clickable { dropdownOpen = true }
+                        .padding(horizontal = 16.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        titleCase(sections[selected].title),
+                        color = PrimaryTextDark,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
                     )
+                    Icon(
+                        imageVector = Icons.Filled.ExpandMore,
+                        contentDescription = "Open section list",
+                        tint = BrandCyanDark,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = dropdownOpen,
+                    onDismissRequest = { dropdownOpen = false },
+                    modifier = Modifier.background(MidnightElevated)
+                ) {
+                    sections.forEachIndexed { idx, section ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        titleCase(section.title),
+                                        color = PrimaryTextDark,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    if (idx == selected) {
+                                        Icon(
+                                            Icons.Filled.Check,
+                                            contentDescription = null,
+                                            tint = BrandCyanDark,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            },
+                            onClick = {
+                                selected = idx
+                                dropdownOpen = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -228,40 +276,6 @@ fun LegalScreen(
                 Spacer(Modifier.height(24.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun LegalSectionChip(
-    title: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val fill = if (selected) BrandCyanDark else Color.Transparent
-    val textColor = if (selected) MidnightBackground else PrimaryTextDark
-    val borderColor = if (selected) Color.Transparent else BrandCyanDark.copy(alpha = 0.35f)
-    val glow = if (selected) BrandCyanDark.copy(alpha = 0.45f) else Color.Transparent
-
-    Box(
-        modifier = Modifier
-            .shadow(
-                elevation = if (selected) 10.dp else 0.dp,
-                shape = RoundedCornerShape(14.dp),
-                ambientColor = glow,
-                spotColor = glow
-            )
-            .background(fill, RoundedCornerShape(14.dp))
-            .border(BorderStroke(1.dp, borderColor), RoundedCornerShape(14.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 18.dp, vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = title,
-            color = textColor,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
     }
 }
 
@@ -435,6 +449,13 @@ private fun FormattedLegalText(raw: String) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         blocks.forEach { block ->
             when (block) {
+                is LegalBlock.Heading ->
+                    Text(
+                        block.text,
+                        color = PrimaryTextDark,
+                        fontSize = if (block.level == 1) 22.sp else 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 is LegalBlock.Paragraph ->
                     Text(
                         block.text,
@@ -482,6 +503,7 @@ private fun BulletRow(marker: String, text: String, markerWidth: androidx.compos
 }
 
 private sealed class LegalBlock {
+    data class Heading(val text: String, val level: Int) : LegalBlock()  // level 1 (#) or 2 (##)
     data class Paragraph(val text: String) : LegalBlock()
     data class Bullets(val items: List<String>) : LegalBlock()
     data class Numbered(val items: List<Pair<String, String>>) : LegalBlock()
@@ -490,9 +512,15 @@ private sealed class LegalBlock {
 private fun parseLegalBlocks(raw: String): List<LegalBlock> {
     val lines = raw.split("\n").map { it.trim() }
     val numberedPrefix = Regex("""^(\d+)\.\s(.+)$""")
+    val h1Prefix = Regex("""^#\s+(.+)$""")
+    val h2Prefix = Regex("""^##\s+(.+)$""")
 
+    // Android LegalContent uses Markdown ("- " bullets, "# " / "## " headings) while
+    // iOS uses "• " bullets. Normalise both so one parser handles either source.
     fun kind(line: String): String = when {
-        line.startsWith("• ") -> "bullet"
+        h2Prefix.matches(line) -> "h2"
+        h1Prefix.matches(line) -> "h1"
+        line.startsWith("• ") || line.startsWith("- ") -> "bullet"
         numberedPrefix.matches(line) -> "numbered"
         else -> "paragraph"
     }
@@ -501,11 +529,27 @@ private fun parseLegalBlocks(raw: String): List<LegalBlock> {
     val buffer = mutableListOf<String>()
     var bufferKind = "paragraph"
 
+    fun stripBullet(line: String): String = when {
+        line.startsWith("• ") -> line.removePrefix("• ")
+        line.startsWith("- ") -> line.removePrefix("- ")
+        else -> line
+    }
+
     fun flush() {
         if (buffer.isEmpty()) return
         when (bufferKind) {
+            "h1" -> buffer.forEach { line ->
+                h1Prefix.matchEntire(line)?.let {
+                    result.add(LegalBlock.Heading(it.groupValues[1], 1))
+                }
+            }
+            "h2" -> buffer.forEach { line ->
+                h2Prefix.matchEntire(line)?.let {
+                    result.add(LegalBlock.Heading(it.groupValues[1], 2))
+                }
+            }
             "bullet" ->
-                result.add(LegalBlock.Bullets(buffer.map { it.removePrefix("• ") }))
+                result.add(LegalBlock.Bullets(buffer.map(::stripBullet)))
             "numbered" -> {
                 val items = buffer.mapNotNull { line ->
                     numberedPrefix.matchEntire(line)?.let { m ->
