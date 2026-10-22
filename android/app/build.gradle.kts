@@ -103,6 +103,15 @@ dependencies {
     // JSON (bundled with Android, but kotlinx-serialization keeps us typed)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
+    // --- Smart Link Guard (Pro) -----------------------------------------------
+    // CameraX for the in-app QR scanner surface.
+    implementation("androidx.camera:camera-core:1.3.4")
+    implementation("androidx.camera:camera-camera2:1.3.4")
+    implementation("androidx.camera:camera-lifecycle:1.3.4")
+    implementation("androidx.camera:camera-view:1.3.4")
+    // ML Kit's on-device barcode scanner — no network calls.
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

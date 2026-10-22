@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.BluetoothSearching
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -124,7 +126,9 @@ fun SettingsScreen(
     onOpenPermWatchdog: () -> Unit = {},
     onOpenSimSwap: () -> Unit = {},
     onOpenWangiri: () -> Unit = {},
-    onOpenCheckIn: () -> Unit = {}
+    onOpenCheckIn: () -> Unit = {},
+    onOpenSmartLinkGuard: () -> Unit = {},
+    onOpenTrackerFinder: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -146,6 +150,8 @@ fun SettingsScreen(
     var simSwapUpsellOpen by remember { mutableStateOf(false) }
     var wangiriUpsellOpen by remember { mutableStateOf(false) }
     var checkInUpsellOpen by remember { mutableStateOf(false) }
+    var smartLinkGuardUpsellOpen by remember { mutableStateOf(false) }
+    var trackerFinderUpsellOpen by remember { mutableStateOf(false) }
     val duressEnabled = remember { DuressState.isEnabled(context) }
     val simSwapEnabled = remember {
         com.onlytrusted.app.ui.simswap.SimSwapState.isEnabled(context)
@@ -550,6 +556,35 @@ fun SettingsScreen(
                         }
                     }
                 )
+                // Smart Link Guard (Pro) — URL inspection for SMS + QR codes.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.LinkOff,
+                    tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
+                    title = "Smart Link Guard (Pro)",
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenSmartLinkGuard()
+                        } else {
+                            smartLinkGuardUpsellOpen = true
+                        }
+                    }
+                )
+                // Tracker Finder (Pro) — BLE scan for AirTag / Tile / Samsung SmartTag.
+                // Last row in Security & data per the brief.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.BluetoothSearching,
+                    tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
+                    title = "Tracker Finder (Pro)",
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenTrackerFinder()
+                        } else {
+                            trackerFinderUpsellOpen = true
+                        }
+                    }
+                )
             }
 
             // --- Shield watermark (Android-only feature) ---
@@ -808,6 +843,68 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { checkInUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (smartLinkGuardUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { smartLinkGuardUpsellOpen = false },
+                title = {
+                    Text(
+                        "Smart Link Guard is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Inspects every URL from SMS and QR codes before you tap it. " +
+                            "Flags shorteners, lookalike domains, suspicious TLDs, and " +
+                            "phishing paths — all 100% on-device. Included in Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        smartLinkGuardUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { smartLinkGuardUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (trackerFinderUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { trackerFinderUpsellOpen = false },
+                title = {
+                    Text(
+                        "Tracker Finder is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Scans nearby Bluetooth for AirTag, Tile, Samsung SmartTag, and " +
+                            "unknown trackers. Devices that keep reappearing across your " +
+                            "scans get flagged as possible followers. Included in Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        trackerFinderUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { trackerFinderUpsellOpen = false }) { Text("Not now") }
                 },
                 containerColor = MidnightCard
             )

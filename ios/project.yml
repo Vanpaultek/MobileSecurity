@@ -48,6 +48,7 @@ targets:
     dependencies:
       - target: CallDirectoryExtension
       - target: MessageFilterExtension
+      - target: SmartLinkGuardExtension
 
   # --- Call Directory Extension ------------------------------------------------
   CallDirectoryExtension:
@@ -84,3 +85,24 @@ targets:
         PRODUCT_NAME: "MessageFilterExtension"
         PRODUCT_MODULE_NAME: MessageFilterExtension
         INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted SMS Filter"
+
+  # --- Smart Link Guard Share Extension ----------------------------------------
+  # iOS cannot intercept incoming SMS the way Android can, so instead we expose
+  # Smart Link Guard as a share destination. The user shares a suspicious URL from
+  # Messages / Safari / anywhere and this extension renders the on-device verdict
+  # with Open / Cancel buttons. Shares the rules file with the main app target.
+  SmartLinkGuardExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SmartLinkGuardExtension
+      - path: OnlyTrusted/Sources/SmartLinkGuard/SmartLinkGuardRules.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.onlytrusted.app.SmartLinkGuardExtension
+        CODE_SIGN_ENTITLEMENTS: Entitlements/SmartLinkGuardExtension.entitlements
+        INFOPLIST_FILE: SmartLinkGuardExtension/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_NAME: "SmartLinkGuardExtension"
+        PRODUCT_MODULE_NAME: SmartLinkGuardExtension
+        INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted Smart Link Guard"

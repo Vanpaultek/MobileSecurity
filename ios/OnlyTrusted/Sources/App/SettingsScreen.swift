@@ -32,6 +32,12 @@ struct SettingsScreen: View {
     // Permission Watchdog (Pro)
     @State private var showWatchdogUpsell = false
     @State private var showWatchdog = false
+    // Tracker Finder (Pro)
+    @State private var showTrackerFinderUpsell = false
+    @State private var showTrackerFinder = false
+    // Smart Link Guard (Pro)
+    @State private var showSmartLinkGuardUpsell = false
+    @State private var showSmartLinkGuard = false
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -177,6 +183,32 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showWatchdogUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showTrackerFinder) {
+            NavigationStack { TrackerFinderScreen() }
+        }
+        .sheet(isPresented: $showTrackerFinderUpsell) {
+            TrackerFinderUpsellSheet(
+                onUpgrade: {
+                    showTrackerFinderUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showTrackerFinderUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showSmartLinkGuard) {
+            NavigationStack { SmartLinkGuardScreen() }
+        }
+        .sheet(isPresented: $showSmartLinkGuardUpsell) {
+            SmartLinkGuardUpsellSheet(
+                onUpgrade: {
+                    showSmartLinkGuardUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showSmartLinkGuardUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -508,6 +540,42 @@ struct SettingsScreen: View {
                     )
                 }
                 .buttonStyle(.plain)
+
+                // Tracker Finder (Pro) — scan nearby BLE for AirTag / Tile / SmartTag
+                // and flag persistent followers.
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showTrackerFinder = true
+                    } else {
+                        showTrackerFinderUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.magnifyingglass",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Tracker Finder (Pro)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Smart Link Guard (Pro) — on-device URL inspection for QR codes +
+                // links shared via the system share sheet. Last row in Security & data.
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showSmartLinkGuard = true
+                    } else {
+                        showSmartLinkGuardUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "shield.lefthalf.filled",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Smart Link Guard (Pro)"
+                    )
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -792,6 +860,43 @@ struct WatchdogUpsellSheet: View {
                 .font(.title2.weight(.bold))
                 .foregroundStyle(Color.appPrimaryText)
             Text("Jump into Apple's App Privacy Report and review exactly which permissions OnlyTrusted holds — with the reason we don't ask for the ones we skip. Included in Pro.")
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer(minLength: 0)
+            Button(action: onUpgrade) {
+                Text("Upgrade to Pro")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 48)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color.subGold)
+            .padding(.horizontal, 24)
+            Button("Not now", action: onDismiss)
+                .foregroundStyle(Color.appSecondaryText)
+                .padding(.bottom, 20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appBackdrop()
+    }
+}
+
+/// Pro upsell sheet for Tracker Finder.
+struct TrackerFinderUpsellSheet: View {
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "location.magnifyingglass")
+                .font(.system(size: 46, weight: .semibold))
+                .foregroundStyle(Color.subGold)
+                .padding(.top, 28)
+            Text("Tracker Finder")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Color.appPrimaryText)
+            Text("Scan nearby Bluetooth for AirTag, Tile, Samsung SmartTag, and unknown trackers. Any device that keeps reappearing across your scans gets flagged as a possible follower. Included in Pro.")
                 .font(.subheadline)
                 .foregroundStyle(Color.appSecondaryText)
                 .multilineTextAlignment(.center)

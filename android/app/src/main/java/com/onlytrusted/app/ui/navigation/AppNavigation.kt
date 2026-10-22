@@ -73,6 +73,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object SimSwapSetup : Destination("simswap_setup", "SIM-Swap", Icons.Filled.Security)
     data object Wangiri : Destination("wangiri", "Wangiri", Icons.Filled.Security)
     data object SafetyCheckIn : Destination("safety_checkin", "Check-In", Icons.Filled.Security)
+    data object SmartLinkGuard : Destination("smart_link_guard", "Links", Icons.Filled.Security)
+    data object TrackerFinder : Destination("tracker_finder", "Tracker", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -194,7 +196,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenPermWatchdog = { navController.navigate(Destination.PermissionWatchdog.route) },
                     onOpenSimSwap = { navController.navigate(Destination.SimSwapSetup.route) },
                     onOpenWangiri = { navController.navigate(Destination.Wangiri.route) },
-                    onOpenCheckIn = { navController.navigate(Destination.SafetyCheckIn.route) }
+                    onOpenCheckIn = { navController.navigate(Destination.SafetyCheckIn.route) },
+                    onOpenSmartLinkGuard = { navController.navigate(Destination.SmartLinkGuard.route) },
+                    onOpenTrackerFinder = { navController.navigate(Destination.TrackerFinder.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -211,6 +215,16 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.SafetyCheckIn.route) {
                 com.onlytrusted.app.ui.checkin.SafetyCheckInScreen()
+            }
+            composable(Destination.SmartLinkGuard.route) {
+                com.onlytrusted.app.ui.smartlinkguard.SmartLinkGuardScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.TrackerFinder.route) {
+                com.onlytrusted.app.ui.trackerfinder.TrackerFinderScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(Destination.Reports.route) {
                 ReportsScreen(onBack = { navController.popBackStack() })

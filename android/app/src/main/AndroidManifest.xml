@@ -24,6 +24,23 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Required by Tracker Finder (Pro) on Android 14+ for the continuous background
+         BLE scan foreground service type. Only started when the user opts in. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- Tracker Finder (Pro): BLE scan for AirTag / Tile / Samsung SmartTag / unknown
+         trackers. BLUETOOTH_SCAN replaces the pre-S location requirement for callers
+         that declare neverForLocation (we never derive the user's position). CONNECT
+         is needed to read advertisement device names when they are present. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="31" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Pre-S fallback: BLE scans on Android 11 and below return nothing without fine
+         location. We request it at runtime from the Tracker Finder screen on those
+         releases only. Omitted on 12+ via maxSdkVersion so Play Store listing scope
+         stays tight. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -43,6 +60,7 @@
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
     <application
         android:name=".OnlyTrustedApp"
@@ -147,6 +165,16 @@
             android:name=".ui.wangiri.WangiriWatcherService"
             android:exported="false" />
 
+        <!-- Tracker Finder (Pro) foreground service. Runs a short BLE scan every 15 minutes
+             while continuous mode is enabled, so the "3+ sessions over >15 min" classifier
+             in TrackerFinderStore has data to work with. Only started by the user via the
+             Tracker Finder screen; stops itself if the Pro gate lapses. -->
+        <service
+            android:name=".ui.trackerfinder.TrackerFinderService"
+            android:exported="false"
+            android:foregroundServiceType="location">
+        </service>
+
         <!-- Safety Check-In daily nag receiver. Fires once per day at the owner's chosen time
              via AlarmManager.setInexactRepeating. Posts a reminder if the owner hasn't tapped
              "I'm safe" in the preceding 24 h. -->
@@ -157,6 +185,26 @@
                 <action android:name="com.onlytrusted.app.action.CHECKIN_NAG" />
             </intent-filter>
         </receiver>
+
+        <!-- Smart Link Guard (Pro): inspects incoming SMS for URL-shaped substrings and
+             runs each through the 100%-on-device rules engine. Fires only when the user
+             is on Pro AND the Smart Link Guard SMS toggle is on; otherwise no-ops. -->
+        <receiver
+            android:name=".ui.smartlinkguard.SmartLinkGuardSmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="900">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Smart Link Guard QR scanner. Launched from the Smart Link Guard screen via
+             an ActivityResultContract; returns the detected URL to the caller. -->
+        <activity
+            android:name=".ui.smartlinkguard.SmartLinkGuardQrActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.OnlyTrusted" />
 
     </application>
 

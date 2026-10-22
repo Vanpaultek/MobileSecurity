@@ -22,6 +22,10 @@
     <string>2</string>
     <key>NSFaceIDUsageDescription</key>
     <string>OnlyTrusted uses Face ID to unlock the app and the family vault.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>OnlyTrusted scans nearby Bluetooth trackers to flag any device that may be following you.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>OnlyTrusted uses the camera to scan QR codes so Smart Link Guard can check them for safety before you open the link.</string>
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>callerid</string>

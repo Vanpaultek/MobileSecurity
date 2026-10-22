@@ -124,6 +124,10 @@ class MainActivity : FragmentActivity() {
         // Wangiri Protection (Pro): the service is a plain started Service — it no-ops if
         // READ_PHONE_STATE isn't granted, so this is safe to call unconditionally.
         com.onlytrusted.app.ui.wangiri.WangiriWatcherService.startIfEligible(this)
+        // Tracker Finder (Pro) continuous mode. The service self-gates on Pro + the
+        // continuous toggle so this is safe to call unconditionally; it exits immediately
+        // if either is off.
+        com.onlytrusted.app.ui.trackerfinder.TrackerFinderService.startIfEligible(this)
     }
 
     private fun canPostNotifications(): Boolean {
