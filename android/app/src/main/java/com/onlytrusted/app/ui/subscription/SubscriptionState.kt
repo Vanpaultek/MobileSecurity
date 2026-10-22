@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
+// SPDX-License-Identifier: AGPL-3.0-or-later
+package com.onlytrusted.app.ui.subscription
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.compose.ui.graphics.Color
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+
+/**
+ * Local-only subscription state that mirrors the iOS `SubscriptionState`.
+ * Backed by SharedPreferences; swap for Google Play Billing entitlements once IAP lands.
+ *
+ * All reads/writes go through [SubscriptionState.get] so the Billing and Upgrade screens
+ * share the same source of truth.
+ */
+object SubscriptionState {
+    private const val PREFS = "subscription_prefs_v1"
+
+    // Keys match the iOS UserDefaults keys so the strings stay recognisable.
+    private const val KEY_ACTIVE = "subscription.v1.active"
+    private const val KEY_PLAN_NAME = "subscription.v1.plan_name"
+    private const val KEY_PRICING = "subscription.v1.pricing"
+    private const val KEY_NEXT_BILLING = "subscription.v1.next_billing"
+    private const val KEY_LAST_FOUR = "subscription.v1.last_four"
+
+    private fun prefs(ctx: Context): SharedPreferences =
+        ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    private fun defaultNextBilling(): Long {
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.DAY_OF_YEAR, 335)
+        return cal.timeInMillis
+    }
+
+    fun isActive(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_ACTIVE, false)
+    fun setActive(ctx: Context, value: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_ACTIVE, value).apply()
+    }
+
+    fun planName(ctx: Context): String =
+        prefs(ctx).getString(KEY_PLAN_NAME, null) ?: "Premium"
+
+    fun pricingSummary(ctx: Context): String =
+        prefs(ctx).getString(KEY_PRICING, null) ?: "$4.99 per year"
+
+    fun nextBillingDateMillis(ctx: Context): Long =
+        prefs(ctx).getLong(KEY_NEXT_BILLING, defaultNextBilling())
+
+    fun nextBillingDate(ctx: Context): Date = Date(nextBillingDateMillis(ctx))
+
+    fun lastFour(ctx: Context): String =
+        prefs(ctx).getString(KEY_LAST_FOUR, null) ?: "4242"
+
+    /** Format a date the same way the iOS screen does (`MMM d, yyyy`). */
+    fun formatDate(date: Date): String =
+        SimpleDateFormat("MMM d, yyyy", Locale.US).format(date)
+
+    /** Mock invoice history used by the Billing History sheet. */
+    data class InvoiceEntry(
+        val date: Date,
+        val description: String,
+        val amountCents: Int
+    ) {
+        val dateString: String get() = formatDate(date)
+        val amountString: String get() = String.format(Locale.US, "$%.2f", amountCents / 100.0)
+    }
+
+    fun invoiceHistory(): List<InvoiceEntry> {
+        val now = System.currentTimeMillis()
+        val day = 86_400_000L
+        return listOf(
+            InvoiceEntry(Date(now - 365 * day), "Premium yearly", 499),
+            InvoiceEntry(Date(now - 730 * day), "Premium yearly", 499)
+        )
+    }
+
+    /**
+     * Called after a successful (stubbed) purchase. Flips the active flag and persists the
+     * plan details so the Billing screen reflects the new state next time it opens.
+     */
+    fun markPurchased(
+        ctx: Context,
+        plan: String,
+        pricing: String,
+        nextDate: Date
+    ) {
+        prefs(ctx).edit()
+            .putBoolean(KEY_ACTIVE, true)
+            .putString(KEY_PLAN_NAME, plan)
+            .putString(KEY_PRICING, pricing)
+            .putLong(KEY_NEXT_BILLING, nextDate.time)
+            .apply()
+    }
+}
+
+/** Shared gold tint used by the crown badges. */
+val subGold = Color(0xFFFABD3D)

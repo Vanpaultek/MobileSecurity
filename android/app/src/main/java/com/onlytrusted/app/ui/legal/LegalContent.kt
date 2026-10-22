@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.legal
 
@@ -85,7 +85,7 @@ If the policy changes, the updated date at the top will change and the full text
 
 ## Contact
 
-Questions, concerns, or data-rights requests: reddy@vanpaultek.com (57Million LLC).
+Questions, concerns, or data-rights requests: admin@vanpaultek.com (VanPaulTek Inc).
     """.trimIndent()
 
     val termsOfUse = """
@@ -137,7 +137,7 @@ These terms are governed by the laws of the country where you are resident, to t
 
 ## Contact
 
-reddy@vanpaultek.com
+admin@vanpaultek.com
     """.trimIndent()
 
     val callEncryptionExplainer = """
@@ -246,7 +246,7 @@ OnlyTrusted targets WCAG 2.1 AA (which is also what US Section 508 adopts). Spec
 
 ## Report an issue
 
-If anything on any screen is hard to use with TalkBack, Switch Access, a large font size, or in High Contrast mode, email reddy@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your Font size + Display size setting if possible.
+If anything on any screen is hard to use with TalkBack, Switch Access, a large font size, or in High Contrast mode, email admin@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your Font size + Display size setting if possible.
     """.trimIndent()
 
     data class LegalSection(val title: String, val body: String)

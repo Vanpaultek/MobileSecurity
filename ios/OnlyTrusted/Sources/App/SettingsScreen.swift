@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 import LocalAuthentication
@@ -10,9 +10,11 @@ struct SettingsScreen: View {
     @State private var appLockToggle = false
     @State private var showLockDeniedAlert = false
     @State private var confirmWipe = false
+    @State private var confirmPanic = false
     @State private var shareURL: URL?
     @State private var exportError: String?
     @State private var lastExport: (() throws -> URL)?
+    @State private var showThemeSheet = false
 
     private var canUseAuth: Bool {
         var err: NSError?
@@ -20,25 +22,57 @@ struct SettingsScreen: View {
     }
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 18) {
-                privacyCard
-                dataCard
-                moreCard
-                footerCard
+        VStack(spacing: 0) {
+            headerTitle
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18)
+                .padding(.top, 6)
+                .padding(.bottom, 12)
+                .background(
+                    ZStack {
+                        Color.appScreenBackground
+                        Color.black.opacity(0.25)
+                    }
+                    .ignoresSafeArea(edges: .top)
+                )
+
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
+                    sectionHeader("Protection")
+                    protectionCard
+
+                    sectionHeader("Premium")
+                    premiumCard
+
+                    sectionHeader("Appearance")
+                    appearanceCard
+
+                    sectionHeader("Security & data")
+                    securityCard
+
+                    sectionHeader("More")
+                    moreCard
+
+                    footerCard
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 32)
         }
-        .background(Color.appScreenBackground.ignoresSafeArea())
-        .navigationTitle("Settings")
-        .navigationBarTitleDisplayMode(.inline)
+        .appBackdrop()
+        .navigationBarHidden(true)
         .onAppear { appLockToggle = gate.appLockEnabled }
         .alert("Set up a passcode first", isPresented: $showLockDeniedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Set up a device passcode, Face ID, or Touch ID in the iOS Settings app first. Otherwise App Lock would permanently lock you out.")
+        }
+        .confirmationDialog("Panic lock now?", isPresented: $confirmPanic, titleVisibility: .visible) {
+            Button("Lock app", role: .destructive) { gate.panic() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The app will lock immediately and require Face ID / Touch ID / passcode to reopen.")
         }
         .confirmationDialog("Wipe everything?", isPresented: $confirmWipe, titleVisibility: .visible) {
             Button("Wipe", role: .destructive) {
@@ -52,6 +86,7 @@ struct SettingsScreen: View {
         } message: {
             Text("This will delete every trusted contact, every blocked number, every event, and every setting stored by this app. It cannot be undone.")
         }
+        .sheet(isPresented: $showThemeSheet) { ThemeSelectorSheet() }
         .sheet(item: Binding(get: { shareURL.map(IdentifiableURL.init) },
                              set: { shareURL = $0?.value })) { wrap in
             ShareSheet(activityItems: [wrap.value])
@@ -69,135 +104,210 @@ struct SettingsScreen: View {
         }
     }
 
-    private var privacyCard: some View {
+    // MARK: - Header title
+
+    private var headerTitle: some View {
+        Text("Settings")
+            .font(.system(size: 30, weight: .bold, design: .rounded))
+            .foregroundStyle(Color.appPrimaryText)
+            .padding(.top, 4)
+    }
+
+
+    // MARK: - Section header
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 20, weight: .semibold, design: .rounded))
+            .foregroundStyle(Color.appSecondaryText)
+            .padding(.horizontal, 4)
+            .padding(.top, 4)
+    }
+
+    // MARK: - Protection (mockup-aligned)
+
+    private var protectionCard: some View {
         PremiumCard {
-            VStack(alignment: .leading, spacing: 14) {
-                CardHeader(icon: "lock.shield.fill", title: "Privacy")
-                VStack(spacing: 0) {
-                    Toggle(isOn: $appLockToggle) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("App Lock").font(.subheadline.weight(.semibold))
-                            Text("Require Face ID, Touch ID, or your device passcode to open OnlyTrusted.")
+            VStack(spacing: 0) {
+                NavigationLink { BlockListScreen() } label: {
+                    SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
+                }
+                SettingsDivider()
+                NavigationLink { NotificationsScreen() } label: {
+                    SettingsNavRow(icon: "bell.fill", iconTint: Color.settingsBlue, label: "Notifications")
+                }
+                SettingsDivider()
+                NavigationLink { CallHandlingScreen() } label: {
+                    SettingsNavRow(icon: "phone.fill", iconTint: Color.settingsBlue, label: "Call Handling")
+                }
+                SettingsDivider()
+                NavigationLink { TextHandlingScreen() } label: {
+                    SettingsNavRow(icon: "message.fill", iconTint: Color.settingsBlue, label: "Text Handling")
+                }
+            }
+        }
+    }
+
+    // MARK: - Premium (new section)
+
+    private var premiumCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                NavigationLink { ReportsScreen() } label: {
+                    SettingsNavRow(icon: "chart.line.uptrend.xyaxis",
+                                   iconTint: Color.settingsBlue,
+                                   label: "Reports")
+                }
+                SettingsDivider()
+                NavigationLink { BillingSubscriptionScreen() } label: {
+                    SettingsNavRow(icon: "creditcard.fill",
+                                   iconTint: Color.subGold,
+                                   label: "Billing & Subscription")
+                }
+                SettingsDivider()
+                NavigationLink { UpgradeToPremiumScreen() } label: {
+                    SettingsNavRow(icon: "crown.fill",
+                                   iconTint: Color.subGold,
+                                   label: "Upgrade to Premium")
+                }
+            }
+        }
+    }
+
+    // MARK: - Appearance (mockup-aligned)
+
+    private var appearanceCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                Button { showThemeSheet = true } label: {
+                    SettingsNavRow(icon: "paintpalette.fill", iconTint: Color.settingsPurple,
+                                   label: "App Theme", value: "Dark (System)")
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    SettingsNavRow(icon: "globe", iconTint: Color.settingsPurple,
+                                   label: "Language", value: "English")
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    SettingsNavRow(icon: "textformat.size", iconTint: Color.settingsPurple,
+                                   label: "Text Size", value: "System")
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Security & data (preserved functionality not in mockup)
+
+    private var securityCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                Toggle(isOn: $appLockToggle) {
+                    HStack(spacing: 14) {
+                        settingsIcon("lock.shield.fill", tint: Color.appAccent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("App Lock")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.appPrimaryText)
+                            Text("Require biometric or passcode to open.")
                                 .font(.caption)
                                 .foregroundStyle(Color.appSecondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    .tint(Color.appAccent)
-                    .padding(.vertical, 10)
-                    .onChange(of: appLockToggle) { _, now in
-                        if now && !canUseAuth {
-                            appLockToggle = false
-                            showLockDeniedAlert = true
-                            return
-                        }
-                        gate.appLockEnabled = now
-                    }
                 }
+                .tint(Color.appAccent)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .onChange(of: appLockToggle) { _, now in
+                    if now && !canUseAuth {
+                        appLockToggle = false
+                        showLockDeniedAlert = true
+                        return
+                    }
+                    gate.appLockEnabled = now
+                }
+
+                SettingsDivider()
+                Button { runExport { try DataExporter.write() } } label: {
+                    SettingsNavRow(icon: "square.and.arrow.up", iconTint: Color.appAccent,
+                                   label: "Export my data as JSON", chevron: false)
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button { runExport { try EvidenceExporter.write() } } label: {
+                    SettingsNavRow(icon: "doc.badge.plus", iconTint: Color.appAccent,
+                                   label: "Export evidence pack", chevron: false)
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button { confirmPanic = true } label: {
+                    SettingsNavRow(icon: "lock.fill", iconTint: Color.appWarning,
+                                   label: "Panic lock", chevron: false, labelTint: Color.appWarning)
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button { confirmWipe = true } label: {
+                    SettingsNavRow(icon: "trash.fill", iconTint: Color.appDanger,
+                                   label: "Wipe everything", chevron: false, labelTint: Color.appDanger)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private var dataCard: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 14) {
-                CardHeader(icon: "square.and.arrow.up.fill", title: "Data")
-                VStack(spacing: 10) {
-                    SystemLinkRow(icon: "square.and.arrow.up", label: "Export my data as JSON") {
-                        runExport { try DataExporter.write() }
-                    }
-                    SystemLinkRow(icon: "doc.badge.plus", label: "Export evidence pack") {
-                        runExport { try EvidenceExporter.write() }
-                    }
-                    Button {
-                        confirmWipe = true
-                    } label: {
-                        HStack(spacing: 14) {
-                            Image(systemName: "trash.fill")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(Color.appDanger)
-                                .frame(width: 28, height: 28)
-                                .decorativeAccessibility()
-                            Text("Wipe everything")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(Color.appDanger)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.appDanger.opacity(0.08))
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
+    // MARK: - More
 
     private var moreCard: some View {
         PremiumCard {
-            VStack(alignment: .leading, spacing: 14) {
-                CardHeader(icon: "ellipsis.circle.fill", title: "More")
-                VStack(spacing: 10) {
-                    NavigationLink {
-                        NotificationsScreen()
-                    } label: {
-                        settingsRow(icon: "bell.badge.fill", label: "Notifications")
-                    }
-                    NavigationLink {
-                        LegalScreen()
-                    } label: {
-                        settingsRow(icon: "doc.text.fill", label: "Privacy, terms, and honest claims")
-                    }
-                    NavigationLink {
-                        AboutScreen()
-                    } label: {
-                        settingsRow(icon: "info.circle.fill", label: "About and attributions")
-                    }
+            VStack(spacing: 0) {
+                NavigationLink { LegalScreen() } label: {
+                    SettingsNavRow(icon: "doc.text.fill", iconTint: Color.appAccent,
+                                   label: "Privacy, terms, and honest claims")
+                }
+                SettingsDivider()
+                NavigationLink { AboutScreen() } label: {
+                    SettingsNavRow(icon: "info.circle.fill", iconTint: Color.appAccent,
+                                   label: "About OnlyTrusted")
                 }
             }
         }
     }
+
+    // MARK: - Footer
 
     private var footerCard: some View {
         VStack(spacing: 4) {
             Text("OnlyTrusted")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Color.appSecondaryText)
-            Text("© 2026 57Million LLC. GNU AGPL-3.0.")
+            Text("© 2026 VanPaulTek Inc · GNU AGPL-3.0")
                 .font(.caption2)
                 .foregroundStyle(Color.appTertiaryText)
-            Text("Support: reddy@vanpaultek.com")
+            Text("admin@vanpaultek.com")
                 .font(.caption2)
                 .foregroundStyle(Color.appTertiaryText)
         }
         .padding(.top, 8)
     }
 
-    private func settingsRow(icon: String, label: String) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(Color.appAccent)
-                .frame(width: 28, height: 28)
-                .decorativeAccessibility()
-            Text(label)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(Color.appPrimaryText)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Color.appTertiaryText)
-                .decorativeAccessibility()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.appScreenBackground)
-        )
+    private func settingsIcon(_ name: String, tint: Color) -> some View {
+        Image(systemName: name)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(tint)
+            .frame(width: 28, height: 28)
+            .decorativeAccessibility()
     }
 
     private func runExport(_ work: @escaping () throws -> URL) {
@@ -206,6 +316,214 @@ struct SettingsScreen: View {
         catch { exportError = String(describing: error) }
     }
 }
+
+// MARK: - Row components
+
+struct SettingsNavRow: View {
+    let icon: String
+    let iconTint: Color
+    let label: String
+    var value: String? = nil
+    var chevron: Bool = true
+    var labelTint: Color = Color.appPrimaryText
+    /// When true, render the icon as a filled solid-color chip (rounded square with
+    /// white icon on tinted gradient) per the new mockup. When false, keeps the
+    /// legacy small-icon look used by Security & data destructive rows.
+    var chipStyle: Bool = true
+
+    var body: some View {
+        HStack(spacing: 14) {
+            if chipStyle {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [iconTint, iconTint.opacity(0.75)],
+                                startPoint: .topLeading, endPoint: .bottomTrailing
+                            )
+                        )
+                        .shadow(color: iconTint.opacity(0.5), radius: 8, x: 0, y: 2)
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 44, height: 44)
+                .decorativeAccessibility()
+            } else {
+                Image(systemName: icon)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(iconTint)
+                    .frame(width: 28, height: 28)
+                    .decorativeAccessibility()
+            }
+            Text(label)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(labelTint)
+            Spacer()
+            if let value {
+                Text(value)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.appBrightCyan)
+            }
+            if chevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.appTertiaryText)
+                    .decorativeAccessibility()
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+    }
+}
+
+struct SettingsDivider: View {
+    var body: some View {
+        Divider()
+            .background(Color.appDivider.opacity(0.5))
+            .padding(.leading, 72)
+    }
+}
+
+/// Blue and purple used for the Settings icon chips (match the neon mockup).
+extension Color {
+    static let settingsBlue   = Color(red:  34.0/255.0, green: 102.0/255.0, blue: 240.0/255.0)
+    static let settingsPurple = Color(red: 139.0/255.0, green:  92.0/255.0, blue: 246.0/255.0)
+}
+
+// MARK: - Placeholder sub-screens (Call Handling / Text Handling / Theme)
+
+struct CallHandlingScreen: View {
+    @State private var mode: CallMode = .silence
+
+    enum CallMode: String, CaseIterable, Identifiable {
+        case silence = "Silence (recommended)"
+        case voicemail = "Send to voicemail"
+        case block = "Block completely"
+        var id: String { rawValue }
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                PremiumCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        CardHeader(icon: "phone.fill", title: "How to handle unknown calls")
+                        Text("Choose what happens when someone not in your trusted contacts tries to call. OnlyTrusted applies this via the Call Directory extension — enable it in iOS Settings → Phone → Call Blocking & Identification.")
+                            .font(.footnote)
+                            .foregroundStyle(Color.appSecondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                        ForEach(CallMode.allCases) { option in
+                            RadioRow(label: option.rawValue, isSelected: mode == option) {
+                                mode = option
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .appBackdrop()
+        .navigationTitle("Call Handling")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct TextHandlingScreen: View {
+    @State private var filterUnknown = true
+    @State private var promoteSpam = true
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                PremiumCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        CardHeader(icon: "message.fill", title: "How to handle unknown texts")
+                        Text("The SMS filter extension can route unknown senders to the Unknown & Junk tab in Messages, keeping your main inbox for trusted contacts.")
+                            .font(.footnote)
+                            .foregroundStyle(Color.appSecondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Toggle("Filter texts from unknown senders", isOn: $filterUnknown)
+                            .tint(Color.appAccent)
+                        Toggle("Promote suspected spam to the Junk tab", isOn: $promoteSpam)
+                            .tint(Color.appAccent)
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .appBackdrop()
+        .navigationTitle("Text Handling")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct RadioRow: View {
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? Color.appAccent : Color.appTertiaryText)
+                Text(label)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appPrimaryText)
+                Spacer()
+            }
+            .padding(.vertical, 8)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct ThemeSelectorSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    enum Theme: String, CaseIterable, Identifiable {
+        case system = "System"
+        case dark = "Dark"
+        case light = "Light"
+        var id: String { rawValue }
+    }
+
+    @State private var choice: Theme = .system
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                PremiumCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        CardHeader(icon: "paintpalette.fill", title: "App theme")
+                        Text("OnlyTrusted is designed dark-first. 'System' follows your device setting; 'Dark' and 'Light' override it just for this app.")
+                            .font(.footnote)
+                            .foregroundStyle(Color.appSecondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                        ForEach(Theme.allCases) { opt in
+                            RadioRow(label: opt.rawValue, isSelected: choice == opt) { choice = opt }
+                        }
+                    }
+                }
+                Spacer()
+            }
+            .padding(20)
+            .appBackdrop()
+            .navigationTitle("App theme")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .tint(Color.appAccent)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Share sheet wrapper (kept from previous)
 
 private struct IdentifiableURL: Identifiable {
     let value: URL

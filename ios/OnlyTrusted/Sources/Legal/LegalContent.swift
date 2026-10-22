@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import Foundation
 
@@ -94,7 +94,7 @@ enum LegalContent {
     OnlyTrusted is not directed at children under 13.
 
     Contact
-    reddy@vanpaultek.com (57Million LLC).
+    admin@vanpaultek.com (VanPaulTek Inc).
     """
 
     static let termsOfUse = """
@@ -119,7 +119,7 @@ enum LegalContent {
     The app is provided "as is." To the maximum extent allowed by applicable law, our liability is limited to the amount you paid for the app.
 
     Contact
-    reddy@vanpaultek.com (57Million LLC).
+    admin@vanpaultek.com (VanPaulTek Inc).
     """
 
     static let honestClaims = """
@@ -172,6 +172,6 @@ enum LegalContent {
 
     Report an issue
 
-    If anything on any screen is hard to use with VoiceOver, Switch Control, a large text size, or in Increase Contrast mode, email reddy@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your iOS text-size setting if possible.
+    If anything on any screen is hard to use with VoiceOver, Switch Control, a large text size, or in Increase Contrast mode, email admin@vanpaultek.com and we will treat it as a priority fix. Include the screen name and your iOS text-size setting if possible.
     """
 }

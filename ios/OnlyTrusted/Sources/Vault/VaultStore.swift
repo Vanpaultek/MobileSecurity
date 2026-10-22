@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import Foundation
 import SwiftUI
@@ -40,6 +40,8 @@ struct MaskedContact: Identifiable {
     let isOwner: Bool
     let maskedEmail: String?
     let maskedNumbers: [String]
+    /// Normalised (E.164-like) phone numbers used by call/SMS deep links. Not shown to the UI.
+    let normalisedNumbers: [String]
 }
 
 struct RevealedContact {
@@ -182,7 +184,8 @@ private extension TrustedContactRecord {
             relation: relation,
             isOwner: isOwner,
             maskedEmail: maskedEmail,
-            maskedNumbers: numbers.map { $0.maskedForDisplay }
+            maskedNumbers: numbers.map { $0.maskedForDisplay },
+            normalisedNumbers: numbers.map { $0.normalisedNumber }
         )
     }
 }

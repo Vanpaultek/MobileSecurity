@@ -1,7 +1,11 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 
+/// Activity Log — matches the new neon mockup.
+/// Large bold title, 4 filter chips (All/Calls/Texts/Blocked), large day-group headings
+/// (Today/Yesterday/This week/Earlier), each event rendered in its own standalone card
+/// with a solid-filled colored icon chip, title+subtitle, and cyan timestamp.
 struct EventsScreen: View {
     @State private var rows: [SecurityEventRecord] = []
     @State private var chainOk: Bool? = nil
@@ -11,90 +15,77 @@ struct EventsScreen: View {
         filter.filter(rows)
     }
 
-    private var grouped: [(String, [SecurityEventRecord])] {
-        let fmt = DateFormatter()
-        fmt.dateStyle = .medium
-        fmt.timeStyle = .none
-        let dict = Dictionary(grouping: filteredRows) { row -> String in
-            fmt.string(from: Date(timeIntervalSince1970: Double(row.timestampMillis) / 1000.0))
+    private var grouped: [(ActivityGroup, [SecurityEventRecord])] {
+        let bucketed = Dictionary(grouping: filteredRows) { ActivityGroup.bucket(for: $0.timestampMillis) }
+        return ActivityGroup.allCases.compactMap { group in
+            guard let items = bucketed[group], !items.isEmpty else { return nil }
+            return (group, items.sorted { $0.timestampMillis > $1.timestampMillis })
         }
-        return dict
-            .sorted { lhs, rhs in
-                (lhs.value.first?.timestampMillis ?? 0) > (rhs.value.first?.timestampMillis ?? 0)
-            }
     }
 
     var body: some View {
-        Group {
-            if rows.isEmpty {
-                PremiumEmptyState(
-                    icon: "clock.badge.checkmark.fill",
-                    title: "No events yet",
-                    message: "Blocked calls, flagged SMS, panic locks, and vault edits will appear here as they happen."
-                )
-            } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 18) {
-                        chainIntegrityCard
-                        filterChips
+        VStack(spacing: 0) {
+            VStack(spacing: 12) {
+                headerTitle
+                filterChips
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 6)
+            .padding(.bottom, 10)
+            .background(
+                ZStack {
+                    Color.appScreenBackground
+                    Color.black.opacity(0.25)
+                }
+                .ignoresSafeArea(edges: .top)
+            )
 
-                        VStack(spacing: 20) {
-                            ForEach(grouped, id: \.0) { day, dayRows in
-                                EventDaySection(day: day, rows: dayRows)
-                            }
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    if filteredRows.isEmpty {
+                        chainIntegrityCardIfTampered
+                        emptyState
+                    } else {
+                        chainIntegrityCardIfTampered
+                        ForEach(grouped, id: \.0) { group, dayRows in
+                            EventDaySection(title: group.title, rows: dayRows)
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 32)
                 }
+                .padding(.horizontal, 18)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
         }
-        .background(Color.appScreenBackground.ignoresSafeArea())
-        .navigationTitle("Events")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    reload()
-                } label: {
-                    Image(systemName: "arrow.clockwise").decorativeAccessibility()
-                }
-                .accessibilityLabel("Reload event log")
-                .minimumHitTarget()
-            }
-        }
+        .appBackdrop()
+        .navigationBarHidden(true)
         .task { reload() }
     }
 
-    @ViewBuilder
-    private var chainIntegrityCard: some View {
-        PremiumCard {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle().fill(chainTint.opacity(0.14))
-                    Image(systemName: chainIcon)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(chainTint)
-                }
-                .frame(width: 44, height: 44)
-                .decorativeAccessibility()
+    // MARK: - Header title row
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(chainTitle)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.appPrimaryText)
-                    Text(chainMessage)
-                        .font(.footnote)
-                        .foregroundStyle(Color.appSecondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
+    private var headerTitle: some View {
+        HStack(spacing: 10) {
+            Text("Activity Log")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.appPrimaryText)
+            Spacer()
+            Button(action: reload) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.appBrightCyan)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle().fill(Color.appElevatedSurface)
+                    )
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Reload event log")
         }
     }
 
-    @ViewBuilder
+    // MARK: - Filter chips
+
     private var filterChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
@@ -107,74 +98,113 @@ struct EventsScreen: View {
                 }
             }
             .padding(.horizontal, 2)
+            .padding(.vertical, 4)
         }
     }
 
-    private var chainIcon: String {
-        switch chainOk {
-        case .some(true): "checkmark.seal.fill"
-        case .some(false): "exclamationmark.octagon.fill"
-        case .none: "ellipsis.circle"
+    // MARK: - Chain integrity (only shown when tampered)
+
+    @ViewBuilder
+    private var chainIntegrityCardIfTampered: some View {
+        if chainOk == false {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(Color.appDanger.opacity(0.18))
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(Color.appDanger)
+                }
+                .frame(width: 44, height: 44)
+                .decorativeAccessibility()
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Audit chain tampered")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                    Text("The event log hash chain is broken. An event may have been edited.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.appElevatedSurface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.appDanger.opacity(0.5), lineWidth: 1)
+                    )
+            )
         }
     }
-    private var chainTint: Color {
-        switch chainOk {
-        case .some(true): Color.appSuccess
-        case .some(false): Color.appDanger
-        case .none: Color.appAccent
+
+    // MARK: - Empty state
+
+    @ViewBuilder
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Spacer(minLength: 32)
+            ZStack {
+                Circle().fill(Color.appAccent.opacity(0.14))
+                    .frame(width: 88, height: 88)
+                Image(systemName: "clock.badge.checkmark.fill")
+                    .font(.system(size: 36, weight: .regular))
+                    .foregroundStyle(Color.appAccent)
+            }
+            .decorativeAccessibility()
+            Text("No events to show")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Color.appPrimaryText)
+            Text(filter == .all
+                 ? "Blocked calls, flagged SMS, panic locks, and vault edits will appear here as they happen."
+                 : "No events match the \"\(filter.title)\" filter yet.")
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
         }
-    }
-    private var chainTitle: String {
-        switch chainOk {
-        case .some(true): "Audit chain intact"
-        case .some(false): "Audit chain MISMATCH"
-        case .none: "Checking audit chain"
-        }
-    }
-    private var chainMessage: String {
-        switch chainOk {
-        case .some(true): "No event has been retroactively modified since you last reset the log."
-        case .some(false): "Something tampered with the event log. Export the evidence pack and contact support."
-        case .none: "Verifying every row of the audit log. This usually takes under a second."
-        }
+        .frame(maxWidth: .infinity)
     }
 
     private func reload() {
-        rows = EventStore.shared.allRecent()
-        Task.detached {
+        let recent = EventStore.shared.allRecent()
+        rows = recent
+        Task.detached(priority: .utility) {
             let ok = EventStore.shared.verifyChain()
             await MainActor.run { chainOk = ok }
         }
     }
 }
 
-// MARK: - Filter chip
+// MARK: - Filter chip (bigger rounded-square per mockup)
 
 enum EventFilter: CaseIterable, Hashable {
-    case all, blocked, allowed, flagged, system
+    case all, calls, texts, blocked
 
     var title: String {
         switch self {
         case .all: "All"
+        case .calls: "Calls"
+        case .texts: "Texts"
         case .blocked: "Blocked"
-        case .allowed: "Allowed"
-        case .flagged: "Spam SMS"
-        case .system: "System"
         }
     }
 
     func filter(_ rows: [SecurityEventRecord]) -> [SecurityEventRecord] {
         switch self {
-        case .all: return rows
-        case .blocked: return rows.filter { $0.type == SecurityEventRecord.Kind.callBlocked }
-        case .allowed: return rows.filter { $0.type == SecurityEventRecord.Kind.callAllowed }
-        case .flagged: return rows.filter { $0.type == SecurityEventRecord.Kind.smsFlagged }
-        case .system: return rows.filter {
-            [SecurityEventRecord.Kind.panicLock,
-             SecurityEventRecord.Kind.vaultEdit,
-             SecurityEventRecord.Kind.wipe,
-             SecurityEventRecord.Kind.callDirectoryReloaded].contains($0.type)
-        }
+        case .all:
+            return rows
+        case .calls:
+            return rows.filter { $0.type.lowercased().contains("call") }
+        case .texts:
+            return rows.filter {
+                let t = $0.type.lowercased()
+                return t.contains("sms") || t.contains("text")
+            }
+        case .blocked:
+            return rows.filter { EventCategory.of($0.type) == .blocked }
         }
     }
 }
@@ -187,114 +217,198 @@ private struct FilterChip: View {
     var body: some View {
         Button(action: onTap) {
             Text(label)
-                .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 9)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(isSelected ? Color.appScreenBackground : Color.appPrimaryText)
+                .padding(.horizontal, 22)
+                .padding(.vertical, 12)
                 .background(
-                    Capsule().fill(isSelected ? Color.appAccent : Color.appCardBackground)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(isSelected ? Color.appBrightCyan : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(
+                                    isSelected ? Color.clear : Color.appBrightCyan.opacity(0.35),
+                                    lineWidth: 1
+                                )
+                        )
                 )
-                .foregroundStyle(isSelected ? Color.white : Color.appPrimaryText)
+                .shadow(color: isSelected ? Color.appBrightCyan.opacity(0.45) : .clear,
+                        radius: isSelected ? 10 : 0, x: 0, y: 0)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
-// MARK: - Day section + row
+// MARK: - Day grouping
+
+enum ActivityGroup: CaseIterable, Hashable {
+    case today, yesterday, thisWeek, earlier
+
+    var title: String {
+        switch self {
+        case .today: "Today"
+        case .yesterday: "Yesterday"
+        case .thisWeek: "This week"
+        case .earlier: "Earlier"
+        }
+    }
+
+    static func bucket(for timestampMillis: Int64) -> ActivityGroup {
+        let date = Date(timeIntervalSince1970: Double(timestampMillis) / 1000.0)
+        let cal = Calendar.current
+        let startOfToday = cal.startOfDay(for: Date())
+        let startOfRow = cal.startOfDay(for: date)
+        let dayDiff = cal.dateComponents([.day], from: startOfRow, to: startOfToday).day ?? 0
+        if dayDiff <= 0 { return .today }
+        if dayDiff == 1 { return .yesterday }
+        if dayDiff < 7 { return .thisWeek }
+        return .earlier
+    }
+}
+
+// MARK: - Semantic category for icon + tint
+
+enum EventCategory {
+    case blocked, allowed, silenced, system
+
+    static func of(_ type: String) -> EventCategory {
+        let t = type.lowercased()
+        if t.contains("silenced") { return .silenced }
+        if t.contains("block") || t.contains("flag") || t == "wipe" || t.contains("panic") {
+            return .blocked
+        }
+        if t.contains("allow") { return .allowed }
+        return .system
+    }
+}
+
+// MARK: - Day section (large header + list of standalone rows)
 
 private struct EventDaySection: View {
-    let day: String
+    let title: String
     let rows: [SecurityEventRecord]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(day)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Color.appSecondaryText)
-                .textCase(.uppercase)
-                .padding(.leading, 8)
+            Text(title)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.appPrimaryText)
 
-            PremiumCard {
-                VStack(spacing: 14) {
-                    ForEach(Array(rows.enumerated()), id: \.element.id) { idx, row in
-                        EventRow(record: row)
-                        if idx < rows.count - 1 {
-                            Divider().padding(.leading, 46)
-                        }
-                    }
+            VStack(spacing: 10) {
+                ForEach(rows, id: \.id) { row in
+                    EventRow(record: row)
                 }
             }
         }
     }
 }
 
+// MARK: - Event row (solid-filled icon chip + title + subtitle + cyan timestamp)
+
 private struct EventRow: View {
     let record: SecurityEventRecord
 
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        return f
+    }()
+
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(spacing: 14) {
+            // Solid-filled colored icon chip (rounded square with glow)
             ZStack {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(typeTint.opacity(0.14))
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(typeTint)
+                    .shadow(color: typeTint.opacity(0.5), radius: 10, x: 0, y: 2)
                 Image(systemName: typeIcon)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(typeTint)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
             }
-            .frame(width: 32, height: 32)
+            .frame(width: 48, height: 48)
             .decorativeAccessibility()
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(humanLabel(record.type))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.appPrimaryText)
-                Text(Date(timeIntervalSince1970: Double(record.timestampMillis) / 1000.0),
-                     style: .time)
-                    .font(.caption)
+                Text(subtitle)
+                    .font(.system(size: 13))
                     .foregroundStyle(Color.appSecondaryText)
-                if let detail = record.detail {
-                    Text(detail)
-                        .font(.caption.monospaced())
-                        .foregroundStyle(Color.appTertiaryText)
-                        .lineLimit(2)
-                        .padding(.top, 1)
-                }
+                    .lineLimit(1)
+                    .truncationMode(.middle)
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
+
+            Text(Self.timeFormatter.string(from: Date(timeIntervalSince1970: Double(record.timestampMillis) / 1000.0)))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.appBrightCyan)
+                .monospacedDigit()
         }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.appElevatedSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.appBrightCyan.opacity(0.1), lineWidth: 1)
+                )
+        )
     }
+
+    private var subtitle: String {
+        if let d = record.detail, !d.isEmpty { return d }
+        return "Unknown number"
+    }
+
+    private var category: EventCategory { EventCategory.of(record.type) }
 
     private var typeIcon: String {
         switch record.type {
-        case SecurityEventRecord.Kind.callBlocked: "phone.down.fill"
-        case SecurityEventRecord.Kind.callAllowed: "phone.fill"
-        case SecurityEventRecord.Kind.smsFlagged: "message.badge.fill"
-        case SecurityEventRecord.Kind.callDirectoryReloaded: "arrow.triangle.2.circlepath"
-        case SecurityEventRecord.Kind.panicLock: "lock.fill"
-        case SecurityEventRecord.Kind.vaultEdit: "person.text.rectangle.fill"
-        case SecurityEventRecord.Kind.wipe: "trash.fill"
-        default: "circle"
+        case SecurityEventRecord.Kind.callBlocked: return "nosign"
+        case SecurityEventRecord.Kind.callAllowed: return "phone.badge.checkmark"
+        case SecurityEventRecord.Kind.smsFlagged:  return "message.badge.filled.fill"
+        case SecurityEventRecord.Kind.callDirectoryReloaded: return "arrow.triangle.2.circlepath"
+        case SecurityEventRecord.Kind.panicLock:   return "lock.fill"
+        case SecurityEventRecord.Kind.vaultEdit:   return "person.text.rectangle.fill"
+        case SecurityEventRecord.Kind.wipe:        return "trash.fill"
+        default:
+            switch category {
+            case .blocked:  return "nosign"
+            case .allowed:  return "phone.badge.checkmark"
+            case .silenced: return "phone.badge.minus"
+            case .system:   return "info.circle.fill"
+            }
         }
     }
 
+    /// Solid tint for the icon chip. Per mockup: blocked = red, silenced = amber,
+    /// allowed-call = teal, allowed-text = blue, system = brand accent.
     private var typeTint: Color {
-        switch record.type {
-        case SecurityEventRecord.Kind.callBlocked, SecurityEventRecord.Kind.smsFlagged: Color.appDanger
-        case SecurityEventRecord.Kind.callAllowed: Color.appSuccess
-        case SecurityEventRecord.Kind.panicLock, SecurityEventRecord.Kind.wipe: Color.appWarning
-        default: Color.appAccent
+        let t = record.type.lowercased()
+        if t.contains("silenced") { return Color.blockingAmber }
+        if category == .blocked   { return Color.appDanger }
+        if category == .allowed {
+            if t.contains("sms") || t.contains("text") {
+                return Color(red: 0.22, green: 0.56, blue: 0.95) // blue
+            }
+            return Color.appAccent // teal for allowed call
         }
+        return Color.appAccent
     }
 
     private func humanLabel(_ type: String) -> String {
         switch type {
-        case SecurityEventRecord.Kind.callBlocked: "Call blocked"
-        case SecurityEventRecord.Kind.callAllowed: "Call allowed"
-        case SecurityEventRecord.Kind.smsFlagged: "Spam SMS flagged"
-        case SecurityEventRecord.Kind.callDirectoryReloaded: "Call directory refreshed"
-        case SecurityEventRecord.Kind.panicLock: "Panic lock engaged"
-        case SecurityEventRecord.Kind.vaultEdit: "Vault edited"
-        case SecurityEventRecord.Kind.wipe: "Data wiped"
-        default: type
+        case SecurityEventRecord.Kind.callBlocked: return "Blocked call"
+        case SecurityEventRecord.Kind.callAllowed: return "Allowed call"
+        case SecurityEventRecord.Kind.smsFlagged:  return "Blocked text"
+        case SecurityEventRecord.Kind.callDirectoryReloaded: return "Call directory refreshed"
+        case SecurityEventRecord.Kind.panicLock:   return "Panic lock engaged"
+        case SecurityEventRecord.Kind.vaultEdit:   return "Vault edited"
+        case SecurityEventRecord.Kind.wipe:        return "Data wiped"
+        default: return type.replacingOccurrences(of: "_", with: " ").capitalized
         }
     }
 }

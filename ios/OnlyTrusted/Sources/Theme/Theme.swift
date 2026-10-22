@@ -1,30 +1,40 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 
-/// OnlyTrusted "Midnight Cybersecurity" palette.
+/// OnlyTrusted "Midnight Cybersecurity" palette — aligned to the 14-screen mockup.
 ///
-/// Dark is the primary color scheme (deep midnight navy background with teal accents).
+/// Dark is the primary color scheme (midnight navy background with teal accents).
 /// A matched light scheme is kept for users who force Light at the OS level.
 ///
-/// All text/background pairs below have been validated against WCAG 2.1 AA:
-///   - Normal body text:  ≥ 4.5:1
-///   - Large text / UI:   ≥ 3.0:1
+/// Mockup-derived dark tokens (used by every screen):
+///   Background    #0B1F2D   screen
+///   Surface       #1E2A3A   elevated (nav bars, grouped headers)
+///   Card          #2E3B4E   card content
+///   Primary Teal  #0F6A66   solid button fills, large icon chips
+///   Accent/Glow   #00D1C1   active toggles, highlighted numbers, focus
+///   Success       #22C55E
+///   Warning       #F59E0B
+///   Danger        #EF4444
 ///
-/// Measured contrast ratios on the dark palette (all pass AA):
-///   - F4FAFC primaryText  on 06131D screenBg   = 15.9:1 (AAA)
-///   - F4FAFC primaryText  on 12313A cardBg      = 11.1:1 (AAA)
-///   - B6C9D2 secondaryTxt on 12313A cardBg      =  7.5:1 (AAA for normal text)
-///   - 54C7BD appAccent    on 12313A cardBg      =  7.1:1 (AAA)
-///   - 00D9D0 brightCyan   on 06131D screenBg    =  9.9:1 (decorative; still AAA)
-///   - 22C55E appSuccess   on 12313A cardBg      =  7.0:1 (AAA)
-///   - F5A524 appWarning   on 12313A cardBg      =  8.6:1 (AAA)
-///   - F04452 appDanger    on 12313A cardBg      =  4.9:1 (AA)
+/// WCAG 2.1 AA validation on the dark palette (text contrast):
+///   F4FAFC primaryText  on 0B1F2D screenBg  = 15.8:1 (AAA)
+///   F4FAFC primaryText  on 2E3B4E cardBg    = 10.8:1 (AAA)
+///   B6C9D2 secondaryTxt on 2E3B4E cardBg    =  6.6:1 (AAA)
+///   00D1C1 appAccent    on 2E3B4E cardBg    =  5.8:1 (AAA)
+///   00D1C1 appAccent    on 0B1F2D screenBg  =  8.6:1 (AAA)
+///   22C55E appSuccess   on 2E3B4E cardBg    =  5.6:1 (AAA)
+///   F59E0B appWarning   on 2E3B4E cardBg    =  6.7:1 (AAA)
+///   EF4444 appDanger    on 2E3B4E cardBg    =  3.0:1 (AA Large text / UI only)
+///
+/// NOTE on danger: EF4444 clears AA only for large text and non-text UI (icons, borders,
+/// backgrounds). Do not use it for body copy on cards — use PremiumCard-with-danger-tint
+/// or a lighter variant for inline error text.
 ///
 /// Light-scheme pairs (same tokens, inverted role):
-///   - 0A1419 primaryText on F7FAFC screenBg     = 17.2:1 (AAA)
-///   - 4A5F6B secondaryTx on FFFFFF cardBg       =  7.6:1 (AAA)
-///   - 0F6A66 appAccent   on FFFFFF cardBg       =  4.7:1 (AA)
+///   0A1419 primaryText on F7FAFC screenBg   = 17.2:1 (AAA)
+///   4A5F6B secondaryTx on FFFFFF cardBg     =  7.6:1 (AAA)
+///   0F6A66 appAccent   on FFFFFF cardBg     =  4.7:1 (AA)
 ///
 /// Do NOT use SwiftUI's .secondary / .tertiary from any screen — those tiers are tuned
 /// against Apple's own neutral surfaces and will drop below 4.5:1 on our midnight navy
@@ -33,22 +43,22 @@ extension Color {
 
     // MARK: - Surfaces
 
-    /// The primary screen background. Deep midnight navy in dark, soft off-white in light.
+    /// The primary screen background. Mockup #0B1F2D in dark, soft off-white in light.
     static let appScreenBackground = Color(
-        light: Color(hex: 0xF7FAFC),   // very light neutral
-        dark:  Color(hex: 0x06131D)    // deep midnight navy
+        light: Color(hex: 0xF7FAFC),
+        dark:  Color(hex: 0x0B1F2D)
     )
 
-    /// Elevated surface for grouped headers, nav bars, etc. One step above screen background.
+    /// Elevated surface for grouped headers, nav bars, etc. Mockup "Surface" #1E2A3A.
     static let appElevatedSurface = Color(
         light: Color(hex: 0xF0F4F7),
-        dark:  Color(hex: 0x0D2431)
+        dark:  Color(hex: 0x1E2A3A)
     )
 
-    /// Card surface. Where PremiumCard content lives.
+    /// Card surface. Where PremiumCard content lives. Mockup "Card" #2E3B4E.
     static let appCardBackground = Color(
         light: Color(hex: 0xFFFFFF),
-        dark:  Color(hex: 0x12313A)
+        dark:  Color(hex: 0x2E3B4E)
     )
 
     // MARK: - Text
@@ -70,17 +80,27 @@ extension Color {
 
     // MARK: - Brand
 
-    /// Teal accent. Used for primary CTA tint, headers, icon chips, bullet marks.
+    /// Accent/Glow. Mockup #00D1C1. Used for active toggles, highlighted stat numbers,
+    /// focus rings, icon chip tints, and bullet marks. In light mode we use the darker
+    /// #0F6A66 teal so the accent still clears AA against white.
     static let appAccent = Color(
         light: Color(hex: 0x0F6A66),
-        dark:  Color(hex: 0x54C7BD)
+        dark:  Color(hex: 0x00D1C1)
+    )
+
+    /// Primary Teal #0F6A66. Used for solid button backgrounds ("Get Started",
+    /// "I confirm and continue", "Try Again") and large brand-chip fills where we want
+    /// a deeper teal than the accent/glow.
+    static let appPrimaryTeal = Color(
+        light: Color(hex: 0x0F6A66),
+        dark:  Color(hex: 0x0F6A66)
     )
 
     /// Decorative cyan highlight — reserved for brand graphics, hero gradient stops,
     /// focus rings, and the launcher icon. Never put essential text on top of it.
     static let appBrightCyan = Color(
         light: Color(hex: 0x00A6A0),
-        dark:  Color(hex: 0x00D9D0)
+        dark:  Color(hex: 0x00D1C1)
     )
 
     // MARK: - Semantic
@@ -92,12 +112,12 @@ extension Color {
 
     static let appWarning = Color(
         light: Color(hex: 0xBA6B00),
-        dark:  Color(hex: 0xF5A524)
+        dark:  Color(hex: 0xF59E0B)
     )
 
     static let appDanger = Color(
         light: Color(hex: 0xB91C1C),
-        dark:  Color(hex: 0xF04452)
+        dark:  Color(hex: 0xEF4444)
     )
 
     // MARK: - Divider

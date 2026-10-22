@@ -1,52 +1,46 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
-import LocalAuthentication
+import UIKit
 
+/// Trusted Contacts list — matches mockup #5.
+/// Header "+" opens add flow. Search bar filters by name or phone. Three tab chips
+/// (All / Family / Work) show live counts. Each row has a tappable call icon,
+/// message icon, and an overflow menu (Edit / Delete). Empty state prompts the
+/// user to add their first contact.
 struct VaultScreen: View {
     @StateObject private var store = VaultStore.shared
-    @State private var revealed: RevealedContact?
-    @State private var revealError: String?
+    @State private var query: String = ""
+    @State private var selectedTab: ContactTab = .all
     @State private var showAdd = false
     @State private var editing: UUID?
+    @State private var pendingDelete: MaskedContact?
 
     var body: some View {
-        Group {
-            if store.contacts.isEmpty {
-                PremiumEmptyState(
-                    icon: "person.2.circle.fill",
-                    title: "No trusted contacts yet",
-                    message: "Start by adding yourself as the owner, then your immediate family. Everything you type is encrypted the moment you save it.",
-                    ctaTitle: "Add your first contact",
-                    ctaAction: { showAdd = true }
-                )
+        ZStack {
+            if store.contacts.isEmpty && query.isEmpty {
+                emptyState
             } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 14) {
-                        ForEach(store.contacts) { contact in
-                            ContactCard(
-                                contact: contact,
-                                onReveal: { requestReveal(contact.id) },
-                                onEdit: { editing = contact.id },
-                                onDelete: { try? store.delete(id: contact.id) }
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 32)
-                }
+                content
             }
         }
-        .background(Color.appScreenBackground.ignoresSafeArea())
-        .navigationTitle("Family vault")
+        .appBackdrop()
+        .navigationTitle("Trusted Contacts")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.appScreenBackground, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showAdd = true
                 } label: {
-                    Image(systemName: "plus.circle.fill").decorativeAccessibility()
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(Color.appScreenBackground)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.appBrightCyan))
+                        .shadow(color: Color.appBrightCyan.opacity(0.45), radius: 10, x: 0, y: 0)
+                        .decorativeAccessibility()
                 }
                 .accessibilityLabel("Add trusted contact")
                 .minimumHitTarget()
@@ -56,47 +50,188 @@ struct VaultScreen: View {
         .sheet(isPresented: $showAdd) {
             NavigationStack { VaultEditScreen(contactId: nil, store: store) }
         }
-        .sheet(item: Binding(get: { editing.map(IdentifiableUUID.init) },
-                             set: { editing = $0?.value })) { wrap in
+        .sheet(item: Binding(
+            get: { editing.map(IdentifiableUUID.init) },
+            set: { editing = $0?.value }
+        )) { wrap in
             NavigationStack { VaultEditScreen(contactId: wrap.value, store: store) }
         }
-        .sheet(item: $revealed) { data in
-            RevealedSheet(data: data)
-        }
-        .alert("Can't reveal", isPresented: Binding(get: { revealError != nil }, set: { _ in revealError = nil })) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(revealError ?? "")
+        .confirmationDialog(
+            pendingDelete.map { "Delete \($0.displayName)?" } ?? "Delete contact?",
+            isPresented: Binding(
+                get: { pendingDelete != nil },
+                set: { if !$0 { pendingDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let c = pendingDelete {
+                    try? store.delete(id: c.id)
+                }
+                pendingDelete = nil
+            }
+            Button("Cancel", role: .cancel) { pendingDelete = nil }
         }
     }
 
-    private func requestReveal(_ id: UUID) {
-        let ctx = LAContext()
-        var err: NSError?
-        let can = ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err)
-        guard can else {
-            // No biometric or PIN enrolled: reveal anyway (same semantics as Android emulator fallback).
-            attemptReveal(id)
-            return
-        }
-        ctx.evaluatePolicy(.deviceOwnerAuthentication,
-                           localizedReason: "Unlock vault to reveal contact") { ok, err in
-            Task { @MainActor in
-                if ok {
-                    attemptReveal(id)
-                } else if let err {
-                    revealError = err.localizedDescription
+    // MARK: - Sections
+
+    private var content: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 16) {
+                SearchField(text: $query)
+                TabChipRow(
+                    selected: $selectedTab,
+                    all: store.contacts.count,
+                    family: tabCount(.family),
+                    work: tabCount(.work)
+                )
+
+                let visible = filtered
+                if visible.isEmpty {
+                    PremiumCard {
+                        VStack(spacing: 10) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.title2)
+                                .foregroundStyle(Color.appTertiaryText)
+                            Text("No matches")
+                                .font(.headline)
+                                .foregroundStyle(Color.appPrimaryText)
+                            Text(query.isEmpty
+                                 ? "No contacts in this tab yet."
+                                 : "No contacts match \u{201C}\(query)\u{201D}.")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.appSecondaryText)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                } else {
+                    PremiumCard {
+                        VStack(spacing: 0) {
+                            ForEach(Array(visible.enumerated()), id: \.element.id) { idx, contact in
+                                ContactRow(
+                                    contact: contact,
+                                    onCall: { placeCall(contact) },
+                                    onMessage: { sendSMS(contact) },
+                                    onEdit: { editing = contact.id },
+                                    onDelete: { pendingDelete = contact }
+                                )
+                                if idx < visible.count - 1 {
+                                    Divider()
+                                        .background(Color.appElevatedSurface)
+                                        .padding(.leading, 60)
+                                }
+                            }
+                        }
+                    }
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
         }
     }
 
-    @MainActor
-    private func attemptReveal(_ id: UUID) {
-        do {
-            revealed = try store.reveal(id: id)
-        } catch {
-            revealError = String(describing: error)
+    private var emptyState: some View {
+        VStack(spacing: 18) {
+            Spacer(minLength: 24)
+            PremiumCard {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.appAccent.opacity(0.14))
+                            .frame(width: 88, height: 88)
+                        Image(systemName: "person.2.circle.fill")
+                            .font(.system(size: 42, weight: .light))
+                            .foregroundStyle(Color.appAccent)
+                    }
+                    .decorativeAccessibility()
+                    Text("No trusted contacts yet")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                    Text("Tap + to add your first.")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .multilineTextAlignment(.center)
+                    Button {
+                        showAdd = true
+                    } label: {
+                        Label("Add Contact", systemImage: "plus")
+                            .font(.body.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appAccent)
+                    .controlSize(.large)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
+
+    // MARK: - Filtering
+
+    private var filtered: [MaskedContact] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return store.contacts.filter { contact in
+            selectedTab.includes(relation: contact.relation) &&
+                matchesQuery(contact, query: trimmed)
+        }
+    }
+
+    private func matchesQuery(_ contact: MaskedContact, query: String) -> Bool {
+        guard !query.isEmpty else { return true }
+        if contact.displayName.range(of: query, options: .caseInsensitive) != nil { return true }
+        let digits = query.filter { $0.isNumber || $0 == "+" }
+        if !digits.isEmpty,
+           contact.normalisedNumbers.contains(where: { $0.contains(digits) }) {
+            return true
+        }
+        return contact.normalisedNumbers.contains(where: { $0.range(of: query, options: .caseInsensitive) != nil }) ||
+            contact.maskedNumbers.contains(where: { $0.range(of: query, options: .caseInsensitive) != nil })
+    }
+
+    private func tabCount(_ tab: ContactTab) -> Int {
+        store.contacts.filter { tab.includes(relation: $0.relation) }.count
+    }
+
+    // MARK: - Actions
+
+    private func placeCall(_ contact: MaskedContact) {
+        guard let raw = contact.normalisedNumbers.first,
+              let url = URL(string: "tel://\(raw)") else { return }
+        UIApplication.shared.open(url)
+    }
+
+    private func sendSMS(_ contact: MaskedContact) {
+        guard let raw = contact.normalisedNumbers.first,
+              let url = URL(string: "sms:\(raw)") else { return }
+        UIApplication.shared.open(url)
+    }
+}
+
+private enum ContactTab: Hashable {
+    case all, family, work
+
+    var title: String {
+        switch self {
+        case .all: return "All"
+        case .family: return "Family"
+        case .work: return "Work"
+        }
+    }
+
+    func includes(relation: String?) -> Bool {
+        switch self {
+        case .all: return true
+        case .family: return (relation ?? "").caseInsensitiveCompare("Family") == .orderedSame
+        case .work:
+            let r = relation ?? ""
+            return r.caseInsensitiveCompare("Work") == .orderedSame ||
+                r.caseInsensitiveCompare("Colleague") == .orderedSame
         }
     }
 }
@@ -107,233 +242,199 @@ private struct IdentifiableUUID: Identifiable {
     init(_ value: UUID) { self.value = value }
 }
 
-extension RevealedContact: Identifiable {}
+// MARK: - Search field
 
-private struct ContactCard: View {
-    let contact: MaskedContact
-    let onReveal: () -> Void
-    let onEdit: () -> Void
-    let onDelete: () -> Void
-
-    @State private var showingDeleteConfirm = false
+private struct SearchField: View {
+    @Binding var text: String
 
     var body: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 14) {
-                    AvatarChip(initials: initials, isOwner: contact.isOwner)
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text(contact.displayName)
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(Color.appPrimaryText)
-                            if contact.isOwner {
-                                Text("Owner")
-                                    .font(.caption2.weight(.bold))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(
-                                        Capsule().fill(Color.appAccent.opacity(0.14))
-                                    )
-                                    .foregroundStyle(Color.appAccent)
-                            }
-                        }
-                        if let relation = contact.relation {
-                            Text(relation)
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appSecondaryText)
-                        }
-                    }
-                    Spacer(minLength: 0)
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.appTertiaryText)
+                .decorativeAccessibility()
+            TextField("", text: $text, prompt:
+                Text("Search trusted contacts...")
+                    .foregroundColor(Color.appTertiaryText)
+            )
+            .textFieldStyle(.plain)
+            .foregroundStyle(Color.appPrimaryText)
+            .autocorrectionDisabled(true)
+            .textInputAutocapitalization(.never)
+            .submitLabel(.search)
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.appTertiaryText)
+                        .decorativeAccessibility()
                 }
-
-                if !contact.maskedNumbers.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(contact.maskedNumbers, id: \.self) { num in
-                            HStack(spacing: 10) {
-                                Image(systemName: "phone.fill")
-                                    .font(.footnote)
-                                    .foregroundStyle(Color.appTertiaryText)
-                                    .decorativeAccessibility()
-                                Text(num)
-                                    .font(.subheadline.monospaced())
-                                    .foregroundStyle(Color.appPrimaryText)
-                            }
-                        }
-                        if let email = contact.maskedEmail {
-                            HStack(spacing: 10) {
-                                Image(systemName: "envelope.fill")
-                                    .font(.footnote)
-                                    .foregroundStyle(Color.appTertiaryText)
-                                    .decorativeAccessibility()
-                                Text(email)
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.appSecondaryText)
-                            }
-                        }
-                    }
-                }
-
-                HStack(spacing: 10) {
-                    Button(action: onEdit) {
-                        Label("Edit", systemImage: "pencil")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 32)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(Color.appAccent)
-
-                    Button(action: onReveal) {
-                        Label("Reveal", systemImage: "eye.fill")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 32)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.appAccent)
-                    .accessibilityLabel("Reveal \(contact.displayName) with Face ID")
-                }
+                .accessibilityLabel("Clear search")
             }
         }
-        .contextMenu {
-            Button(role: .destructive) { showingDeleteConfirm = true } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        }
-        .confirmationDialog("Delete \(contact.displayName)?",
-                            isPresented: $showingDeleteConfirm,
-                            titleVisibility: .visible) {
-            Button("Delete", role: .destructive, action: onDelete)
-            Button("Cancel", role: .cancel) {}
-        }
-    }
-
-    private var initials: String {
-        let parts = contact.displayName.split(separator: " ")
-        let letters = parts.prefix(2).compactMap { $0.first?.uppercased() }
-        return letters.joined()
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color.appElevatedSurface)
+        )
     }
 }
 
-private struct AvatarChip: View {
-    let initials: String
-    let isOwner: Bool
+// MARK: - Tab chips
+
+private struct TabChipRow: View {
+    @Binding var selected: ContactTab
+    let all: Int
+    let family: Int
+    let work: Int
+
+    var body: some View {
+        HStack(spacing: 10) {
+            chip(.all, count: all)
+            chip(.family, count: family)
+            chip(.work, count: work)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func chip(_ tab: ContactTab, count: Int) -> some View {
+        let isSelected = selected == tab
+        return Button {
+            selected = tab
+        } label: {
+            Text("\(tab.title) (\(count))")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(isSelected ? Color.white : Color.appSecondaryText)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(isSelected ? Color.appAccent : Color.appElevatedSurface)
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(
+                            isSelected ? Color.clear : Color.appTertiaryText.opacity(0.3),
+                            lineWidth: 1
+                        )
+                )
+                .shadow(
+                    color: isSelected ? Color.appAccent.opacity(0.45) : .clear,
+                    radius: isSelected ? 10 : 0,
+                    x: 0,
+                    y: 0
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(tab.title), \(count) contacts")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+// MARK: - Contact row
+
+private struct ContactRow: View {
+    let contact: MaskedContact
+    let onCall: () -> Void
+    let onMessage: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            AvatarCircle(initial: initial)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(contact.displayName)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                        .lineLimit(1)
+                    if contact.isOwner {
+                        Text("Owner")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(Color.appAccent.opacity(0.18)))
+                            .foregroundStyle(Color.appAccent)
+                    }
+                }
+                Text(subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(subtitleIsCategory ? Color.appBrightCyan : Color.appSecondaryText)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 8)
+
+            Button(action: onCall) {
+                Image(systemName: "phone.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.appBrightCyan)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+                    .decorativeAccessibility()
+            }
+            .accessibilityLabel("Call \(contact.displayName)")
+            .disabled(contact.normalisedNumbers.isEmpty)
+            .opacity(contact.normalisedNumbers.isEmpty ? 0.4 : 1)
+
+            Button(action: onMessage) {
+                Image(systemName: "ellipsis.message.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.appBrightCyan)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+                    .decorativeAccessibility()
+            }
+            .accessibilityLabel("Message \(contact.displayName)")
+            .disabled(contact.normalisedNumbers.isEmpty)
+            .opacity(contact.normalisedNumbers.isEmpty ? 0.4 : 1)
+
+            Menu {
+                Button { onEdit() } label: { Label("Edit", systemImage: "pencil") }
+                Button(role: .destructive) { onDelete() } label: { Label("Delete", systemImage: "trash") }
+            } label: {
+                Image(systemName: "ellipsis.vertical")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Color.appBrightCyan)
+                    .frame(width: 36, height: 44)
+                    .contentShape(Rectangle())
+                    .decorativeAccessibility()
+            }
+            .accessibilityLabel("More options for \(contact.displayName)")
+        }
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+
+    private var subtitle: String {
+        if let r = contact.relation, !r.isEmpty { return r }
+        return contact.maskedNumbers.first ?? "No phone"
+    }
+
+    private var subtitleIsCategory: Bool {
+        guard let r = contact.relation?.lowercased() else { return false }
+        return ["family", "work", "medical", "other", "colleague"].contains(r)
+    }
+
+    private var initial: String {
+        contact.displayName.first.map { String($0).uppercased() } ?? "?"
+    }
+}
+
+private struct AvatarCircle: View {
+    let initial: String
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.appAccent, Color.appAccent.opacity(0.65)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            if initials.isEmpty {
-                Image(systemName: isOwner ? "person.fill" : "person")
-                    .font(.title3)
-                    .foregroundStyle(.white)
-            } else {
-                Text(initials)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-            }
+                .fill(Color.appAccent.opacity(0.18))
+            Text(initial)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.appAccent)
         }
         .frame(width: 46, height: 46)
         .decorativeAccessibility()
-    }
-}
-
-private struct RevealedSheet: View {
-    let data: RevealedContact
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 16) {
-                    PremiumCard {
-                        VStack(alignment: .leading, spacing: 14) {
-                            CardHeader(icon: "person.text.rectangle.fill", title: "Identity")
-                            LabeledRow(label: "Name", value: data.displayName)
-                            if let relation = data.relation {
-                                LabeledRow(label: "Relation", value: relation)
-                            }
-                            if data.isOwner {
-                                LabeledRow(label: "Role", value: "Phone owner")
-                            }
-                        }
-                    }
-
-                    if !data.numbers.isEmpty {
-                        PremiumCard {
-                            VStack(alignment: .leading, spacing: 14) {
-                                CardHeader(icon: "phone.fill", title: "Phone numbers")
-                                ForEach(data.numbers) { n in
-                                    LabeledRow(
-                                        label: n.label ?? "Phone",
-                                        value: n.normalisedNumber,
-                                        monospaced: true
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if let address = data.addressPlain, !address.isEmpty {
-                        PremiumCard {
-                            VStack(alignment: .leading, spacing: 10) {
-                                CardHeader(icon: "mappin.and.ellipse", title: "Address")
-                                Text(address)
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.appPrimaryText)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-
-                    if let notes = data.notesPlain, !notes.isEmpty {
-                        PremiumCard {
-                            VStack(alignment: .leading, spacing: 10) {
-                                CardHeader(icon: "note.text", title: "Notes")
-                                Text(notes)
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.appPrimaryText)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-            }
-            .background(Color.appScreenBackground.ignoresSafeArea())
-            .navigationTitle(data.displayName)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Hide") { dismiss() }
-                        .tint(Color.appAccent)
-                }
-            }
-        }
-    }
-}
-
-private struct LabeledRow: View {
-    let label: String
-    let value: String
-    var monospaced: Bool = false
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(label)
-                .font(.subheadline)
-                .foregroundStyle(Color.appSecondaryText)
-            Spacer(minLength: 12)
-            Text(value)
-                .font(monospaced ? .subheadline.monospaced() : .subheadline.weight(.medium))
-                .foregroundStyle(Color.appPrimaryText)
-                .multilineTextAlignment(.trailing)
-        }
     }
 }

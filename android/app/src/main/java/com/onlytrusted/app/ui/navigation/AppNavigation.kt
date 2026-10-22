@@ -1,18 +1,22 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,15 +38,22 @@ import com.onlytrusted.app.ui.legal.LegalScreen
 import com.onlytrusted.app.ui.notifications.NotificationsScreen
 import com.onlytrusted.app.ui.permissions.PermissionAuditScreen
 import com.onlytrusted.app.ui.posture.PostureScreen
+import com.onlytrusted.app.ui.reports.ReportsScreen
 import com.onlytrusted.app.ui.settings.SettingsScreen
 import com.onlytrusted.app.ui.shield.ShieldLogScreen
+import com.onlytrusted.app.ui.subscription.BillingSubscriptionScreen
+import com.onlytrusted.app.ui.subscription.UpgradeToPremiumScreen
+import com.onlytrusted.app.ui.theme.BrandCyanDark
+import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.PrimaryTextDark
+import com.onlytrusted.app.ui.theme.SecondaryTextDark
 import com.onlytrusted.app.ui.vault.VaultEditScreen
 import com.onlytrusted.app.ui.vault.VaultScreen
 
 sealed class Destination(val route: String, val label: String, val icon: ImageVector) {
-    data object Dashboard : Destination("dashboard", "Shield", Icons.Filled.Shield)
-    data object Vault : Destination("vault", "Family", Icons.Filled.Groups)
-    data object Events : Destination("events", "Events", Icons.Filled.History)
+    data object Dashboard : Destination("dashboard", "Home", Icons.Filled.Shield)
+    data object Vault : Destination("vault", "Contacts", Icons.Filled.Groups)
+    data object Events : Destination("events", "Log", Icons.Filled.History)
     data object BlockList : Destination("blocklist", "Blocked", Icons.Filled.Block)
     data object Settings : Destination("settings", "Settings", Icons.Filled.Settings)
     data object Permissions : Destination("permissions", "Permissions", Icons.Filled.Security)
@@ -51,6 +62,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object Legal : Destination("legal", "Legal", Icons.Filled.Security)
     data object About : Destination("about", "About", Icons.Filled.Security)
     data object Notifications : Destination("notifications", "Notifications", Icons.Filled.Security)
+    data object Reports : Destination("reports", "Reports", Icons.AutoMirrored.Filled.ShowChart)
+    data object BillingSubscription : Destination("billing_subscription", "Billing", Icons.Filled.CreditCard)
+    data object UpgradePremium : Destination("upgrade_premium", "Premium", Icons.Filled.WorkspacePremium)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -59,8 +73,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
 private val bottomBarDestinations = listOf(
     Destination.Dashboard,
     Destination.Vault,
-    Destination.Events,
     Destination.BlockList,
+    Destination.Events,
     Destination.Settings
 )
 
@@ -72,9 +86,13 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
     val showBottomBar = currentRoute in bottomBarDestinations.map { it.route }
 
     Scaffold(
+        containerColor = MidnightBackground,
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MidnightBackground,
+                    contentColor = PrimaryTextDark
+                ) {
                     bottomBarDestinations.forEach { dest ->
                         val selected = backStackEntry?.destination?.hierarchy
                             ?.any { it.route == dest.route } == true ||
@@ -94,7 +112,14 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                                 }
                             },
                             icon = { Icon(dest.icon, contentDescription = dest.label) },
-                            label = { Text(dest.label) }
+                            label = { Text(dest.label) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = BrandCyanDark,
+                                selectedTextColor = BrandCyanDark,
+                                unselectedIconColor = SecondaryTextDark,
+                                unselectedTextColor = SecondaryTextDark,
+                                indicatorColor = MidnightBackground
+                            )
                         )
                     }
                 }
@@ -110,7 +135,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                 DashboardScreen(
                     onPanic = onPanic,
                     onGoToVault = { navController.navigate(Destination.Vault.route) },
-                    onGoToSettings = { navController.navigate(Destination.Settings.route) }
+                    onGoToSettings = { navController.navigate(Destination.Settings.route) },
+                    onGoToBlockList = { navController.navigate(Destination.BlockList.route) },
+                    onGoToEvents = { navController.navigate(Destination.Events.route) }
                 )
             }
             composable(Destination.Vault.route) {
@@ -138,15 +165,31 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenShieldLog = { navController.navigate(Destination.ShieldLog.route) },
                     onOpenLegal = { navController.navigate(Destination.Legal.route) },
                     onOpenAbout = { navController.navigate(Destination.About.route) },
-                    onOpenNotifications = { navController.navigate(Destination.Notifications.route) }
+                    onOpenNotifications = { navController.navigate(Destination.Notifications.route) },
+                    onOpenReports = { navController.navigate(Destination.Reports.route) },
+                    onOpenBilling = { navController.navigate(Destination.BillingSubscription.route) },
+                    onOpenUpgrade = { navController.navigate(Destination.UpgradePremium.route) }
                 )
+            }
+            composable(Destination.Reports.route) {
+                ReportsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Destination.BillingSubscription.route) {
+                BillingSubscriptionScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Destination.UpgradePremium.route) {
+                UpgradeToPremiumScreen(onBack = { navController.popBackStack() })
             }
             composable(Destination.Permissions.route) { PermissionAuditScreen() }
             composable(Destination.Posture.route) { PostureScreen() }
             composable(Destination.ShieldLog.route) { ShieldLogScreen() }
-            composable(Destination.Legal.route) { LegalScreen() }
+            composable(Destination.Legal.route) {
+                LegalScreen(onBack = { navController.popBackStack() })
+            }
             composable(Destination.About.route) { AboutScreen() }
-            composable(Destination.Notifications.route) { NotificationsScreen() }
+            composable(Destination.Notifications.route) {
+                NotificationsScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }

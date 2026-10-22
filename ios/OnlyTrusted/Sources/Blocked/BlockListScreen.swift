@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 import CallKit
@@ -70,15 +70,16 @@ struct BlockListScreen: View {
                 } else {
                     blockedListCard
                 }
-                activationCard
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 32)
         }
-        .background(Color.appScreenBackground.ignoresSafeArea())
-        .navigationTitle("Blocked")
+        .appBackdrop()
+        .navigationTitle("Blocking & Unknown")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.appScreenBackground, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showAdd = true } label: {
@@ -182,30 +183,6 @@ struct BlockListScreen: View {
         }
     }
 
-    private var activationCard: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 14) {
-                CardHeader(icon: "gearshape.fill", title: "One-time iOS activation", tint: Color.appWarning)
-                Text("iOS requires each user to turn on third-party call blocking and SMS filtering in the Settings app. We cannot flip these switches for you. The links below open the right page.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.appSecondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                VStack(spacing: 10) {
-                    SystemLinkRow(icon: "phone.badge.waveform", label: "Enable blocking in Phone settings") {
-                        openURL("App-prefs:Phone")
-                    }
-                    SystemLinkRow(icon: "message.badge", label: "Enable SMS filter in Messages settings") {
-                        openURL("App-prefs:MESSAGES")
-                    }
-                }
-            }
-        }
-    }
-
-    private func openURL(_ raw: String) {
-        guard let url = URL(string: raw) else { return }
-        UIApplication.shared.open(url)
-    }
 }
 
 // MARK: - Row
@@ -322,7 +299,7 @@ private struct AddBlockedSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color.appScreenBackground.ignoresSafeArea())
+            .appBackdrop()
             .navigationTitle("Block a number")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

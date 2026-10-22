@@ -1,58 +1,94 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.dashboard
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CallEnd
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.onlytrusted.app.OnlyTrustedApp
+import com.onlytrusted.app.R
+import com.onlytrusted.app.ui.theme.BrandAccentDark
+import com.onlytrusted.app.ui.theme.BrandCyanDark
+import com.onlytrusted.app.ui.theme.BrandPrimaryTeal
+import com.onlytrusted.app.ui.theme.DangerDark
+import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.MidnightCard
+import com.onlytrusted.app.ui.theme.MidnightElevated
+import com.onlytrusted.app.ui.theme.PrimaryTextDark
+import com.onlytrusted.app.ui.theme.SecondaryTextDark
+import com.onlytrusted.app.ui.theme.TertiaryTextDark
+import com.onlytrusted.app.ui.theme.WarningDark
+import java.util.Calendar
 
 @Composable
 fun DashboardScreen(
     onPanic: () -> Unit = {},
     onGoToVault: () -> Unit = {},
-    onGoToSettings: () -> Unit = {}
+    onGoToSettings: () -> Unit = {},
+    onGoToBlockList: () -> Unit = {},
+    onGoToEvents: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -61,6 +97,7 @@ fun DashboardScreen(
     })
     val state by vm.state.collectAsStateWithLifecycle()
     val runtime by vm.runtimeState.collectAsStateWithLifecycle()
+    var showHonestLimitsSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         vm.refreshRuntime()
@@ -70,436 +107,515 @@ fun DashboardScreen(
         vm.setHasAnyTrustedContact(state.trustedContactCount > 0)
     }
 
-    val steps = buildList {
-        add(QuickStep("Add yourself + family to the vault", runtime.hasAnyTrustedContact, onGoToVault))
-        add(QuickStep(
-            "Make OnlyTrusted the default caller-ID & spam app",
-            runtime.isDefaultCallScreener
-        ) {
-            val intent = Intent("android.settings.MANAGE_DEFAULT_APPS_SETTINGS")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            runCatching { context.startActivity(intent) }
-        })
-        add(QuickStep("Turn on Trusted-only calls", runtime.trustedOnlyCalls) {
-            vm.setTrustedOnlyCalls(true)
-        })
-        add(QuickStep("Turn on App Lock", runtime.appLockEnabled, onGoToSettings))
-    }
-    val setupDone = steps.all { it.done }
+    val protectionActive = state.trustedContactCount > 0 && runtime.trustedOnlyCalls
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MidnightBackground)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 18.dp)
+            .padding(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        HeaderCard(
-            setupDone = setupDone,
-            auditOk = runtime.auditChainIntact,
-            onPanic = {
-                vm.triggerPanicLock(context)
-                onPanic()
-            }
+        CinematicHeader_Unused(name = null, onSettings = onGoToSettings)
+        ProtectionActiveCard(isActive = protectionActive)
+        StatsRow(
+            trusted = state.trustedContactCount,
+            blockedToday = state.blockedCalls24h,
+            blockedWeek = state.flaggedSms24h
         )
-
-        if (!setupDone) {
-            QuickSetupCard(steps = steps)
-        }
-
-        TrustedModeCard(
-            calls = runtime.trustedOnlyCalls,
-            sms = runtime.trustedOnlySms,
-            contactCount = state.trustedContactCount,
-            onToggleCalls = vm::setTrustedOnlyCalls,
-            onToggleSms = vm::setTrustedOnlySms,
-            onManageVault = onGoToVault
+        QuickActionsSection(
+            onAddContact = onGoToVault,
+            onBlockNumber = onGoToBlockList,
+            onViewLog = onGoToEvents
         )
+        HonestLimitsCallout(onTap = { showHonestLimitsSheet = true })
 
-        ShieldOverlayCard(
-            canDraw = runtime.canDrawOverlays,
-            ownerTag = runtime.ownerTag,
-            onStart = {
-                if (vm.startShield()) {
-                    // overlay started; no additional UI feedback needed . it's visible on screen
+        // --- Android-only advanced protections (preserved) ---
+        androidx.compose.material3.Card { TrustedModeContent(vm, state, runtime, onGoToVault) }
+        androidx.compose.material3.Card { SensorOwnershipContent(context, runtime) }
+    }
+
+    if (showHonestLimitsSheet) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showHonestLimitsSheet = false },
+            title = { Text("Honest Limits", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HonestLimitBullet("Monitor other apps' microphone or camera use.")
+                    HonestLimitBullet("Stop recordings made on another device.")
+                    HonestLimitBullet("Full screenshot blocking across the whole phone needs a hardened OS or root.")
+                    HonestLimitBullet("Prevent carrier or operating-system tracking.")
                 }
             },
-            onStop = vm::stopShield,
-            onRequestPermission = vm::openOverlayPermission,
-            onConfigureTag = onGoToSettings
+            confirmButton = {
+                TextButton(onClick = { showHonestLimitsSheet = false }) {
+                    Text("Got it", color = BrandAccentDark)
+                }
+            },
+            containerColor = MidnightCard
         )
-
-        SensorOwnershipCard(
-            micMuted = runtime.sensorPrivacy.micMuted,
-            cameraMuted = runtime.sensorPrivacy.cameraMuted,
-            onOpenPrivacy = {
-                val intent = Intent(Settings.ACTION_PRIVACY_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                runCatching { context.startActivity(intent) }
-            }
-        )
-
-        PermissionHoldersCard(
-            onInspect = { pkg ->
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    .setData(android.net.Uri.parse("package:$pkg"))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                runCatching { context.startActivity(intent) }
-            }
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            MiniStat(Modifier.weight(1f), Icons.Filled.Mic, state.micEvents24h, "Mic uses")
-            MiniStat(Modifier.weight(1f), Icons.Filled.CameraAlt, state.cameraEvents24h, "Camera uses")
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            MiniStat(Modifier.weight(1f), Icons.Filled.Block, state.blockedCalls24h, "Calls blocked")
-            MiniStat(Modifier.weight(1f), Icons.Filled.Sms, state.flaggedSms24h, "Spam SMS")
-        }
     }
 }
 
+// MARK: - Cinematic header (lakescape backdrop + wordmark + settings + greeting)
+
 @Composable
-private fun HeaderCard(
-    setupDone: Boolean,
-    auditOk: Boolean?,
-    onPanic: () -> Unit
-) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+private fun CinematicHeader_Unused(name: String?, onSettings: () -> Unit) {
+    val headerHeight = 240.dp
+    val greeting = remember {
+        val h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when {
+            h < 12 -> "Good morning"
+            h < 18 -> "Good afternoon"
+            else -> "Good evening"
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(headerHeight)
+            .clip(RoundedCornerShape(24.dp))
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Shield, contentDescription = null)
-                Text(
-                    if (setupDone) "You're protected" else "Finish setup to be protected",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
+        // Lakescape backdrop (reuse SplashHero PNG — anchor top so baked wordmark stays
+        // off-screen below the clipped frame; dark gradient overlay preserves greeting
+        // legibility.)
+        Image(
+            painter = painterResource(id = R.drawable.splash_hero),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MidnightBackground.copy(alpha = 0.35f),
+                            MidnightBackground.copy(alpha = 0.70f),
+                            MidnightBackground
+                        )
+                    )
                 )
+        )
+
+        // Top row: wordmark + settings
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val wordmark = buildAnnotatedString {
+                withStyle(SpanStyle(color = Color.White)) { append("Only") }
+                withStyle(SpanStyle(color = BrandCyanDark)) { append("Trusted") }
             }
             Text(
-                if (setupDone)
-                    "Mic and camera belong to you. Trusted-only is on. Audit chain " +
-                        (if (auditOk == false) "tampered." else "intact.")
-                else "Complete the Quick Setup below to switch on the full protections.",
-                style = MaterialTheme.typography.bodyMedium
+                text = wordmark,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
             )
-            Button(
-                onClick = onPanic,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
-                modifier = Modifier.fillMaxWidth()
+            Spacer(Modifier.weight(1f))
+            IconButton(
+                onClick = onSettings,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, BrandCyanDark.copy(alpha = 0.4f), CircleShape)
             ) {
-                Icon(Icons.Filled.Lock, contentDescription = null)
-                Text("Panic lock", modifier = Modifier.padding(start = 8.dp))
+                Icon(
+                    Icons.Filled.Settings,
+                    contentDescription = "Settings",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        // Greeting anchored bottom-left
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 16.dp, bottom = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                "$greeting,",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    name ?: "Welcome",
+                    color = BrandCyanDark,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("👋", fontSize = 22.sp)
             }
         }
     }
 }
 
-private data class QuickStep(
-    val label: String,
-    val done: Boolean,
-    val action: () -> Unit
-)
+// MARK: - Protection active card (previous version)
 
 @Composable
-private fun QuickSetupCard(steps: List<QuickStep>) {
-    Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Quick setup", style = MaterialTheme.typography.titleLarge)
-            steps.forEach { step ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (step.done) Icons.Filled.CheckCircle
-                            else Icons.Filled.RadioButtonUnchecked,
-                        contentDescription = null,
-                        tint = if (step.done) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline
+private fun ProtectionActiveCard(isActive: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MidnightElevated)
+            .border(
+                1.dp,
+                BrandCyanDark.copy(alpha = if (isActive) 0.4f else 0.15f),
+                RoundedCornerShape(20.dp)
+            )
+            .padding(18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Neon shield badge — thick glowing cyan ring with heavy bloom + bright white
+        // shield in the center. Previous version used a thin ring; this is the "neon" look.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(86.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(86.dp)
+                    .shadow(
+                        elevation = 14.dp,
+                        shape = CircleShape,
+                        ambientColor = BrandCyanDark,
+                        spotColor = BrandCyanDark
                     )
-                    Text(
-                        step.label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 12.dp).weight(1f)
+                    .border(
+                        4.dp,
+                        BrandCyanDark.copy(alpha = if (isActive) 1f else 0.35f),
+                        CircleShape
                     )
-                    if (!step.done) {
-                        TextButton(onClick = step.action) {
-                            Text("Do it")
-                            Icon(Icons.Filled.ChevronRight, contentDescription = null)
-                        }
-                    }
-                }
+            )
+            Icon(
+                imageVector = Icons.Filled.GppGood,
+                contentDescription = "Protection shield",
+                tint = Color.White.copy(alpha = 0.92f),
+                modifier = Modifier
+                    .size(52.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = CircleShape,
+                        ambientColor = BrandCyanDark,
+                        spotColor = BrandCyanDark
+                    )
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                if (isActive) "Protection is active" else "Setup needed",
+                color = BrandCyanDark,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                if (isActive) "Only trusted contacts can reach you."
+                else "Add trusted contacts to begin.",
+                color = SecondaryTextDark,
+                fontSize = 14.sp
+            )
+        }
+
+        Icon(
+            Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = TertiaryTextDark,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+// MARK: - 3 stat tiles
+
+@Composable
+private fun StatsRow(trusted: Int, blockedToday: Int, blockedWeek: Int) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        StatTile(Modifier.weight(1f), Icons.Filled.Groups, BrandAccentDark, trusted, "Trusted\nContacts")
+        StatTile(Modifier.weight(1f), Icons.Filled.Block, DangerDark, blockedToday, "Blocked\nToday")
+        StatTile(Modifier.weight(1f), Icons.AutoMirrored.Filled.ShowChart, BrandCyanDark, blockedWeek, "Blocked\nThis Week")
+    }
+}
+
+@Composable
+private fun StatTile(modifier: Modifier, icon: ImageVector, tint: Color, value: Int, label: String) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MidnightElevated)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.Top) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(tint.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
+            ) {
+                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(15.dp))
             }
+            Spacer(Modifier.weight(1f))
+            Text(
+                value.toString(),
+                color = tint,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(label, color = SecondaryTextDark, fontSize = 12.sp)
+    }
+}
+
+// MARK: - Quick actions
+
+@Composable
+private fun QuickActionsSection(
+    onAddContact: () -> Unit,
+    onBlockNumber: () -> Unit,
+    onViewLog: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Quick Actions",
+                color = PrimaryTextDark,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick = { }, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                Text("See All", color = BrandAccentDark, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.width(4.dp))
+                Icon(
+                    Icons.Outlined.ChevronRight,
+                    contentDescription = null,
+                    tint = BrandAccentDark,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            QuickActionCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Filled.PersonAdd,
+                title = "Add Contact",
+                subtitle = "Add to trusted list",
+                tint = BrandAccentDark,
+                onClick = onAddContact
+            )
+            QuickActionCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Filled.CallEnd,
+                title = "Block Number",
+                subtitle = "Block unwanted calls & messages",
+                tint = DangerDark,
+                onClick = onBlockNumber
+            )
+            QuickActionCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Filled.Description,
+                title = "View Log",
+                subtitle = "See recent blocked activity",
+                tint = BrandCyanDark,
+                onClick = onViewLog
+            )
         }
     }
 }
 
 @Composable
-private fun TrustedModeCard(
-    calls: Boolean,
-    sms: Boolean,
-    contactCount: Int,
-    onToggleCalls: (Boolean) -> Unit,
-    onToggleSms: (Boolean) -> Unit,
+private fun QuickActionCard(
+    modifier: Modifier,
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    tint: Color,
+    onClick: () -> Unit
+) {
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = MidnightElevated,
+        modifier = modifier.heightIn(min = 150.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(46.dp)
+                    .background(tint.copy(alpha = 0.18f), RoundedCornerShape(12.dp))
+            ) {
+                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
+            }
+            Text(
+                title,
+                color = PrimaryTextDark,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                subtitle,
+                color = SecondaryTextDark,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
+        }
+    }
+}
+
+// MARK: - Honest Limits callout (restored)
+
+@Composable
+private fun HonestLimitsCallout(onTap: () -> Unit) {
+    androidx.compose.material3.Surface(
+        onClick = onTap,
+        shape = RoundedCornerShape(18.dp),
+        color = WarningDark.copy(alpha = 0.08f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, WarningDark.copy(alpha = 0.5f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(WarningDark.copy(alpha = 0.18f), RoundedCornerShape(12.dp))
+            ) {
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = WarningDark, modifier = Modifier.size(22.dp))
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Honest Limits", color = WarningDark, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "This app cannot monitor other apps' microphone or camera use. Tap to see all platform limits.",
+                    color = SecondaryTextDark,
+                    fontSize = 13.sp
+                )
+            }
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = WarningDark.copy(alpha = 0.7f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun HonestLimitBullet(text: String) {
+    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(
+            modifier = Modifier
+                .padding(top = 6.dp)
+                .size(5.dp)
+                .background(WarningDark, CircleShape)
+        )
+        Text(text, color = PrimaryTextDark, fontSize = 13.sp, lineHeight = 18.sp)
+    }
+}
+
+// MARK: - Android-only extras (preserved from previous dashboard)
+
+@Composable
+private fun TrustedModeContent(
+    vm: DashboardViewModel,
+    state: DashboardState,
+    runtime: DashboardViewModel.RuntimeState,
     onManageVault: () -> Unit
 ) {
-    Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Groups, contentDescription = null)
-                Text(
-                    "Trusted-only mode",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp).weight(1f)
-                )
-                TextButton(onClick = onManageVault) { Text("Vault →") }
-            }
-            Text("$contactCount trusted contact(s).", style = MaterialTheme.typography.bodyMedium)
-            SwitchRow("Silence calls not in vault", calls, onToggleCalls)
-            SwitchRow("Flag SMS not in vault", sms, onToggleSms)
-            if (contactCount == 0) {
-                Text(
-                    "Add family first . turning this on with an empty vault will silence everyone.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Groups, contentDescription = null, tint = BrandAccentDark)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "Trusted-only mode",
+                color = PrimaryTextDark,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = onManageVault) { Text("Vault →", color = BrandAccentDark) }
         }
+        Text("${state.trustedContactCount} trusted contact(s).", color = SecondaryTextDark, fontSize = 13.sp)
+        SwitchRow("Silence calls not in vault", runtime.trustedOnlyCalls, vm::setTrustedOnlyCalls)
+        SwitchRow("Flag SMS not in vault", runtime.trustedOnlySms, vm::setTrustedOnlySms)
     }
 }
 
 @Composable
 private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Switch(checked = checked, onCheckedChange = onChange)
+        Text(label, color = PrimaryTextDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        androidx.compose.material3.Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 
 @Composable
-private fun SensorOwnershipCard(
-    micMuted: Boolean?,
-    cameraMuted: Boolean?,
-    onOpenPrivacy: () -> Unit
+private fun SensorOwnershipContent(
+    context: android.content.Context,
+    runtime: DashboardViewModel.RuntimeState
 ) {
-    Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Verified, contentDescription = null)
-                Text(
-                    "Mic & camera ownership",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            SensorRow("Mic", micMuted)
-            SensorRow("Camera", cameraMuted)
-            TextButton(onClick = onOpenPrivacy) {
-                Text("Open system Privacy settings")
-                Icon(Icons.Filled.ChevronRight, contentDescription = null)
-            }
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Verified, contentDescription = null, tint = BrandAccentDark)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "Mic & camera ownership",
+                color = PrimaryTextDark,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        SensorStatus("Mic", runtime.sensorPrivacy.micMuted)
+        SensorStatus("Camera", runtime.sensorPrivacy.cameraMuted)
+        TextButton(onClick = {
+            val intent = Intent(Settings.ACTION_PRIVACY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { context.startActivity(intent) }
+        }) {
+            Text("Open system Privacy settings", color = BrandAccentDark)
+            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = BrandAccentDark)
         }
     }
 }
 
 @Composable
-private fun SensorRow(label: String, muted: Boolean?) {
+private fun SensorStatus(label: String, muted: Boolean?) {
     val (text, tint) = when (muted) {
-        true -> "muted . hardware off" to MaterialTheme.colorScheme.primary
-        false -> "available to granted apps" to MaterialTheme.colorScheme.outline
-        null -> "state unknown" to MaterialTheme.colorScheme.outline
+        true -> "muted — hardware off" to BrandAccentDark
+        false -> "available to granted apps" to SecondaryTextDark
+        null -> "state unknown" to SecondaryTextDark
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = tint)
-        Text("$label: $text",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(start = 8.dp))
-    }
-}
-
-@Composable
-private fun ShieldOverlayCard(
-    canDraw: Boolean,
-    ownerTag: String,
-    onStart: () -> Unit,
-    onStop: () -> Unit,
-    onRequestPermission: () -> Unit,
-    onConfigureTag: () -> Unit
-) {
-    Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Shield, contentDescription = null)
-                Text(
-                    "Shield watermark",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            Text(
-                "Paints a diagonal watermark across the whole screen so any screenshot or " +
-                    "screen recording someone takes while this is on carries your tag and a " +
-                    "unique session code. Match the code to the Shield log if a leak appears.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            when {
-                !canDraw -> {
-                    Text(
-                        "Allow OnlyTrusted to draw over other apps so the watermark can appear " +
-                            "on top of your video-call or messaging app.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Button(onClick = onRequestPermission, modifier = Modifier.fillMaxWidth()) {
-                        Text("Grant overlay permission")
-                    }
-                }
-                ownerTag.isBlank() -> {
-                    Text(
-                        "Set an owner tag (your initials or a nickname) so you can tell your " +
-                            "sessions apart from everyone else's.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Button(onClick = onConfigureTag, modifier = Modifier.fillMaxWidth()) {
-                        Text("Set owner tag in Settings")
-                    }
-                }
-                else -> {
-                    Text(
-                        "Tag: $ownerTag",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = onStart, modifier = Modifier.weight(1f)) {
-                            Text("Start Shield")
-                        }
-                        TextButton(onClick = onStop, modifier = Modifier.weight(1f)) {
-                            Text("Stop")
-                        }
-                    }
-                    Text(
-                        "Tip: this app cannot encrypt a cellular call . carriers own that layer. " +
-                            "For end-to-end encrypted voice/video, use Signal or WhatsApp, then " +
-                            "turn Shield on so the screen itself is still watermarked.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MiniStat(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    value: Int,
-    label: String
-) {
-    Card(modifier = modifier) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(icon, contentDescription = null)
-            Text(
-                value.toString(),
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(label, style = MaterialTheme.typography.bodyMedium, color = Color.Unspecified)
-        }
-    }
-}
-
-@androidx.compose.runtime.Composable
-private fun PermissionHoldersCard(onInspect: (String) -> Unit) {
-    val ctx = androidx.compose.ui.platform.LocalContext.current
-    val snapshot = androidx.compose.runtime.remember {
-        androidx.compose.runtime.mutableStateOf<com.onlytrusted.app.privacy.MicCameraHolders.Snapshot?>(null)
-    }
-    val expanded = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        snapshot.value = com.onlytrusted.app.privacy.MicCameraHolders.read(ctx)
-    }
-    val data = snapshot.value ?: return
-
-    androidx.compose.material3.Card {
-        androidx.compose.foundation.layout.Column(
-            modifier = androidx.compose.ui.Modifier.padding(16.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)
-        ) {
-            androidx.compose.foundation.layout.Row(
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-            ) {
-                androidx.compose.material3.Icon(
-                    androidx.compose.material.icons.Icons.Filled.Shield,
-                    contentDescription = null
-                )
-                androidx.compose.material3.Text(
-                    "Apps that can use mic / camera",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-                    modifier = androidx.compose.ui.Modifier
-                        .padding(start = 8.dp)
-                        .weight(1f)
-                )
-                androidx.compose.material3.TextButton(onClick = { expanded.value = !expanded.value }) {
-                    androidx.compose.material3.Text(if (expanded.value) "Hide" else "Show all")
-                }
-            }
-            androidx.compose.material3.Text(
-                "Mic: ${data.micCount} app(s)   •   Camera: ${data.cameraCount} app(s)",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-            )
-            if (expanded.value) {
-                data.holders.take(50).forEach { h ->
-                    androidx.compose.material3.TextButton(
-                        onClick = { onInspect(h.packageName) },
-                        modifier = androidx.compose.ui.Modifier.fillMaxWidth()
-                    ) {
-                        androidx.compose.foundation.layout.Column(
-                            modifier = androidx.compose.ui.Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp)
-                        ) {
-                            androidx.compose.material3.Text(
-                                h.label,
-                                style = androidx.compose.material3.MaterialTheme.typography.titleLarge
-                            )
-                            val badges = buildString {
-                                if (h.hasMic) append("Mic ")
-                                if (h.hasCamera) append("Camera ")
-                            }.trim()
-                            androidx.compose.material3.Text(
-                                badges + "  ·  " + h.packageName,
-                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-                if (data.holders.size > 50) {
-                    androidx.compose.material3.Text(
-                        "Showing first 50 of ${data.holders.size}.",
-                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
+        Icon(Icons.Filled.Shield, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(8.dp))
+        Text("$label: $text", color = PrimaryTextDark, fontSize = 13.sp)
     }
 }

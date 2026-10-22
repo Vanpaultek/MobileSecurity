@@ -1,279 +1,463 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 
 struct MainTabs: View {
     @EnvironmentObject private var gate: AppGate
+    @State private var selectedTab: Tab = .home
+
+    enum Tab: Hashable { case home, contacts, blocked, log, settings }
 
     var body: some View {
-        TabView {
-            NavigationStack { DashboardScreen() }
-                .tabItem { Label("Shield", systemImage: "shield.lefthalf.filled") }
+        TabView(selection: $selectedTab) {
+            NavigationStack {
+                DashboardScreen(onNavigate: { selectedTab = $0 })
+            }
+            .tabItem { Label("Home", systemImage: "house.fill") }
+            .tag(Tab.home)
 
             NavigationStack { VaultScreen() }
-                .tabItem { Label("Family", systemImage: "person.2.fill") }
-
-            NavigationStack { EventsScreen() }
-                .tabItem { Label("Events", systemImage: "clock.arrow.circlepath") }
+                .tabItem { Label("Contacts", systemImage: "person.2.fill") }
+                .tag(Tab.contacts)
 
             NavigationStack { BlockListScreen() }
                 .tabItem { Label("Blocked", systemImage: "nosign") }
+                .tag(Tab.blocked)
+
+            NavigationStack { EventsScreen() }
+                .tabItem { Label("Log", systemImage: "doc.text.fill") }
+                .tag(Tab.log)
 
             NavigationStack { SettingsScreen() }
                 .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                .tag(Tab.settings)
         }
         .tint(Color.appAccent)
+        .toolbarBackground(Color.appScreenBackground, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
     }
 }
 
+// MARK: - Dashboard (Home tab)
+
 struct DashboardScreen: View {
+    let onNavigate: (MainTabs.Tab) -> Void
+
     @EnvironmentObject private var gate: AppGate
     @StateObject private var vault = VaultStore.shared
+    @State private var blockedToday: Int = 0
+    @State private var blockedWeek: Int = 0
+    @State private var showHonestLimitsSheet = false
 
-    private var setupProgress: Double {
-        let total = 2.0
-        var done = 0.0
-        if !vault.contacts.isEmpty { done += 1 }
-        if gate.appLockEnabled { done += 1 }
-        return done / total
-    }
+    private var protectionActive: Bool { !vault.contacts.isEmpty }
+
+    // Mockup target shows "12 / 8 / 42" populated numbers. These fall back to zero when
+    // there is no live data, so the empty-state still renders cleanly.
+    private var trustedCount: Int { vault.contacts.count }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 20) {
-                HeroCard(
-                    percent: Int(setupProgress * 100),
-                    allDone: setupProgress >= 1.0,
-                    onPanic: { gate.panic() }
+            VStack(alignment: .leading, spacing: 18) {
+                CinematicHeader(
+                    name: nil,
+                    onSettings: { onNavigate(.settings) }
                 )
-
-                if setupProgress < 1.0 {
-                    QuickSetupCard(
-                        hasVaultEntry: !vault.contacts.isEmpty,
-                        appLockOn: gate.appLockEnabled
-                    )
-                }
-
-                MicCameraCard()
-                HonestLimitsCard()
+                ProtectionActiveCard(isActive: protectionActive)
+                statsRow
+                quickActionsSection
+                HonestLimitsCallout(onTap: { showHonestLimitsSheet = true })
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 32)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 24)
         }
         .background(Color.appScreenBackground.ignoresSafeArea())
-        .navigationTitle("Shield")
-        .navigationBarTitleDisplayMode(.inline)
-        .task { await vault.reload() }
+        .navigationBarHidden(true)
+        .task {
+            await vault.reload()
+            refreshStats()
+        }
+        .sheet(isPresented: $showHonestLimitsSheet) {
+            NavigationStack {
+                HonestLimitsSheet()
+            }
+        }
+    }
+
+    private var statsRow: some View {
+        HStack(spacing: 10) {
+            StatTile(icon: "person.2.fill",
+                     tint: Color.appAccent,
+                     value: trustedCount,
+                     label: "Trusted\nContacts")
+            StatTile(icon: "nosign",
+                     tint: Color.appDanger,
+                     value: blockedToday,
+                     label: "Blocked\nToday")
+            StatTile(icon: "chart.bar.fill",
+                     tint: Color.appBrightCyan,
+                     value: blockedWeek,
+                     label: "Blocked\nThis Week")
+        }
+    }
+
+    private var quickActionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Quick Actions")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.appPrimaryText)
+
+            HStack(spacing: 10) {
+                QuickActionCard(
+                    icon: "person.badge.plus.fill",
+                    title: "Add Contact",
+                    subtitle: "Add to trusted list",
+                    tint: Color.appAccent,
+                    action: { onNavigate(.contacts) }
+                )
+                QuickActionCard(
+                    icon: "phone.down.fill",
+                    title: "Block Number",
+                    subtitle: "Block unwanted calls & messages",
+                    tint: Color.appDanger,
+                    action: { onNavigate(.blocked) }
+                )
+                QuickActionCard(
+                    icon: "doc.text.fill",
+                    title: "View Log",
+                    subtitle: "See recent blocked activity",
+                    tint: Color.appBrightCyan,
+                    action: { onNavigate(.log) }
+                )
+            }
+        }
+    }
+
+    private func refreshStats() {
+        let all = BlockListStore.shared.allRecent()
+        let cal = Calendar.current
+        let startOfToday = cal.startOfDay(for: Date())
+        let startOfWeek = cal.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
+        blockedToday = all.filter { $0.addedAt >= startOfToday }.count
+        blockedWeek  = all.filter { $0.addedAt >= startOfWeek }.count
     }
 }
 
-// MARK: - Hero gradient card
+// MARK: - Cinematic header (lakescape backdrop + wordmark + settings + greeting)
 
-private struct HeroCard: View {
-    let percent: Int
-    let allDone: Bool
-    let onPanic: () -> Void
+private struct CinematicHeader: View {
+    let name: String?
+    let onSettings: () -> Void
+
+    private var timeOfDay: String {
+        let h = Calendar.current.component(.hour, from: Date())
+        if h < 12 { return "Good morning" }
+        if h < 18 { return "Good afternoon" }
+        return "Good evening"
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            // Status + big percent
+        ZStack(alignment: .topLeading) {
+            // Lakescape backdrop (reuse SplashHero asset). The SplashHero PNG has the
+            // "OnlyTrusted" wordmark + tagline baked into its middle band, so we scale
+            // the image larger than the header frame and anchor to the TOP so only the
+            // shield + mountain-ring section shows — the baked wordmark lives off-screen
+            // below our clipped frame. A heavier darker gradient on top preserves text
+            // legibility for the native greeting block.
+            GeometryReader { proxy in
+                Image("SplashHero")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: proxy.size.width * 1.4,
+                           height: proxy.size.width * 1.4 * (1672.0 / 941.0),
+                           alignment: .top)
+                    .offset(x: -proxy.size.width * 0.2, y: -proxy.size.height * 0.12)
+                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                    .clipped()
+                    .overlay {
+                        LinearGradient(
+                            colors: [
+                                Color.appScreenBackground.opacity(0.12),
+                                Color.appScreenBackground.opacity(0.35),
+                                Color.appScreenBackground.opacity(0.95)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+            }
+            .frame(height: 240)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+            // Top row: wordmark + settings gear
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(allDone ? "You're protected" : "Finish setup")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-                    Text(allDone
-                         ? "Trusted-only is on. Audit chain intact."
-                         : "Complete the steps below to switch on full protection.")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.white.opacity(0.85))
-                        .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 0) {
+                    Text("Only").foregroundStyle(.white)
+                    Text("Trusted").foregroundStyle(Color.appAccent)
                 }
-                Spacer(minLength: 12)
-                ProgressRing(percent: percent)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+
+                Spacer()
+
+                Button(action: onSettings) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color.white)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            Circle()
+                                .fill(Color.white.opacity(0.08))
+                                .overlay(Circle().stroke(Color.appBrightCyan.opacity(0.4), lineWidth: 1))
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+
+            // Greeting block anchored to bottom-left of the header area
+            VStack(alignment: .leading, spacing: 2) {
+                Spacer()
+                Text("\(timeOfDay),")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                HStack(spacing: 8) {
+                    Text(name ?? "Welcome")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.appAccent)
+                    Text("👋")
+                        .font(.system(size: 24))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 240, alignment: .bottomLeading)
+        }
+        .frame(height: 240)
+    }
+}
+
+// MARK: - Protection active card
+
+private struct ProtectionActiveCard: View {
+    let isActive: Bool
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // Neon shield badge — thick glowing cyan ring with heavy bloom + bright white
+            // shield in the center. Previous version used a thin ring with low alpha glow;
+            // this matches the "neon" reference.
+            ZStack {
+                Circle()
+                    .stroke(Color.appBrightCyan.opacity(isActive ? 1.0 : 0.35), lineWidth: 4)
+                    .frame(width: 86, height: 86)
+                    .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.9 : 0),
+                            radius: 14, x: 0, y: 0)
+                    .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.55 : 0),
+                            radius: 28, x: 0, y: 0)
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 44, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .shadow(color: Color.appBrightCyan.opacity(0.6), radius: 8, x: 0, y: 0)
+                    .accessibilityLabel("Protection shield")
             }
 
-            Button(role: .destructive, action: onPanic) {
-                Label("Panic lock", systemImage: "lock.fill")
-                    .font(.body.weight(.semibold))
-                    .frame(maxWidth: .infinity, minHeight: 36)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isActive ? "Protection is active" : "Setup needed")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.appAccent)
+                Text(isActive
+                     ? "Only trusted contacts can reach you."
+                     : "Add trusted contacts to begin.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.white.opacity(0.18))
-            .foregroundStyle(.white)
-            .controlSize(.large)
-            .accessibilityLabel("Panic lock the app")
+
+            Spacer(minLength: 0)
+
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(Color.appTertiaryText)
         }
-        .padding(24)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color.appAccent, Color.appAccent.opacity(0.75)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color.appElevatedSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.appAccent.opacity(isActive ? 0.4 : 0.15), lineWidth: 1)
                 )
+                .shadow(color: Color.appAccent.opacity(isActive ? 0.2 : 0), radius: 18, x: 0, y: 0)
         )
     }
 }
 
-private struct ProgressRing: View {
-    let percent: Int
-    private let size: CGFloat = 76
+// MARK: - Stat tile (icon chip + number + label, previous version)
 
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.white.opacity(0.25), lineWidth: 6)
-            Circle()
-                .trim(from: 0, to: Double(percent) / 100)
-                .stroke(Color.white, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-            VStack(spacing: 0) {
-                Text("\(percent)")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.white)
-                Text("%")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color.white.opacity(0.85))
-            }
-        }
-        .frame(width: size, height: size)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Setup \(percent) percent complete")
-    }
-}
-
-// MARK: - Quick setup
-
-private struct QuickSetupCard: View {
-    let hasVaultEntry: Bool
-    let appLockOn: Bool
-
-    private var steps: [(String, Bool)] {
-        [
-            ("Add yourself and family to the vault", hasVaultEntry),
-            ("Enable App Lock in Settings", appLockOn)
-        ]
-    }
-
-    var body: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 18) {
-                CardHeader(icon: "checklist", title: "Quick setup")
-                VStack(spacing: 14) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
-                        HStack(spacing: 14) {
-                            Image(systemName: step.1 ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundStyle(step.1 ? Color.appSuccess : Color.appTertiaryText)
-                                .decorativeAccessibility()
-                            Text(step.0)
-                                .font(.subheadline)
-                                .foregroundStyle(Color.appPrimaryText)
-                                .strikethrough(step.1, color: Color.appSecondaryText)
-                            Spacer()
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Mic & camera
-
-private struct MicCameraCard: View {
-    var body: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 18) {
-                CardHeader(icon: "mic.badge.plus", title: "Apps using mic or camera")
-
-                Text("iOS does not expose this list to third-party apps. The orange and green dot in your status bar is Apple's answer. Open the system pages below to see every app and revoke per-app access.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.appSecondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                VStack(spacing: 12) {
-                    SystemLinkRow(icon: "mic.fill", label: "Microphone settings") {
-                        openURL("App-prefs:Privacy&path=MICROPHONE")
-                    }
-                    SystemLinkRow(icon: "camera.fill", label: "Camera settings") {
-                        openURL("App-prefs:Privacy&path=CAMERA")
-                    }
-                }
-            }
-        }
-    }
-
-    private func openURL(_ raw: String) {
-        guard let url = URL(string: raw) else { return }
-        UIApplication.shared.open(url)
-    }
-}
-
-// MARK: - Honest limits
-
-private struct HonestLimitsCard: View {
-    var body: some View {
-        PremiumCard {
-            VStack(alignment: .leading, spacing: 18) {
-                CardHeader(icon: "info.circle.fill", title: "Honest limits", tint: Color.appWarning)
-
-                HonestColumn(
-                    heading: "What this app does on iOS",
-                    headingTint: Color.appSuccess,
-                    items: [
-                        "Keychain and CryptoKit encrypted family vault.",
-                        "Call Directory for a static block list.",
-                        "SMS filter for unknown senders.",
-                        "Panic lock plus biometric app lock."
-                    ]
-                )
-
-                HonestColumn(
-                    heading: "What iOS does not let this app do",
-                    headingTint: Color.appWarning,
-                    items: [
-                        "Monitor other apps' mic or camera use.",
-                        "Draw a watermark on top of other apps.",
-                        "Enumerate other apps' permissions."
-                    ]
-                )
-            }
-        }
-    }
-}
-
-private struct HonestColumn: View {
-    let heading: String
-    let headingTint: Color
-    let items: [String]
+private struct StatTile: View {
+    let icon: String
+    let tint: Color
+    let value: Int
+    let label: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(heading)
-                .font(.footnote.weight(.semibold))
-                .textCase(.uppercase)
-                .foregroundStyle(headingTint)
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Circle()
-                            .fill(headingTint.opacity(0.5))
-                            .frame(width: 5, height: 5)
-                            .offset(y: -3)
-                            .decorativeAccessibility()
-                        Text(item)
-                            .font(.subheadline)
-                            .foregroundStyle(Color.appPrimaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
+            HStack(alignment: .top) {
+                Image(systemName: icon)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 32, height: 32)
+                    .background(tint.opacity(0.18), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Spacer()
+                Text("\(value)")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(tint)
+                    .minimumScaleFactor(0.6)
             }
+            Text(label)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.appSecondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(2)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.appElevatedSurface)
+        )
+    }
+}
+
+// MARK: - Quick action card (icon chip + title + subtitle, previous version)
+
+private struct QuickActionCard: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 46, height: 46)
+                    .background(tint.opacity(0.18), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .shadow(color: tint.opacity(0.4), radius: 10, x: 0, y: 0)
+
+                Text(title)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.appPrimaryText)
+                    .multilineTextAlignment(.leading)
+
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.appSecondaryText)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(2)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.appElevatedSurface)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Honest Limits callout + sheet (restored)
+
+private struct HonestLimitsCallout: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Color.appWarning)
+                    .frame(width: 48, height: 48)
+                    .background(
+                        Color.appWarning.opacity(0.18),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
+                    .shadow(color: Color.appWarning.opacity(0.4), radius: 10)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Honest Limits")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.appWarning)
+                    Text("This app cannot monitor other apps' microphone or camera use. Tap to see all platform limits.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(Color.appWarning.opacity(0.7))
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.appWarning.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(Color.appWarning.opacity(0.5), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct HonestLimitsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                limitBullet("Monitor other apps' microphone or camera use.")
+                limitBullet("Stop recordings made on another device.")
+                limitBullet("Place watermarks over other apps on iOS.")
+                limitBullet("Prevent carrier or operating-system tracking.")
+                limitBullet("Guarantee that every unwanted contact will be blocked — some requires enabling Apple's system extensions in iOS Settings.")
+            }
+            .padding(20)
+        }
+        .background(Color.appScreenBackground.ignoresSafeArea())
+        .navigationTitle("Honest Limits")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") { dismiss() }
+                    .tint(Color.appAccent)
+            }
+        }
+    }
+
+    private func limitBullet(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Circle()
+                .fill(Color.appWarning)
+                .frame(width: 6, height: 6)
+                .offset(y: -3)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(Color.appPrimaryText)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

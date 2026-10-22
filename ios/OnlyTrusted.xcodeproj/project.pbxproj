@@ -11,6 +11,7 @@
 		094D2B501F88ED9FD2DFC8B9 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A751149F1B0D6CFD467F357D /* SplashScreen.swift */; };
 		09B4425B6994A813383A2F9B /* BlockingPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B53C61D78638526477C6C53 /* BlockingPreferences.swift */; };
 		10ED513248320061108B30BA /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
+		1A56C37DF322E512F04621D7 /* UpgradeToPremiumScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */; };
 		1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
 		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
@@ -20,10 +21,13 @@
 		2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */; };
 		2C1C57334861C68F1D4697F5 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		3099C006611569D587D98E02 /* EventsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */; };
+		32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */; };
 		3A24CBCD6D895998F3A59B70 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
 		41D922C570BA400222F1ED3A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
+		4C091E1465E0117CF62999EA /* AppBackdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67E35947FEDCCD998311AE4 /* AppBackdrop.swift */; };
 		54F1222A590D224BD05496FB /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */; };
 		6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
+		751BD6FC052CDABEF855688F /* BillingSubscriptionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */; };
 		7A0B31F7B59CC3C0C4FB498F /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490883DF89C527594BD0E0E /* Exporters.swift */; };
 		7CC7A7692C3CBBE641ED3862 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
 		87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */; };
@@ -37,6 +41,7 @@
 		B9133CBDCF92C2136AA035CE /* LegalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119AC115F503D46187427F9C /* LegalScreen.swift */; };
 		BB0E07BD1982FB98B607DE36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 501D17326F04F78A780C80B5 /* Assets.xcassets */; };
 		BD0F5C0ECAF573D0F78D9EE1 /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */; };
+		C17DF555649579E8DF08C98A /* CyberBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4916E2EF293691F7203D197D /* CyberBackground.swift */; };
 		C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
 		D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */; };
 		D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
@@ -44,6 +49,7 @@
 		E77DA326804F1AB7DA39F0A0 /* MessageFilterHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CE8313835B13C68C3BAE56 /* MessageFilterHandler.swift */; };
 		F2CDFE0A3BA4AC9F54C32FAB /* CallDirectoryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */; };
 		F317F03552A6496C0FEC0001 /* CallDirectoryExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F3D31222798A38B44DFE785F /* ReportsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A66FFC76D02EA4B8E5AABFD /* ReportsScreen.swift */; };
 		F3FC4BEA9BF8AF5BB6F1EE26 /* AppGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA15C620019BB9D395CEDC12 /* AppGate.swift */; };
 		F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB8BB9444909AA0350EAE85 /* LegalContent.swift */; };
 		FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
@@ -85,9 +91,11 @@
 		0181DD98D26C9984555D6A90 /* MainTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabs.swift; sourceTree = "<group>"; };
 		0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListScreen.swift; sourceTree = "<group>"; };
 		119AC115F503D46187427F9C /* LegalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalScreen.swift; sourceTree = "<group>"; };
+		1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingSubscriptionScreen.swift; sourceTree = "<group>"; };
 		22D54D38BF141DB14E7F2838 /* ErrorStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorStateView.swift; sourceTree = "<group>"; };
 		4851D38B8F1106FC519D68DD /* OnlyTrusted.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OnlyTrusted.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultEditScreen.swift; sourceTree = "<group>"; };
+		4916E2EF293691F7203D197D /* CyberBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberBackground.swift; sourceTree = "<group>"; };
 		501D17326F04F78A780C80B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		528559BBE2D0AE609BD1D884 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5B53C61D78638526477C6C53 /* BlockingPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingPreferences.swift; sourceTree = "<group>"; };
@@ -100,13 +108,17 @@
 		883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MessageFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		892B99558FF5112FC81B218F /* CallDirectoryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDirectoryHandler.swift; sourceTree = "<group>"; };
 		8990FFD2A86A59C606EA58A8 /* ConsentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentScreen.swift; sourceTree = "<group>"; };
+		8A66FFC76D02EA4B8E5AABFD /* ReportsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsScreen.swift; sourceTree = "<group>"; };
 		964AB9EDC5C3B076D8F4DBE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A651F201558860B72E2B18EA /* PhoneUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneUtils.swift; sourceTree = "<group>"; };
 		A751149F1B0D6CFD467F357D /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
 		B624AA0E449B364901659D23 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		B67E35947FEDCCD998311AE4 /* AppBackdrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBackdrop.swift; sourceTree = "<group>"; };
 		B875C9E9199F8E854722B33A /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
 		BA15C620019BB9D395CEDC12 /* AppGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGate.swift; sourceTree = "<group>"; };
+		C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberComponents.swift; sourceTree = "<group>"; };
 		CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyTrustedApp.swift; sourceTree = "<group>"; };
+		D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeToPremiumScreen.swift; sourceTree = "<group>"; };
 		D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsScreen.swift; sourceTree = "<group>"; };
 		DD57602976D8C9A69AEB4959 /* BlockListStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListStore.swift; sourceTree = "<group>"; };
 		DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldCrypto.swift; sourceTree = "<group>"; };
@@ -140,7 +152,9 @@
 				BE88C114F01F7FB7F4965C92 /* Legal */,
 				59FC3E7C7CBEEB57ED07CBFB /* Lock */,
 				8B2BAE45A4D64FD531E8626F /* Onboarding */,
+				E0BEBB8BCADF302F3D864698 /* Reports */,
 				7B0854CADCA48980A3484FC0 /* Shared */,
+				D9CBF7641523999CDCD71F32 /* Subscription */,
 				624695B8BED90C9B3D2A350A /* Theme */,
 				6090D23C3520BFEAD7394652 /* Vault */,
 			);
@@ -219,7 +233,10 @@
 		624695B8BED90C9B3D2A350A /* Theme */ = {
 			isa = PBXGroup;
 			children = (
+				B67E35947FEDCCD998311AE4 /* AppBackdrop.swift */,
 				66F8C52E1A8099780F21613E /* Cards.swift */,
+				4916E2EF293691F7203D197D /* CyberBackground.swift */,
+				C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */,
 				EEFF4754051354FB2E3F10DA /* Theme.swift */,
 			);
 			path = Theme;
@@ -281,6 +298,15 @@
 			path = Legal;
 			sourceTree = "<group>";
 		};
+		D9CBF7641523999CDCD71F32 /* Subscription */ = {
+			isa = PBXGroup;
+			children = (
+				1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */,
+				D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */,
+			);
+			path = Subscription;
+			sourceTree = "<group>";
+		};
 		DCA5EB861CF734178216726C /* CallDirectoryExtension */ = {
 			isa = PBXGroup;
 			children = (
@@ -288,6 +314,14 @@
 				528559BBE2D0AE609BD1D884 /* Info.plist */,
 			);
 			path = CallDirectoryExtension;
+			sourceTree = "<group>";
+		};
+		E0BEBB8BCADF302F3D864698 /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				8A66FFC76D02EA4B8E5AABFD /* ReportsScreen.swift */,
+			);
+			path = Reports;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -421,13 +455,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				06B64183C02925954AB1C87B /* AboutScreen.swift in Sources */,
+				4C091E1465E0117CF62999EA /* AppBackdrop.swift in Sources */,
 				F3FC4BEA9BF8AF5BB6F1EE26 /* AppGate.swift in Sources */,
 				9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */,
+				751BD6FC052CDABEF855688F /* BillingSubscriptionScreen.swift in Sources */,
 				A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */,
 				A7E6F5E9928F9E49B31AF961 /* BlockListStore.swift in Sources */,
 				09B4425B6994A813383A2F9B /* BlockingPreferences.swift in Sources */,
 				22313F1408F73C4FFD65B90B /* Cards.swift in Sources */,
 				95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */,
+				C17DF555649579E8DF08C98A /* CyberBackground.swift in Sources */,
+				32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */,
 				B6886A083BF35B9D0435BCEE /* ErrorStateView.swift in Sources */,
 				D3D4D30A9C6CCD09A92EE88A /* EventStore.swift in Sources */,
 				3099C006611569D587D98E02 /* EventsScreen.swift in Sources */,
@@ -440,10 +478,12 @@
 				BD0F5C0ECAF573D0F78D9EE1 /* OnboardingScreen.swift in Sources */,
 				D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */,
 				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
+				F3D31222798A38B44DFE785F /* ReportsScreen.swift in Sources */,
 				9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */,
 				FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */,
 				094D2B501F88ED9FD2DFC8B9 /* SplashScreen.swift in Sources */,
 				2684C20B6C66EC750384154D /* Theme.swift in Sources */,
+				1A56C37DF322E512F04621D7 /* UpgradeToPremiumScreen.swift in Sources */,
 				D86AAE6A5F9830A8315985C8 /* VaultEditScreen.swift in Sources */,
 				87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */,
 				54F1222A590D224BD05496FB /* VaultStore.swift in Sources */,

@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,39 +17,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NotificationsOff
-import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onlytrusted.app.R
 import com.onlytrusted.app.privacy.OnboardingState
 import com.onlytrusted.app.ui.theme.BrandAccentDark
+import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
 import com.onlytrusted.app.ui.theme.MidnightCard
+import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
 import com.onlytrusted.app.ui.theme.SecondaryTextDark
-import com.onlytrusted.app.ui.theme.WarningDark
+import com.onlytrusted.app.ui.theme.TertiaryTextDark
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
@@ -63,135 +72,192 @@ fun OnboardingScreen(onContinue: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(top = 32.dp, bottom = 120.dp),
+                .padding(horizontal = 18.dp)
+                .padding(top = 0.dp, bottom = 96.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(136.dp)
-                    .background(BrandAccentDark.copy(alpha = 0.12f), RoundedCornerShape(50))
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.brand_logo),
-                    contentDescription = "OnlyTrusted",
-                    modifier = Modifier
-                        .size(92.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                )
-            }
-
-            Text(
-                "OnlyTrusted",
-                color = PrimaryTextDark,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                "A safer, quieter phone starts here.",
-                color = SecondaryTextDark,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(vertical = 4.dp)) {
-                    BenefitRow(Icons.Filled.Groups, "Allow only trusted contacts")
-                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
-                    BenefitRow(Icons.Filled.NotificationsOff, "Silence or block everyone else")
-                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
-                    BenefitRow(Icons.Filled.FactCheck, "Keep a local audit log")
-                    HorizontalDivider(Modifier.padding(start = 68.dp, end = 20.dp))
-                    BenefitRow(Icons.Filled.VerifiedUser, "Your data never leaves this device")
-                }
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Filled.VerifiedUser,
-                            contentDescription = null,
-                            tint = WarningDark,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            "Honest limits Android imposes",
-                            color = PrimaryTextDark,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    HonestLimitBullet("A normal Android app cannot hardware-mute the mic or camera; the system toggles in Quick Settings do that.")
-                    HonestLimitBullet("You cannot stop the other side of a call from recording their own device.")
-                    HonestLimitBullet("Full screenshot blocking across the whole phone needs a hardened OS or root.")
-                    HonestLimitBullet("Carrier and network-level tracking is outside any app's control.")
-                }
-            }
+            CinematicHero()
+            Headline()
+            BenefitList()
+            PageIndicator(activeIndex = 1, count = 3)
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(MidnightCard)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .background(MidnightBackground)
+                .padding(horizontal = 18.dp, vertical = 10.dp)
         ) {
             Button(
                 onClick = {
                     OnboardingState.markOnboarded(context)
                     onContinue()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BrandCyanDark,
+                    contentColor = MidnightBackground
+                )
             ) {
-                Text("Get Started")
+                Text(
+                    "Get Started",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.Outlined.ChevronRight,
+                    contentDescription = null,
+                    tint = MidnightBackground,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
 }
 
+// MARK: - Hero (full-width image with wordmark overlay)
+
 @Composable
-private fun BenefitRow(icon: ImageVector, title: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+private fun CinematicHero() {
+    val heroHeight = 380.dp
+    Box(
+        contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .height(heroHeight)
+            .clip(RoundedCornerShape(22.dp))
+            .border(1.dp, BrandCyanDark.copy(alpha = 0.36f), RoundedCornerShape(22.dp))
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(36.dp)
-                .background(BrandAccentDark.copy(alpha = 0.14f), RoundedCornerShape(10.dp))
-        ) {
-            Icon(icon, contentDescription = null, tint = BrandAccentDark)
+        Image(
+            painter = painterResource(id = R.drawable.onboarding_hero),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier.fillMaxSize()
+        )
+        // "OnlyTrusted" wordmark overlaid on top of hero (white Only + teal Trusted)
+        val wordmark = buildAnnotatedString {
+            withStyle(SpanStyle(color = Color.White)) { append("Only") }
+            withStyle(SpanStyle(color = BrandCyanDark)) { append("Trusted") }
         }
-        Spacer(Modifier.width(14.dp))
         Text(
-            title,
-            color = PrimaryTextDark,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
+            text = wordmark,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 10.dp)
         )
     }
 }
 
 @Composable
-private fun HonestLimitBullet(text: String) {
-    Row(verticalAlignment = Alignment.Top) {
+private fun Headline() {
+    Text(
+        text = "A safer, quieter phone\nstarts here.",
+        color = PrimaryTextDark,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp)
+    )
+}
+
+@Composable
+private fun BenefitList() {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        BenefitTile(
+            icon = Icons.Filled.Groups,
+            title = "Allow only trusted contacts",
+            subtitle = "Keep your conversations with people you trust."
+        )
+        BenefitTile(
+            icon = Icons.Filled.NotificationsOff,
+            title = "Silence or block everyone else",
+            subtitle = "Reduce unwanted calls and messages."
+        )
+        BenefitTile(
+            icon = Icons.Filled.History,
+            title = "Keep a local audit log",
+            subtitle = "Review recent calls and messages on your device."
+        )
+        BenefitTile(
+            icon = Icons.Filled.Shield,
+            title = "Your data never leaves this device",
+            subtitle = "Everything stays private and on your phone."
+        )
+        BenefitTile(
+            icon = Icons.Filled.Info,
+            title = "Important to know",
+            subtitle = "Android has system limitations. OnlyTrusted cannot monitor other apps, your microphone, or your camera. Call blocking and message filtering use Android's supported features."
+        )
+    }
+}
+
+@Composable
+private fun BenefitTile(icon: ImageVector, title: String, subtitle: String) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MidnightElevated)
+            .border(1.dp, BrandCyanDark.copy(alpha = 0.14f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(top = 7.dp, end = 10.dp)
-                .size(5.dp)
-                .background(BrandAccentDark, RoundedCornerShape(50))
+                .size(46.dp)
+                .background(BrandCyanDark.copy(alpha = 0.14f), RoundedCornerShape(12.dp))
+        ) {
+            Icon(icon, contentDescription = null, tint = BrandCyanDark, modifier = Modifier.size(22.dp))
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(
+                title,
+                color = PrimaryTextDark,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                subtitle,
+                color = SecondaryTextDark,
+                fontSize = 13.sp
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = TertiaryTextDark,
+            modifier = Modifier.size(18.dp)
         )
-        Text(
-            text,
-            color = PrimaryTextDark,
-            style = MaterialTheme.typography.bodyMedium
-        )
+    }
+}
+
+@Composable
+private fun PageIndicator(activeIndex: Int, count: Int) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 4.dp)
+    ) {
+        for (i in 0 until count) {
+            val active = i == activeIndex
+            Box(
+                modifier = Modifier
+                    .size(if (active) 9.dp else 7.dp)
+                    .background(
+                        color = if (active) BrandAccentDark else BrandAccentDark.copy(alpha = 0.3f),
+                        shape = CircleShape
+                    )
+            )
+        }
     }
 }

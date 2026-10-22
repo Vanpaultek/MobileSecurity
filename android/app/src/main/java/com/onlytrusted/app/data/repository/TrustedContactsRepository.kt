@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.data.repository
 
@@ -47,7 +47,8 @@ class TrustedContactsRepository(private val dao: TrustedContactDao) {
                 relation = entry.contact.relation,
                 isOwner = entry.contact.isOwner,
                 maskedEmail = entry.contact.emailMasked,
-                maskedNumbers = entry.numbers.map { it.maskedForDisplay }
+                maskedNumbers = entry.numbers.map { it.maskedForDisplay },
+                normalisedNumbers = entry.numbers.map { it.normalisedNumber }
             )
         }
     }
@@ -135,5 +136,7 @@ data class MaskedContact(
     val relation: String?,
     val isOwner: Boolean,
     val maskedEmail: String?,
-    val maskedNumbers: List<String>
+    val maskedNumbers: List<String>,
+    /** Normalised (E.164-like) numbers used by tel:/sms: deep links. Never displayed. */
+    val normalisedNumbers: List<String> = emptyList()
 )

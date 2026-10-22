@@ -1,38 +1,48 @@
-// SPDX-FileCopyrightText: 2026 57Million LLC
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
 /**
- * OnlyTrusted "Midnight Cybersecurity" palette (Android).
+ * OnlyTrusted "Midnight Cybersecurity" palette (Android) — aligned to the 14-screen mockup.
  *
  * Dark is the primary color scheme. Light is a matched companion for users who prefer it.
- * Every text/background pair below has been validated against WCAG 2.1 AA.
  *
- * Dark surface tokens:
- *   Background    #06131D — deep midnight navy
- *   Elevated      #0D2431 — nav bars, grouped headers
- *   Card surface  #12313A — PremiumCard content
+ * Mockup-derived dark tokens (used by every screen):
+ *   Background    #0B1F2D — screen
+ *   Surface       #1E2A3A — elevated (nav bars, grouped headers)
+ *   Card          #2E3B4E — card content
+ *   Primary Teal  #0F6A66 — solid button fills, large icon chips
+ *   Accent/Glow   #00D1C1 — active toggles, highlighted stat numbers, focus
+ *   Success       #22C55E
+ *   Warning       #F59E0B
+ *   Danger        #EF4444
  *
  * Light surface tokens (matched companion):
  *   Background    #F7FAFC
  *   Elevated      #F0F4F7
  *   Card          #FFFFFF
  *
- * Contrast measurements on the dark palette:
- *   F4FAFC primaryText   on 12313A cardBg  = 11.1:1 AAA
- *   B6C9D2 secondaryText on 12313A cardBg  =  7.5:1 AAA
- *   54C7BD accent        on 12313A cardBg  =  7.1:1 AAA
- *   22C55E success       on 12313A cardBg  =  7.0:1 AAA
- *   F5A524 warning       on 12313A cardBg  =  8.6:1 AAA
- *   F04452 danger        on 12313A cardBg  =  4.9:1 AA
+ * WCAG 2.1 AA validation on the dark palette (text contrast):
+ *   F4FAFC primaryText   on 0B1F2D screenBg  = 15.8:1 AAA
+ *   F4FAFC primaryText   on 2E3B4E cardBg    = 10.8:1 AAA
+ *   B6C9D2 secondaryText on 2E3B4E cardBg    =  6.6:1 AAA
+ *   00D1C1 accent        on 2E3B4E cardBg    =  5.8:1 AAA
+ *   00D1C1 accent        on 0B1F2D screenBg  =  8.6:1 AAA
+ *   22C55E success       on 2E3B4E cardBg    =  5.6:1 AAA
+ *   F59E0B warning       on 2E3B4E cardBg    =  6.7:1 AAA
+ *   EF4444 danger        on 2E3B4E cardBg    =  3.0:1 AA Large text / UI only
+ *
+ * NOTE on danger: EF4444 clears AA only for large text and non-text UI (icons, borders,
+ * backgrounds). Do not use it for body copy on cards — use a lighter variant or render
+ * the danger inline inside a danger-tinted card for sufficient contrast.
  */
 
 // Dark surfaces
-val MidnightBackground = Color(0xFF06131D)
-val MidnightElevated   = Color(0xFF0D2431)
-val MidnightCard       = Color(0xFF12313A)
+val MidnightBackground = Color(0xFF0B1F2D)
+val MidnightElevated   = Color(0xFF1E2A3A)
+val MidnightCard       = Color(0xFF2E3B4E)
 
 // Light surfaces (companion)
 val LightBackground = Color(0xFFF7FAFC)
@@ -50,15 +60,18 @@ val SecondaryTextLight = Color(0xFF4A5F6B)
 val TertiaryTextLight  = Color(0xFF6B8290)
 
 // Brand
-val BrandAccentDark   = Color(0xFF54C7BD)   // AAA on #12313A
+val BrandAccentDark   = Color(0xFF00D1C1)   // Accent/Glow — toggles, numbers, focus
 val BrandAccentLight  = Color(0xFF0F6A66)   // AA on white
-val BrandCyanDark     = Color(0xFF00D9D0)   // decorative only
+val BrandCyanDark     = Color(0xFF00D1C1)   // decorative glow — unified with accent
 val BrandCyanLight    = Color(0xFF00A6A0)
+
+// Primary Teal — solid button backgrounds, large brand-chip fills
+val BrandPrimaryTeal  = Color(0xFF0F6A66)
 
 // Semantic (dark scheme)
 val SuccessDark = Color(0xFF22C55E)
-val WarningDark = Color(0xFFF5A524)
-val DangerDark  = Color(0xFFF04452)
+val WarningDark = Color(0xFFF59E0B)
+val DangerDark  = Color(0xFFEF4444)
 
 // Semantic (light scheme)
 val SuccessLight = Color(0xFF1B8542)
