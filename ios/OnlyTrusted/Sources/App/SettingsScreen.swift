@@ -71,6 +71,13 @@ struct SettingsScreen: View {
     @State private var showTrustedWitnessSetup = false
     @State private var trustedWitnessError: String?
     @StateObject private var trustedWitness = TrustedWitnessState.shared
+    // Steganographic Vault (Elite) — hides the vault inside a decoy PNG/PDF.
+    @State private var showStegoVaultUpsell = false
+    @State private var showStegoVaultSetup = false
+    // Signed Audit Log (Elite) — hardware-signed, merkle-anchored event log.
+    @State private var showSignedLogUpsell = false
+    @State private var showSignedLogSetup = false
+    @StateObject private var signedLog = SignedLogStore.shared
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -402,6 +409,34 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showTrustedWitnessUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Steganographic Vault (Elite)
+        .sheet(isPresented: $showStegoVaultSetup) {
+            NavigationStack { StegoVaultScreen() }
+        }
+        .sheet(isPresented: $showStegoVaultUpsell) {
+            StegoVaultUpsellSheet(
+                onUpgrade: {
+                    showStegoVaultUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showStegoVaultUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Signed Audit Log (Elite)
+        .sheet(isPresented: $showSignedLogSetup) {
+            NavigationStack { SignedLogScreen() }
+        }
+        .sheet(isPresented: $showSignedLogUpsell) {
+            SignedLogUpsellSheet(
+                onUpgrade: {
+                    showSignedLogUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showSignedLogUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -962,6 +997,45 @@ struct SettingsScreen: View {
                             : (sub.hasElite ? Color.appAccent : Color.subGold),
                         label: "Trusted Witness (Elite)",
                         value: trustedWitness.featureEnabled ? "On · \(trustedWitness.witnesses.count)" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Steganographic Vault (Elite) — hide the vault inside an innocuous PNG or
+                // PDF decoy. Opens an on-screen wizard with create + load flows.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showStegoVaultSetup = true
+                    } else {
+                        showStegoVaultUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "photo.badge.plus",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Steganographic Vault (Elite)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Signed Audit Log (Elite) — hardware-key-signed events + Merkle commits +
+                // tamper-evident evidence pack export + verifier. Requires an enrolled key.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showSignedLogSetup = true
+                    } else {
+                        showSignedLogUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "signature",
+                        iconTint: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey
+                            ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Signed Audit Log (Elite)",
+                        value: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
                     )
                 }
                 .buttonStyle(.plain)

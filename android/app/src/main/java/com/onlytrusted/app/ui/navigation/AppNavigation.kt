@@ -88,6 +88,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     // Shamir Split + Trusted Witness (Elite) — P2P-driven setup screens.
     data object ShamirSplit : Destination("shamir_split", "Shamir", Icons.Filled.Security)
     data object TrustedWitness : Destination("trusted_witness", "Witness", Icons.Filled.Security)
+    // Elite — Steganographic Vault + Hardware-Signed Audit Log (forensic-proof features).
+    data object StegoVault : Destination("stego_vault", "Stego", Icons.Filled.Security)
+    data object SignedLog : Destination("signed_log", "Signed", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -217,7 +220,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenFaceLock = { navController.navigate(Destination.FaceLock.route) },
                     onOpenGeofence = { navController.navigate(Destination.Geofence.route) },
                     onOpenShamirSplit = { navController.navigate(Destination.ShamirSplit.route) },
-                    onOpenTrustedWitness = { navController.navigate(Destination.TrustedWitness.route) }
+                    onOpenTrustedWitness = { navController.navigate(Destination.TrustedWitness.route) },
+                    onOpenStegoVault = { navController.navigate(Destination.StegoVault.route) },
+                    onOpenSignedLog = { navController.navigate(Destination.SignedLog.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -288,6 +293,19 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             composable(Destination.TrustedWitness.route) {
                 com.onlytrusted.app.ui.p2p.TrustedWitnessSetupScreen(
                     onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.StegoVault.route) {
+                com.onlytrusted.app.ui.stego.StegoVaultScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.SignedLog.route) {
+                com.onlytrusted.app.ui.signedlog.SignedLogScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenHardwareKey = {
+                        navController.navigate(Destination.HardwareKey.route)
+                    }
                 )
             }
             composable(Destination.Reports.route) {

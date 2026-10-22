@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.PhoneDisabled
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SimCard
@@ -148,7 +149,9 @@ fun SettingsScreen(
     onOpenFaceLock: () -> Unit = {},
     onOpenGeofence: () -> Unit = {},
     onOpenShamirSplit: () -> Unit = {},
-    onOpenTrustedWitness: () -> Unit = {}
+    onOpenTrustedWitness: () -> Unit = {},
+    onOpenStegoVault: () -> Unit = {},
+    onOpenSignedLog: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -180,6 +183,11 @@ fun SettingsScreen(
     var shamirUpsellOpen by remember { mutableStateOf(false) }
     var trustedWitnessUpsellOpen by remember { mutableStateOf(false) }
     var trustedWitnessGateError by remember { mutableStateOf<String?>(null) }
+    var stegoVaultUpsellOpen by remember { mutableStateOf(false) }
+    var signedLogUpsellOpen by remember { mutableStateOf(false) }
+    val signEveryEnabled = remember {
+        com.onlytrusted.app.ui.signedlog.SignedLogState.isSignEveryEntryEnabled(context)
+    }
     val shamirSplitStatus = remember {
         com.onlytrusted.app.ui.p2p.ShamirState.mySplit(context)
     }
@@ -781,6 +789,42 @@ fun SettingsScreen(
                     }
                 )
 
+                // Steganographic Vault (Elite) — hide the vault inside a decoy PNG or PDF.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.PhotoLibrary,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Steganographic Vault (Elite)",
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenStegoVault()
+                        } else {
+                            stegoVaultUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Signed Audit Log (Elite) — hardware-signed events + Merkle commitments +
+                // court-ready evidence pack export + verifier.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.VerifiedUser,
+                    tint = when {
+                        signEveryEnabled && hardwareKeyActive -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> BrandAccentDark
+                        else -> subGold
+                    },
+                    title = "Signed Audit Log (Elite)",
+                    value = if (signEveryEnabled && hardwareKeyActive) "On" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenSignedLog()
+                        } else {
+                            signedLogUpsellOpen = true
+                        }
+                    }
+                )
+
                 // Trusted Witness (Elite) — proximity-approved sensitive actions.
                 RowDivider()
                 SettingsNavRow(
@@ -1131,6 +1175,26 @@ fun SettingsScreen(
                     onOpenUpgrade()
                 },
                 onDismiss = { trustedWitnessUpsellOpen = false }
+            )
+        }
+
+        if (stegoVaultUpsellOpen) {
+            com.onlytrusted.app.ui.stego.StegoVaultUpsellDialog(
+                onUpgrade = {
+                    stegoVaultUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { stegoVaultUpsellOpen = false }
+            )
+        }
+
+        if (signedLogUpsellOpen) {
+            com.onlytrusted.app.ui.signedlog.SignedLogUpsellDialog(
+                onUpgrade = {
+                    signedLogUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { signedLogUpsellOpen = false }
             )
         }
 
