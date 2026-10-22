@@ -5,6 +5,10 @@
     <!-- Core permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- READ_PHONE_STATE: required by the SIM-Swap Alarm (Pro) to read SIM serial + IMSI +
+         carrier operator for fingerprinting the current SIM so we can detect a swap.
+         Also used by caller-id lookups. On Android 10+ IMSI/getSubscriberId often requires
+         carrier privilege; we fall back to SIM serial + operator in that case. -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
@@ -24,6 +28,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
+    <!--
+      Required for the user-facing Permission Watchdog feature in OnlyTrusted — audits
+      other apps' sensitive permissions on the user's device, no network use. The feature
+      is Pro-gated and runs entirely on-device.
+    -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -128,6 +137,24 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Wangiri (one-ring-hangup) watcher. Started from the app on launch when the user
+             is on Pro and the feature is enabled. Observes TelephonyManager call-state only;
+             we don't survive process death — the user re-opens the app to resume observation. -->
+        <service
+            android:name=".ui.wangiri.WangiriWatcherService"
+            android:exported="false" />
+
+        <!-- Safety Check-In daily nag receiver. Fires once per day at the owner's chosen time
+             via AlarmManager.setInexactRepeating. Posts a reminder if the owner hasn't tapped
+             "I'm safe" in the preceding 24 h. -->
+        <receiver
+            android:name=".ui.checkin.CheckInNagReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.onlytrusted.app.action.CHECKIN_NAG" />
             </intent-filter>
         </receiver>
 

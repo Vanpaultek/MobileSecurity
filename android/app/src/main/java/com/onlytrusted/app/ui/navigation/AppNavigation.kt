@@ -38,10 +38,12 @@ import com.onlytrusted.app.ui.events.EventsScreen
 import com.onlytrusted.app.ui.legal.LegalScreen
 import com.onlytrusted.app.ui.notifications.NotificationsScreen
 import com.onlytrusted.app.ui.permissions.PermissionAuditScreen
+import com.onlytrusted.app.ui.permwatchdog.PermissionWatchdogScreen
 import com.onlytrusted.app.ui.posture.PostureScreen
 import com.onlytrusted.app.ui.reports.ReportsScreen
 import com.onlytrusted.app.ui.settings.SettingsScreen
 import com.onlytrusted.app.ui.shield.ShieldLogScreen
+import com.onlytrusted.app.ui.simswap.SimSwapSetupScreen
 import com.onlytrusted.app.ui.subscription.BillingSubscriptionScreen
 import com.onlytrusted.app.ui.subscription.UpgradeToPremiumScreen
 import com.onlytrusted.app.ui.theme.BrandCyanDark
@@ -67,6 +69,10 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object BillingSubscription : Destination("billing_subscription", "Billing", Icons.Filled.CreditCard)
     data object UpgradePremium : Destination("upgrade_premium", "Premium", Icons.Filled.WorkspacePremium)
     data object DuressSetup : Destination("duress_setup", "Duress", Icons.Filled.Security)
+    data object PermissionWatchdog : Destination("permission_watchdog", "Watchdog", Icons.Filled.Security)
+    data object SimSwapSetup : Destination("simswap_setup", "SIM-Swap", Icons.Filled.Security)
+    data object Wangiri : Destination("wangiri", "Wangiri", Icons.Filled.Security)
+    data object SafetyCheckIn : Destination("safety_checkin", "Check-In", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -86,6 +92,18 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute in bottomBarDestinations.map { it.route }
+
+    // F — App Permission Watchdog (Pro): if the user is on Pro and daily audit is enabled,
+    // the composable self-gates and shows a non-dismissable alert when ≥1 app has gained
+    // sensitive permissions since the stored baseline.
+    com.onlytrusted.app.ui.permwatchdog.PermissionWatchdogLaunchAlert(
+        onOpenWatchdog = { navController.navigate(Destination.PermissionWatchdog.route) }
+    )
+
+    // SIM-Swap Alarm (Pro): checks the carrier identity against the stored baseline on
+    // every launch; a mismatch surfaces a non-dismissable full-screen alert and the user
+    // can lock the app, call their carrier, or acknowledge the swap as intentional.
+    com.onlytrusted.app.ui.simswap.SimSwapLaunchAlert(onLock = onPanic)
 
     Scaffold(
         containerColor = MidnightBackground,
@@ -172,11 +190,27 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenReports = { navController.navigate(Destination.Reports.route) },
                     onOpenBilling = { navController.navigate(Destination.BillingSubscription.route) },
                     onOpenUpgrade = { navController.navigate(Destination.UpgradePremium.route) },
-                    onOpenDuress = { navController.navigate(Destination.DuressSetup.route) }
+                    onOpenDuress = { navController.navigate(Destination.DuressSetup.route) },
+                    onOpenPermWatchdog = { navController.navigate(Destination.PermissionWatchdog.route) },
+                    onOpenSimSwap = { navController.navigate(Destination.SimSwapSetup.route) },
+                    onOpenWangiri = { navController.navigate(Destination.Wangiri.route) },
+                    onOpenCheckIn = { navController.navigate(Destination.SafetyCheckIn.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
                 DuressSetupScreen(onDone = { navController.popBackStack() })
+            }
+            composable(Destination.PermissionWatchdog.route) {
+                PermissionWatchdogScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Destination.SimSwapSetup.route) {
+                SimSwapSetupScreen(onDone = { navController.popBackStack() })
+            }
+            composable(Destination.Wangiri.route) {
+                com.onlytrusted.app.ui.wangiri.WangiriSettingsScreen()
+            }
+            composable(Destination.SafetyCheckIn.route) {
+                com.onlytrusted.app.ui.checkin.SafetyCheckInScreen()
             }
             composable(Destination.Reports.route) {
                 ReportsScreen(onBack = { navController.popBackStack() })

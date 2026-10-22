@@ -8,6 +8,7 @@ struct SettingsScreen: View {
     @StateObject private var store = VaultStore.shared
     @StateObject private var sub = SubscriptionState.shared
     @StateObject private var duress = DuressState.shared
+    @StateObject private var simswap = SIMSwapState.shared
 
     @State private var appLockToggle = false
     @State private var showLockDeniedAlert = false
@@ -20,6 +21,17 @@ struct SettingsScreen: View {
     @State private var showDuressUpsell = false
     @State private var showDuressSetup = false
     @State private var showUpgradeSheet = false
+    // SIM-Swap Alarm (Pro)
+    @State private var showSimSwapUpsell = false
+    @State private var showSimSwapSetup = false
+    // Pro batch: Wangiri Protection + Safety Check-In
+    @State private var showWangiriUpsell = false
+    @State private var showWangiriSettings = false
+    @State private var showCheckInUpsell = false
+    @State private var showCheckInSettings = false
+    // Permission Watchdog (Pro)
+    @State private var showWatchdogUpsell = false
+    @State private var showWatchdog = false
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -123,6 +135,58 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showDuressUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showSimSwapSetup) {
+            NavigationStack { SIMSwapSetupScreen() }
+        }
+        .sheet(isPresented: $showSimSwapUpsell) {
+            SIMSwapUpsellSheet(
+                onUpgrade: {
+                    showSimSwapUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showSimSwapUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showWangiriSettings) {
+            NavigationStack { WangiriSettingsScreen() }
+        }
+        .sheet(isPresented: $showWangiriUpsell) {
+            WangiriUpsellSheet(
+                onUpgrade: {
+                    showWangiriUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showWangiriUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showCheckInSettings) {
+            NavigationStack { SafetyCheckInScreen() }
+        }
+        .sheet(isPresented: $showWatchdog) {
+            NavigationStack { PermissionWatchdogScreen() }
+        }
+        .sheet(isPresented: $showWatchdogUpsell) {
+            WatchdogUpsellSheet(
+                onUpgrade: {
+                    showWatchdogUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showWatchdogUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showCheckInUpsell) {
+            CheckInUpsellSheet(
+                onUpgrade: {
+                    showCheckInUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showCheckInUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -373,6 +437,74 @@ struct SettingsScreen: View {
                         iconTint: duress.isEnabled ? Color.appSuccess : Color.subGold,
                         label: "Duress Mode (Pro)",
                         value: duress.isEnabled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showSimSwapSetup = true
+                    } else {
+                        showSimSwapUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "simcard.fill",
+                        iconTint: simswap.isEnabled ? Color.appSuccess : Color.subGold,
+                        label: "SIM-Swap Alarm (Pro)",
+                        value: simswap.isEnabled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Wangiri Protection (Pro)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showWangiriSettings = true
+                    } else {
+                        showWangiriUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "phone.down.waveform.fill",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Wangiri Protection (Pro)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Safety Check-In (Pro)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showCheckInSettings = true
+                    } else {
+                        showCheckInUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.fill.viewfinder",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Safety Check-In (Pro)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // App Permission Watchdog (Pro)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showWatchdog = true
+                    } else {
+                        showWatchdogUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "lock.shield.fill",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "App Permission Watchdog (Pro)"
                     )
                 }
                 .buttonStyle(.plain)
@@ -643,6 +775,43 @@ private struct IdentifiableURL: Identifiable {
     let value: URL
     var id: URL { value }
     init(_ value: URL) { self.value = value }
+}
+
+/// Pro upsell sheet for the App Permission Watchdog.
+struct WatchdogUpsellSheet: View {
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "lock.shield.fill")
+                .font(.system(size: 46, weight: .semibold))
+                .foregroundStyle(Color.subGold)
+                .padding(.top, 28)
+            Text("Permission Watchdog")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Color.appPrimaryText)
+            Text("Jump into Apple's App Privacy Report and review exactly which permissions OnlyTrusted holds — with the reason we don't ask for the ones we skip. Included in Pro.")
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer(minLength: 0)
+            Button(action: onUpgrade) {
+                Text("Upgrade to Pro")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 48)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color.subGold)
+            .padding(.horizontal, 24)
+            Button("Not now", action: onDismiss)
+                .foregroundStyle(Color.appSecondaryText)
+                .padding(.bottom, 20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appBackdrop()
+    }
 }
 
 /// Pro upsell sheet shown when a non-Pro user taps "Duress Mode (Pro)". Explains the feature

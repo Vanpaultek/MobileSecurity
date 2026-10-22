@@ -121,6 +121,9 @@ class MainActivity : FragmentActivity() {
         if (SettingsViewModel.isPocketDetectionEnabled(application)) {
             PocketDetectionService.start(this)
         }
+        // Wangiri Protection (Pro): the service is a plain started Service — it no-ops if
+        // READ_PHONE_STATE isn't granted, so this is safe to call unconditionally.
+        com.onlytrusted.app.ui.wangiri.WangiriWatcherService.startIfEligible(this)
     }
 
     private fun canPostNotifications(): Boolean {

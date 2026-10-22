@@ -22,6 +22,9 @@ struct SecurityEventRecord: Codable, Identifiable {
         static let panicLock = "PANIC_LOCK"
         static let vaultEdit = "VAULT_EDIT"
         static let wipe = "WIPE"
+        /// Fired when the SIM-Swap Alarm detects a different carrier identity than the
+        /// baseline captured on Pro activation. Pro-tier.
+        static let simSwap = "SIM_SWAP"
     }
 }
 

@@ -46,6 +46,13 @@ struct MainTabs: View {
                     .padding(.bottom, 100)
             }
         }
+        .onAppear {
+            // Pro feature: Wangiri Protection auto-starts if the subscription is active and
+            // the user hasn't disabled it. The watcher is a no-op when disabled.
+            if SubscriptionState.shared.hasHighPremium {
+                WangiriWatcher.shared.startIfNeeded()
+            }
+        }
     }
 }
 

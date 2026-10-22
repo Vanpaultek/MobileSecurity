@@ -30,15 +30,19 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PhoneDisabled
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.AlertDialog
@@ -116,7 +120,11 @@ fun SettingsScreen(
     onOpenReports: () -> Unit = {},
     onOpenBilling: () -> Unit = {},
     onOpenUpgrade: () -> Unit = {},
-    onOpenDuress: () -> Unit = {}
+    onOpenDuress: () -> Unit = {},
+    onOpenPermWatchdog: () -> Unit = {},
+    onOpenSimSwap: () -> Unit = {},
+    onOpenWangiri: () -> Unit = {},
+    onOpenCheckIn: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -134,7 +142,14 @@ fun SettingsScreen(
     var themeSheetOpen by remember { mutableStateOf(false) }
     val themeSheetState = rememberModalBottomSheetState()
     var duressUpsellOpen by remember { mutableStateOf(false) }
+    var watchdogUpsellOpen by remember { mutableStateOf(false) }
+    var simSwapUpsellOpen by remember { mutableStateOf(false) }
+    var wangiriUpsellOpen by remember { mutableStateOf(false) }
+    var checkInUpsellOpen by remember { mutableStateOf(false) }
     val duressEnabled = remember { DuressState.isEnabled(context) }
+    val simSwapEnabled = remember {
+        com.onlytrusted.app.ui.simswap.SimSwapState.isEnabled(context)
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -480,6 +495,61 @@ fun SettingsScreen(
                         }
                     }
                 )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.VerifiedUser,
+                    tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
+                    title = "App Permission Watchdog (Pro)",
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenPermWatchdog()
+                        } else {
+                            watchdogUpsellOpen = true
+                        }
+                    }
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.SimCard,
+                    tint = if (simSwapEnabled) BrandAccentDark else subGold,
+                    title = "SIM-Swap Alarm (Pro)",
+                    value = if (simSwapEnabled) "On" else null,
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenSimSwap()
+                        } else {
+                            simSwapUpsellOpen = true
+                        }
+                    }
+                )
+                // Wangiri Protection (Pro)
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.PhoneDisabled,
+                    tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
+                    title = "Wangiri Protection (Pro)",
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenWangiri()
+                        } else {
+                            wangiriUpsellOpen = true
+                        }
+                    }
+                )
+                // Safety Check-In (Pro)
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.LocationSearching,
+                    tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
+                    title = "Safety Check-In (Pro)",
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenCheckIn()
+                        } else {
+                            checkInUpsellOpen = true
+                        }
+                    }
+                )
             }
 
             // --- Shield watermark (Android-only feature) ---
@@ -615,6 +685,129 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { duressUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (watchdogUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { watchdogUpsellOpen = false },
+                title = {
+                    Text(
+                        "App Permission Watchdog is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "A daily on-device audit of every installed app's sensitive permissions. " +
+                            "Get alerted when something new asks for your camera, mic, location, " +
+                            "contacts, SMS, or call log. Available on Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        watchdogUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { watchdogUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (simSwapUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { simSwapUpsellOpen = false },
+                title = {
+                    Text(
+                        "SIM-Swap Alarm is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Detect when an attacker ports your number to their SIM. OnlyTrusted " +
+                            "fingerprints your SIM serial + carrier, alerts you on next app " +
+                            "open if it changes, auto-locks the app, and logs the event. " +
+                            "Available on Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        simSwapUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { simSwapUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (wangiriUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { wangiriUpsellOpen = false },
+                title = {
+                    Text(
+                        "Wangiri Protection is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Detects the classic one-ring hangup scam the moment it happens and " +
+                            "auto-adds the caller to your blocked list. Included in Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        wangiriUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { wangiriUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (checkInUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { checkInUpsellOpen = false },
+                title = {
+                    Text(
+                        "Safety Check-In is a Pro feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "One tap sends 'I'm safe' to every trusted contact. Optional daily " +
+                            "reminder if you forget. Included in Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        checkInUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { checkInUpsellOpen = false }) { Text("Not now") }
                 },
                 containerColor = MidnightCard
             )

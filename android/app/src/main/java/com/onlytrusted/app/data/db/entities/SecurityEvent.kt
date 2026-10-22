@@ -29,5 +29,11 @@ data class SecurityEvent(
         const val TYPE_PANIC_LOCK = "PANIC_LOCK"
         const val TYPE_SENSOR_PRIVACY_ON = "SENSOR_PRIVACY_ON"
         const val TYPE_SENSOR_PRIVACY_OFF = "SENSOR_PRIVACY_OFF"
+        /** A one-ring wangiri scam call detected by [com.onlytrusted.app.ui.wangiri.WangiriWatcherService]. */
+        const val TYPE_WANGIRI_BLOCKED = "WANGIRI_BLOCKED"
+        /** Owner tapped "I'm safe" in the Safety Check-In Pro screen. */
+        const val TYPE_SAFETY_CHECKIN_SENT = "SAFETY_CHECKIN_SENT"
+        /** SIM-Swap Alarm detected a different carrier identity than the stored baseline. */
+        const val TYPE_SIM_SWAP = "SIM_SWAP"
     }
 }
