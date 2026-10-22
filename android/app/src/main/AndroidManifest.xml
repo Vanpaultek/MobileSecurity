@@ -21,8 +21,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <!-- No FGS types of microphone/camera declared anymore: SensorMonitorService only
+         OBSERVES other apps' use via SensorPrivacyManager / registerAudioRecordingCallback
+         / registerAvailabilityCallback and doesn't itself hold RECORD_AUDIO / CAMERA. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Required by Tracker Finder (Pro) on Android 14+ for the continuous background
          BLE scan foreground service type. Only started when the user opts in. -->
@@ -90,11 +91,15 @@
             android:excludeFromRecents="true"
             android:theme="@style/Theme.OnlyTrusted" />
 
-        <!-- Sensor monitor (mic + camera usage) -->
+        <!-- Sensor monitor (observes OTHER apps' mic + camera use via SensorPrivacyManager /
+             AudioManager.registerAudioRecordingCallback / CameraManager.registerAvailabilityCallback).
+             This service does NOT record audio or capture video itself, so Android 14+'s
+             foregroundServiceType=microphone / camera would be mis-declared and would require
+             RECORD_AUDIO / CAMERA permissions we don't need. Use specialUse only. -->
         <service
             android:name=".services.SensorMonitorService"
             android:exported="false"
-            android:foregroundServiceType="microphone|camera|specialUse">
+            android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Privacy sensor monitoring: alerts the user when mic or camera is accessed by other apps." />
