@@ -112,6 +112,14 @@ dependencies {
     // ML Kit's on-device barcode scanner — no network calls.
     implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
+    // --- Hardware Security Key (Elite) ----------------------------------------
+    // Credential Manager unified API; the play-services-auth provider adds the
+    // FIDO2 / WebAuthn backend so YubiKey / Titan / SoloKey can register and
+    // assert via the standard CreatePublicKeyCredentialRequest / GetCredentialRequest
+    // flows. The core credentials module alone cannot talk to USB / NFC keys.
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

@@ -23,6 +23,9 @@ struct DuressSetupScreen: View {
     @State private var selectedAlertId: UUID?
     @State private var decoy: [DecoyRow] = DecoyRow.defaults
     @State private var successMessage: String?
+    // Hardware-key gate feedback shown when the user tries to disarm but cancels or fails
+    // the FIDO2 tap. See `HardwareKeyGate.requireAssertion` wired below.
+    @State private var hardwareKeyError: String?
 
     private var realContacts: [MaskedContact] {
         vault.realContactsForSetup()
@@ -60,6 +63,14 @@ struct DuressSetupScreen: View {
             Button("Done") { successMessage = nil; dismiss() }
         } message: {
             Text(successMessage ?? "")
+        }
+        .alert("Hardware key required", isPresented: Binding(
+            get: { hardwareKeyError != nil },
+            set: { if !$0 { hardwareKeyError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(hardwareKeyError ?? "")
         }
     }
 
@@ -240,7 +251,25 @@ struct DuressSetupScreen: View {
                 Toggle(isOn: Binding(
                     get: { state.isEnabled },
                     set: { enable in
-                        if enable { armWithDecoy() } else { state.isEnabled = false }
+                        if enable {
+                            armWithDecoy()
+                        } else {
+                            // Elite hardware-key gate: when at least one key is enrolled,
+                            // disarming Duress Mode requires a FIDO2 tap. No key enrolled =>
+                            // the gate is a no-op and this path matches the pre-Elite behavior.
+                            HardwareKeyGate.requireAssertion(
+                                reason: "Confirm Duress disarm with your security key."
+                            ) { outcome in
+                                switch outcome {
+                                case .success:
+                                    state.isEnabled = false
+                                case .cancelled:
+                                    hardwareKeyError = "Disarm cancelled — security key tap missing."
+                                case .failed(let msg):
+                                    hardwareKeyError = "Hardware key required: \(msg)"
+                                }
+                            }
+                        }
                     }
                 )) {
                     VStack(alignment: .leading, spacing: 2) {

@@ -81,6 +81,10 @@ class SettingsViewModel(private val app: OnlyTrustedApp) : AndroidViewModel(app)
             app.database.shieldSessionDao().deleteAll()
             prefs.edit().clear().apply()
             app.getSharedPreferences("protection_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+            // Clear Dead-Man Wipe (Elite) state so a manual Wipe doesn't leave a stale
+            // deadline that would immediately re-wipe on next launch.
+            com.onlytrusted.app.deadmanwipe.DeadmanWipeState.clearAll(app)
+            com.onlytrusted.app.deadmanwipe.DeadmanWipeScheduler.cancelAll(app)
             AppLockManager.setEnabled(app, false)
             AppLockManager.resetUnlock(app)
             _state.value = SettingsState()

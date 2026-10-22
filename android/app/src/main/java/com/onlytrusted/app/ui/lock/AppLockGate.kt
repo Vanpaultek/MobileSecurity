@@ -97,6 +97,8 @@ fun AppLockGate(
             onSuccess = {
                 // Real unlock: always clear any duress session that was active.
                 DuressState.setDuressSession(false)
+                // Dead-Man Wipe (Elite): reset the inactivity countdown.
+                com.onlytrusted.app.deadmanwipe.DeadmanWipeState.markUnlockNow(context)
                 onUnlocked()
             },
             onFailure = { error = it }

@@ -38,6 +38,19 @@ struct SettingsScreen: View {
     // Smart Link Guard (Pro)
     @State private var showSmartLinkGuardUpsell = false
     @State private var showSmartLinkGuard = false
+    // Hardware Security Key (Elite)
+    @State private var showHardwareKeyUpsell = false
+    @State private var showHardwareKeySetup = false
+    @State private var hardwareKeyGateError: String?
+    // Dead-Man Wipe (Elite)
+    @State private var showDeadmanWipeUpsell = false
+    @State private var showDeadmanWipeSetup = false
+    // Encrypted Vault Backup (Elite)
+    @State private var showEncryptedBackupUpsell = false
+    @State private var showEncryptedBackupSetup = false
+    @State private var showBackupRestoreUpsell = false
+    @State private var showBackupRestore = false
+    @StateObject private var deadman = DeadmanWipeState.shared
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -120,15 +133,38 @@ struct SettingsScreen: View {
         }
         .confirmationDialog("Wipe everything?", isPresented: $confirmWipe, titleVisibility: .visible) {
             Button("Wipe", role: .destructive) {
-                try? store.wipe()
-                try? BlockListStore.shared.wipe()
-                EventStore.shared.wipe()
-                EventStore.shared.append(type: SecurityEventRecord.Kind.wipe)
-                UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
+                // Elite-tier gate: if the user has enrolled a hardware security key, "Wipe
+                // everything" requires a physical key tap. No key enrolled → the gate is a
+                // no-op and the wipe runs immediately.
+                HardwareKeyGate.requireAssertion(
+                    reason: "Confirm wipe with your security key."
+                ) { outcome in
+                    switch outcome {
+                    case .success:
+                        try? store.wipe()
+                        try? BlockListStore.shared.wipe()
+                        EventStore.shared.wipe()
+                        EventStore.shared.append(type: SecurityEventRecord.Kind.wipe)
+                        HardwareKeyState.shared.clearAll()
+                        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
+                    case .cancelled:
+                        hardwareKeyGateError = "Wipe cancelled — security key tap missing."
+                    case .failed(let msg):
+                        hardwareKeyGateError = "Hardware key required: \(msg)"
+                    }
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will delete every trusted contact, every blocked number, every event, and every setting stored by this app. It cannot be undone.")
+        }
+        .alert("Hardware key required", isPresented: Binding(
+            get: { hardwareKeyGateError != nil },
+            set: { if !$0 { hardwareKeyGateError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(hardwareKeyGateError ?? "")
         }
         .sheet(isPresented: $showThemeSheet) { ThemeSelectorSheet() }
         .sheet(isPresented: $showDuressSetup) {
@@ -209,6 +245,61 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showSmartLinkGuardUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showHardwareKeySetup) {
+            NavigationStack { HardwareKeySetupScreen() }
+        }
+        .sheet(isPresented: $showHardwareKeyUpsell) {
+            HardwareKeyUpsellSheet(
+                onUpgrade: {
+                    showHardwareKeyUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showHardwareKeyUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Dead-Man Wipe (Elite)
+        .sheet(isPresented: $showDeadmanWipeSetup) {
+            NavigationStack { DeadmanWipeSetupScreen() }
+        }
+        .sheet(isPresented: $showDeadmanWipeUpsell) {
+            DeadmanWipeUpsellSheet(
+                onUpgrade: {
+                    showDeadmanWipeUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showDeadmanWipeUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Encrypted Backup (Elite)
+        .sheet(isPresented: $showEncryptedBackupSetup) {
+            NavigationStack { EncryptedBackupScreen() }
+        }
+        .sheet(isPresented: $showEncryptedBackupUpsell) {
+            EncryptedBackupUpsellSheet(
+                onUpgrade: {
+                    showEncryptedBackupUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showEncryptedBackupUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Backup Restore (Elite)
+        .sheet(isPresented: $showBackupRestore) {
+            NavigationStack { BackupRestoreScreen() }
+        }
+        .sheet(isPresented: $showBackupRestoreUpsell) {
+            BackupRestoreUpsellSheet(
+                onUpgrade: {
+                    showBackupRestoreUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showBackupRestoreUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -560,7 +651,7 @@ struct SettingsScreen: View {
                 .buttonStyle(.plain)
 
                 // Smart Link Guard (Pro) — on-device URL inspection for QR codes +
-                // links shared via the system share sheet. Last row in Security & data.
+                // links shared via the system share sheet.
                 SettingsDivider()
                 Button {
                     if sub.hasHighPremium {
@@ -573,6 +664,83 @@ struct SettingsScreen: View {
                         icon: "shield.lefthalf.filled",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
                         label: "Smart Link Guard (Pro)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
+                // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
+                // backup export, Dead-Man Wipe disable) behind a physical key tap.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showHardwareKeySetup = true
+                    } else {
+                        showHardwareKeyUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "key.horizontal.fill",
+                        iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
+                        label: "Hardware Security Key (Elite)",
+                        value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Dead-Man Wipe (Elite) — auto-wipe after N days of no unlock. Tapping
+                // opens the setup screen (with toggle, interval picker, timer status, and
+                // reset button). The value shown here collapses the toggle state + interval
+                // into a short "On · 30d" / "Off" label so the row doubles as toggle info.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showDeadmanWipeSetup = true
+                    } else {
+                        showDeadmanWipeUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "clock.badge.exclamationmark",
+                        iconTint: deadman.isEnabled ? Color.appDanger : Color.subGold,
+                        label: "Dead-Man Wipe (Elite)",
+                        value: deadman.isEnabled ? "On · \(deadman.intervalDays)d" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Encrypted vault backup (Elite) — AES-256-GCM blob exported via the
+                // standard share sheet; user saves to iCloud / Drive / wherever.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showEncryptedBackupSetup = true
+                    } else {
+                        showEncryptedBackupUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "externaldrive.badge.icloud",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Encrypted vault backup (Elite)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Restore from backup (Elite) — pick a `.ot2bak`, enter passphrase,
+                // overwrite everything in the app.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showBackupRestore = true
+                    } else {
+                        showBackupRestoreUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "arrow.down.doc",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Restore from backup (Elite)"
                     )
                 }
                 .buttonStyle(.plain)

@@ -75,6 +75,10 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object SafetyCheckIn : Destination("safety_checkin", "Check-In", Icons.Filled.Security)
     data object SmartLinkGuard : Destination("smart_link_guard", "Links", Icons.Filled.Security)
     data object TrackerFinder : Destination("tracker_finder", "Tracker", Icons.Filled.Security)
+    data object HardwareKey : Destination("hardware_key", "Security key", Icons.Filled.Security)
+    data object DeadmanWipe : Destination("deadman_wipe", "Dead-Man", Icons.Filled.Security)
+    data object EncryptedBackup : Destination("encrypted_backup", "Backup", Icons.Filled.Security)
+    data object BackupRestore : Destination("backup_restore", "Restore", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -198,7 +202,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenWangiri = { navController.navigate(Destination.Wangiri.route) },
                     onOpenCheckIn = { navController.navigate(Destination.SafetyCheckIn.route) },
                     onOpenSmartLinkGuard = { navController.navigate(Destination.SmartLinkGuard.route) },
-                    onOpenTrackerFinder = { navController.navigate(Destination.TrackerFinder.route) }
+                    onOpenTrackerFinder = { navController.navigate(Destination.TrackerFinder.route) },
+                    onOpenHardwareKey = { navController.navigate(Destination.HardwareKey.route) },
+                    onOpenDeadmanWipe = { navController.navigate(Destination.DeadmanWipe.route) },
+                    onOpenEncryptedBackup = { navController.navigate(Destination.EncryptedBackup.route) },
+                    onOpenBackupRestore = { navController.navigate(Destination.BackupRestore.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -223,6 +231,26 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.TrackerFinder.route) {
                 com.onlytrusted.app.ui.trackerfinder.TrackerFinderScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.HardwareKey.route) {
+                com.onlytrusted.app.ui.hardwarekey.HardwareKeySetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.DeadmanWipe.route) {
+                com.onlytrusted.app.ui.deadmanwipe.DeadmanWipeSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.EncryptedBackup.route) {
+                com.onlytrusted.app.ui.backup.EncryptedBackupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.BackupRestore.route) {
+                com.onlytrusted.app.ui.backup.BackupRestoreScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

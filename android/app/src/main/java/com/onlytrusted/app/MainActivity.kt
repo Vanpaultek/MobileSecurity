@@ -43,6 +43,19 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         applyScreenshotProtection()
 
+        // Dead-Man Wipe (Elite): if the inactivity deadline has elapsed, wipe before the UI
+        // mounts. Runs synchronously on the IO dispatcher — the Composable will see a
+        // freshly-emptied database when it reads from the repository.
+        if (com.onlytrusted.app.deadmanwipe.DeadmanWipeState.shouldWipeNow(this)) {
+            kotlinx.coroutines.runBlocking {
+                com.onlytrusted.app.deadmanwipe.DeadmanWipePerformer.performWipe(this@MainActivity)
+            }
+        } else if (com.onlytrusted.app.deadmanwipe.DeadmanWipeState.isEnabled(this)) {
+            // Opportunistic re-schedule in case the user upgraded the app and the workers
+            // were cleared by Play's install step.
+            com.onlytrusted.app.deadmanwipe.DeadmanWipeScheduler.rescheduleAll(this)
+        }
+
         setContent {
             OnlyTrustedTheme {
                 var splashDone by remember { mutableStateOf(false) }

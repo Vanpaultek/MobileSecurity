@@ -35,5 +35,9 @@ data class SecurityEvent(
         const val TYPE_SAFETY_CHECKIN_SENT = "SAFETY_CHECKIN_SENT"
         /** SIM-Swap Alarm detected a different carrier identity than the stored baseline. */
         const val TYPE_SIM_SWAP = "SIM_SWAP"
+        /** Fired by the Dead-Man Wipe (Elite) just before the full-state wipe runs. */
+        const val TYPE_WIPE = "WIPE"
+        /** Encrypted vault backup (Elite) was restored from a `.ot2bak` file. */
+        const val TYPE_BACKUP_RESTORED = "BACKUP_RESTORED"
     }
 }

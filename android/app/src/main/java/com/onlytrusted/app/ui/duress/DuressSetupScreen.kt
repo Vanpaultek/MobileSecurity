@@ -49,8 +49,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.rememberCoroutineScope
 import com.onlytrusted.app.OnlyTrustedApp
 import com.onlytrusted.app.data.repository.MaskedContact
+import com.onlytrusted.app.ui.hardwarekey.HardwareKeyGate
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.DangerDark
@@ -85,6 +87,10 @@ fun DuressSetupScreen(onDone: () -> Unit = {}) {
     var enabled by remember { mutableStateOf(DuressState.isEnabled(context)) }
     var decoy by remember { mutableStateOf(defaultDecoy()) }
     var success by remember { mutableStateOf(false) }
+    // Elite hardware-key gate feedback. Shown when the user attempts to disarm Duress Mode
+    // but the FIDO2 tap is cancelled or fails.
+    var hardwareKeyGateError by remember { mutableStateOf<String?>(null) }
+    val gateScope = rememberCoroutineScope()
 
     // Auto-fill owner name from the real "owner" contact if we have one and the field is blank.
     LaunchedEffect(realContacts) {
@@ -168,9 +174,27 @@ fun DuressSetupScreen(onDone: () -> Unit = {}) {
                     DuressState.setOwnerName(context, it)
                 },
                 onToggle = { want ->
-                    if (want) armWithDecoy(context, decoy)
-                    enabled = want
-                    DuressState.setEnabled(context, want)
+                    if (want) {
+                        armWithDecoy(context, decoy)
+                        enabled = true
+                        DuressState.setEnabled(context, true)
+                    } else {
+                        // Elite hardware-key gate: disarming Duress Mode requires a FIDO2
+                        // tap when at least one key is enrolled. No key → gate is a no-op.
+                        HardwareKeyGate.requireAssertion(
+                            context = context,
+                            reason = "Confirm Duress disarm with your security key.",
+                            scope = gateScope,
+                            onSuccess = {
+                                enabled = false
+                                DuressState.setEnabled(context, false)
+                            },
+                            onCancel = { msg ->
+                                hardwareKeyGateError = msg
+                                    ?: "Disarm cancelled — security key tap missing."
+                            }
+                        )
+                    }
                 },
                 onBack = { step = 3 },
                 onFinish = {
@@ -221,6 +245,28 @@ fun DuressSetupScreen(onDone: () -> Unit = {}) {
             confirmButton = {
                 TextButton(onClick = { success = false; onDone() }) {
                     Text("Done", color = BrandAccentDark)
+                }
+            },
+            containerColor = MidnightCard
+        )
+    }
+
+    if (hardwareKeyGateError != null) {
+        AlertDialog(
+            onDismissRequest = { hardwareKeyGateError = null },
+            title = {
+                Text(
+                    "Hardware key required",
+                    color = PrimaryTextDark,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(hardwareKeyGateError.orEmpty(), color = SecondaryTextDark)
+            },
+            confirmButton = {
+                TextButton(onClick = { hardwareKeyGateError = null }) {
+                    Text("OK", color = BrandAccentDark)
                 }
             },
             containerColor = MidnightCard

@@ -25,6 +25,8 @@ import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.BluetoothSearching
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -43,8 +45,10 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.AlertDialog
@@ -89,6 +93,8 @@ import com.onlytrusted.app.export.DataExporter
 import com.onlytrusted.app.export.EvidenceExporter
 import com.onlytrusted.app.security.AppLockManager
 import com.onlytrusted.app.ui.duress.DuressState
+import com.onlytrusted.app.ui.hardwarekey.HardwareKeyGate
+import com.onlytrusted.app.ui.hardwarekey.HardwareKeyState
 import com.onlytrusted.app.ui.lock.BiometricPrompter
 import com.onlytrusted.app.ui.safety.AutoLockPrefs
 import com.onlytrusted.app.ui.safety.CarrierSpamReport
@@ -128,7 +134,11 @@ fun SettingsScreen(
     onOpenWangiri: () -> Unit = {},
     onOpenCheckIn: () -> Unit = {},
     onOpenSmartLinkGuard: () -> Unit = {},
-    onOpenTrackerFinder: () -> Unit = {}
+    onOpenTrackerFinder: () -> Unit = {},
+    onOpenHardwareKey: () -> Unit = {},
+    onOpenDeadmanWipe: () -> Unit = {},
+    onOpenEncryptedBackup: () -> Unit = {},
+    onOpenBackupRestore: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -152,7 +162,15 @@ fun SettingsScreen(
     var checkInUpsellOpen by remember { mutableStateOf(false) }
     var smartLinkGuardUpsellOpen by remember { mutableStateOf(false) }
     var trackerFinderUpsellOpen by remember { mutableStateOf(false) }
+    var hardwareKeyUpsellOpen by remember { mutableStateOf(false) }
+    var hardwareKeyGateError by remember { mutableStateOf<String?>(null) }
+    var deadmanUpsellOpen by remember { mutableStateOf(false) }
+    var encryptedBackupUpsellOpen by remember { mutableStateOf(false) }
+    var backupRestoreUpsellOpen by remember { mutableStateOf(false) }
+    val deadmanEnabled = remember { com.onlytrusted.app.deadmanwipe.DeadmanWipeState.isEnabled(context) }
+    val deadmanInterval = remember { com.onlytrusted.app.deadmanwipe.DeadmanWipeState.intervalDays(context) }
     val duressEnabled = remember { DuressState.isEnabled(context) }
+    val hardwareKeyActive = remember { HardwareKeyState.hasEnrolledKey(context) }
     val simSwapEnabled = remember {
         com.onlytrusted.app.ui.simswap.SimSwapState.isEnabled(context)
     }
@@ -571,7 +589,6 @@ fun SettingsScreen(
                     }
                 )
                 // Tracker Finder (Pro) — BLE scan for AirTag / Tile / Samsung SmartTag.
-                // Last row in Security & data per the brief.
                 RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.BluetoothSearching,
@@ -582,6 +599,71 @@ fun SettingsScreen(
                             onOpenTrackerFinder()
                         } else {
                             trackerFinderUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
+                // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
+                // backup export, Dead-Man Wipe disable) behind a physical key tap.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.VpnKey,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Hardware Security Key (Elite)",
+                    value = if (SubscriptionState.hasElite(context) && hardwareKeyActive) "On" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenHardwareKey()
+                        } else {
+                            hardwareKeyUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Dead-Man Wipe (Elite) — auto-wipe after N days of no unlock.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Timelapse,
+                    tint = if (deadmanEnabled) DangerDark else subGold,
+                    title = "Dead-Man Wipe (Elite)",
+                    value = if (deadmanEnabled) "On · ${deadmanInterval}d" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenDeadmanWipe()
+                        } else {
+                            deadmanUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Encrypted vault backup (Elite) — AES-256-GCM `.ot2bak` saved via SAF to
+                // Google Drive / Dropbox / anywhere.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.CloudUpload,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Encrypted vault backup (Elite)",
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenEncryptedBackup()
+                        } else {
+                            encryptedBackupUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Restore from backup (Elite) — pick a `.ot2bak`, decrypt, overwrite.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.CloudDownload,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Restore from backup (Elite)",
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenBackupRestore()
+                        } else {
+                            backupRestoreUpsellOpen = true
                         }
                     }
                 )
@@ -691,13 +773,157 @@ fun SettingsScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         confirmWipe = false
-                        vm.wipeEverything()
-                        scope.launch { snackbarHostState.showSnackbar("Everything wiped.") }
+                        // Elite-tier gate: if the user has enrolled a hardware security key,
+                        // the wipe only runs after a FIDO2 tap. No key enrolled → the gate
+                        // is a no-op and the wipe fires immediately.
+                        HardwareKeyGate.requireAssertion(
+                            context = context,
+                            reason = "Confirm wipe with your security key.",
+                            scope = scope,
+                            onSuccess = {
+                                vm.wipeEverything()
+                                HardwareKeyState.clearAll(context)
+                                scope.launch { snackbarHostState.showSnackbar("Everything wiped.") }
+                            },
+                            onCancel = { msg ->
+                                hardwareKeyGateError = msg
+                                    ?: "Wipe cancelled — security key tap missing."
+                            }
+                        )
                     }) { Text("Wipe") }
                 },
                 dismissButton = {
                     TextButton(onClick = { confirmWipe = false }) { Text("Cancel") }
                 }
+            )
+        }
+
+        if (hardwareKeyGateError != null) {
+            AlertDialog(
+                onDismissRequest = { hardwareKeyGateError = null },
+                title = {
+                    Text(
+                        "Hardware key required",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(hardwareKeyGateError.orEmpty(), color = SecondaryTextDark)
+                },
+                confirmButton = {
+                    TextButton(onClick = { hardwareKeyGateError = null }) {
+                        Text("OK", color = BrandAccentDark)
+                    }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (hardwareKeyUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { hardwareKeyUpsellOpen = false },
+                title = {
+                    Text(
+                        "Hardware Security Key is an Elite feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Use a YubiKey, Google Titan Key, or any FIDO2 security key to gate " +
+                            "the most dangerous actions: disarming Duress Mode, wiping the vault, " +
+                            "exporting encrypted backups, and disabling the Dead-Man Wipe. " +
+                            "Included in Elite.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        hardwareKeyUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { hardwareKeyUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (deadmanUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { deadmanUpsellOpen = false },
+                title = { Text("Dead-Man Wipe is an Elite feature", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "A trip-wire for lost or seized devices. If OnlyTrusted hasn't been " +
+                            "unlocked for a long time, it wipes every contact, blocked number, " +
+                            "event, and setting on its own. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        deadmanUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { deadmanUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (encryptedBackupUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { encryptedBackupUpsellOpen = false },
+                title = { Text("Encrypted vault backup is an Elite feature", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "Export every trusted contact, blocked number, event, and setting as a " +
+                            "single AES-256-GCM encrypted file. You pick where it goes — Google " +
+                            "Drive, Dropbox, anywhere. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        encryptedBackupUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { encryptedBackupUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (backupRestoreUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { backupRestoreUpsellOpen = false },
+                title = { Text("Restore from backup is an Elite feature", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "Pick a .ot2bak file from anywhere on your device, enter your " +
+                            "passphrase, and OnlyTrusted restores every contact, blocked number, " +
+                            "event, and setting. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        backupRestoreUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { backupRestoreUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
             )
         }
 

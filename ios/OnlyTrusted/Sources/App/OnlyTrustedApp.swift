@@ -8,6 +8,20 @@ struct OnlyTrustedApp: App {
     @StateObject private var simswap = SIMSwapState.shared
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        // Dead-Man Wipe (Elite): check the inactivity deadline before any UI renders. If the
+        // window has already elapsed, wipe everything first — this makes the trip-wire fire
+        // reliably even if the user keeps re-opening the app without unlocking it.
+        // `performWipe()` is MainActor-isolated and so is the shared instance; dispatch
+        // synchronously on the main queue (SwiftUI App init runs there anyway).
+        MainActor.assumeIsolated {
+            let state = DeadmanWipeState.shared
+            if state.shouldWipeNow() {
+                state.performWipe()
+            }
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

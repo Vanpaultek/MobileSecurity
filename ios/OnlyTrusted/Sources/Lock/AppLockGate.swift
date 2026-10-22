@@ -201,6 +201,8 @@ struct AppLockGate: View {
                 if ok {
                     // Real unlock — always clear duress session.
                     duress.isDuressSession = false
+                    // Dead-Man Wipe (Elite): reset the countdown on every real unlock.
+                    DeadmanWipeState.shared.markUnlockNow()
                     onUnlocked()
                 } else if let err {
                     error = err.localizedDescription
