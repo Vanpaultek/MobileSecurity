@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -61,7 +62,7 @@ import java.util.Date
 private val settingsBlue = Color(0xFF2266F0)
 
 private enum class BillingCadence { Monthly, Yearly }
-private enum class Plan { Free, Premium, Family, HighPremium }
+private enum class Plan { Free, Premium, Family, HighPremium, Elite }
 
 private data class PlanFeature(val text: String, val included: Boolean)
 
@@ -70,6 +71,7 @@ private fun Plan.displayName(): String = when (this) {
     Plan.Premium -> "Premium"
     Plan.Family -> "Family"
     Plan.HighPremium -> "Pro"
+    Plan.Elite -> "Elite"
 }
 
 private fun Plan.tier(): SubscriptionTier = when (this) {
@@ -77,6 +79,7 @@ private fun Plan.tier(): SubscriptionTier = when (this) {
     Plan.Premium -> SubscriptionTier.PREMIUM
     Plan.Family -> SubscriptionTier.FAMILY
     Plan.HighPremium -> SubscriptionTier.HIGH_PREMIUM
+    Plan.Elite -> SubscriptionTier.ELITE
 }
 
 private fun Plan.priceLabel(cadence: BillingCadence): String = when (this) {
@@ -84,11 +87,12 @@ private fun Plan.priceLabel(cadence: BillingCadence): String = when (this) {
     Plan.Premium -> if (cadence == BillingCadence.Monthly) "$0.99" else "$4.99"
     Plan.Family -> if (cadence == BillingCadence.Monthly) "$1.99" else "$9.99"
     Plan.HighPremium -> if (cadence == BillingCadence.Monthly) "$2.99" else "$19.99"
+    Plan.Elite -> if (cadence == BillingCadence.Monthly) "$3.99" else "$29.99"
 }
 
 private fun Plan.cadenceSuffix(cadence: BillingCadence): String = when (this) {
     Plan.Free -> ""
-    Plan.Premium, Plan.Family, Plan.HighPremium ->
+    Plan.Premium, Plan.Family, Plan.HighPremium, Plan.Elite ->
         if (cadence == BillingCadence.Monthly) "per month" else "per year"
 }
 
@@ -118,6 +122,14 @@ private fun Plan.features(): List<PlanFeature> = when (this) {
         PlanFeature("Tracker Finder (AirTag, Tile…)", true),
         PlanFeature("Smart Link Guard (SMS + QR)", true),
         PlanFeature("Wangiri + Safety Check-In", true)
+    )
+    Plan.Elite -> listOf(
+        PlanFeature("Everything in Pro", true),
+        PlanFeature("Hardware security key (YubiKey, Titan, SoloKey)", true),
+        PlanFeature("Dead-man wipe (auto-wipe if device confiscated)", true),
+        PlanFeature("Encrypted vault backup to your own cloud", true),
+        PlanFeature("Panic lockdown mode", true),
+        PlanFeature("Priority support with 24h response", true)
     )
 }
 
@@ -175,6 +187,7 @@ fun UpgradeToPremiumScreen(onBack: () -> Unit = {}) {
                 Plan.Premium -> "Subscribe to Premium"
                 Plan.Family -> "Subscribe to Family"
                 Plan.HighPremium -> "Subscribe to Pro"
+                Plan.Elite -> "Subscribe to Elite"
             }
             CtaButton(label = ctaLabel, onClick = { showPurchaseConfirmation = true })
             RestoreButton(
@@ -430,6 +443,8 @@ private fun PlansGrid(
             PlanCard(Plan.Family, cadence, selectedPlan == Plan.Family, onSelect, Modifier.weight(1f))
             PlanCard(Plan.HighPremium, cadence, selectedPlan == Plan.HighPremium, onSelect, Modifier.weight(1f))
         }
+        // Elite sits alone, full-width — the top-shelf tier gets its own slot.
+        PlanCard(Plan.Elite, cadence, selectedPlan == Plan.Elite, onSelect, Modifier.fillMaxWidth())
     }
 }
 
@@ -507,6 +522,7 @@ private fun PlanCard(
                     textAlign = TextAlign.Center
                 )
                 Plan.HighPremium -> AllProtectionPill()
+                Plan.Elite -> ElitePill()
             }
 
             Spacer(Modifier.size(2.dp))
@@ -586,6 +602,20 @@ private fun PlanChip(plan: Plan) {
                 modifier = Modifier.size(22.dp)
             )
         }
+        Plan.Elite -> Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(size)
+                .border(1.5.dp, BrandCyanDark, CircleShape)
+                .shadow(10.dp, CircleShape, ambientColor = BrandCyanDark, spotColor = BrandCyanDark)
+        ) {
+            Icon(
+                Icons.Filled.VpnKey,
+                contentDescription = null,
+                tint = BrandCyanDark,
+                modifier = Modifier.size(22.dp)
+            )
+        }
     }
 }
 
@@ -621,6 +651,23 @@ private fun AllProtectionPill() {
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = aboutOrange
+        )
+    }
+}
+
+@Composable
+private fun ElitePill() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .border(1.dp, BrandCyanDark, RoundedCornerShape(999.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            "Elite — Max Security",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = BrandCyanDark
         )
     }
 }

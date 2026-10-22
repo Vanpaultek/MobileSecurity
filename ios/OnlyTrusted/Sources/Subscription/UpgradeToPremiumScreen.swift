@@ -15,7 +15,7 @@ struct UpgradeToPremiumScreen: View {
     @State private var showRestoreNotice: String?
 
     enum BillingCadence: Hashable { case monthly, yearly }
-    enum Plan: Hashable { case free, premium, family, highPremium }
+    enum Plan: Hashable { case free, premium, family, highPremium, elite }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -158,6 +158,9 @@ struct UpgradeToPremiumScreen: View {
                 planCard(.family)
                 planCard(.highPremium)
             }
+            // Elite sits alone, full-width — it's the "top shelf" tier so it earns the
+            // premium slot visually.
+            planCard(.elite)
         }
     }
 
@@ -200,6 +203,20 @@ struct UpgradeToPremiumScreen: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Capsule().stroke(Color.aboutOrange, lineWidth: 1))
+                case .elite:
+                    Text("Elite — Max Security")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Color.appBrightCyan)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .stroke(
+                                    LinearGradient(colors: [Color.appBrightCyan, Color.aboutOrange],
+                                                   startPoint: .leading, endPoint: .trailing),
+                                    lineWidth: 1
+                                )
+                        )
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -271,6 +288,7 @@ struct UpgradeToPremiumScreen: View {
         case .premium: return "Subscribe to Premium"
         case .family: return "Subscribe to Family"
         case .highPremium: return "Subscribe to Pro"
+        case .elite: return "Subscribe to Elite"
         }
     }
 
@@ -320,6 +338,7 @@ extension UpgradeToPremiumScreen.Plan {
         case .premium: return "Premium"
         case .family: return "Family"
         case .highPremium: return "Pro"
+        case .elite: return "Elite"
         }
     }
 
@@ -329,6 +348,7 @@ extension UpgradeToPremiumScreen.Plan {
         case .premium: return .premium
         case .family: return .family
         case .highPremium: return .highPremium
+        case .elite: return .elite
         }
     }
 
@@ -341,13 +361,15 @@ extension UpgradeToPremiumScreen.Plan {
             return cadence == .monthly ? "$1.99" : "$9.99"
         case .highPremium:
             return cadence == .monthly ? "$2.99" : "$19.99"
+        case .elite:
+            return cadence == .monthly ? "$3.99" : "$29.99"
         }
     }
 
     func cadenceSuffix(for cadence: UpgradeToPremiumScreen.BillingCadence) -> String {
         switch self {
         case .free: return ""
-        case .premium, .family, .highPremium:
+        case .premium, .family, .highPremium, .elite:
             return cadence == .monthly ? "per month" : "per year"
         }
     }
@@ -387,6 +409,23 @@ extension UpgradeToPremiumScreen.Plan {
                         .stroke(Color.aboutOrange, lineWidth: 1.5)
                         .shadow(color: Color.aboutOrange.opacity(0.6), radius: 10)
                 )
+        case .elite:
+            Image(systemName: "key.horizontal.fill")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(
+                    LinearGradient(colors: [Color.appBrightCyan, Color.aboutOrange],
+                                   startPoint: .leading, endPoint: .trailing)
+                )
+                .frame(width: 46, height: 46)
+                .background(
+                    Circle()
+                        .stroke(
+                            LinearGradient(colors: [Color.appBrightCyan, Color.aboutOrange],
+                                           startPoint: .leading, endPoint: .trailing),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: Color.appBrightCyan.opacity(0.6), radius: 10)
+                )
         }
     }
 
@@ -419,6 +458,14 @@ extension UpgradeToPremiumScreen.Plan {
             .init(text: "Tracker Finder (AirTag, Tile…)", included: true),
             .init(text: "Smart Link Guard (SMS + QR)", included: true),
             .init(text: "Wangiri + Safety Check-In", included: true)
+        ]
+        case .elite: return [
+            .init(text: "Everything in Pro", included: true),
+            .init(text: "Hardware security key (YubiKey, Titan, SoloKey)", included: true),
+            .init(text: "Dead-man wipe (auto-wipe if device confiscated)", included: true),
+            .init(text: "Encrypted vault backup to your own cloud", included: true),
+            .init(text: "Panic lockdown mode", included: true),
+            .init(text: "Priority support with 24h response", included: true)
         ]
         }
     }

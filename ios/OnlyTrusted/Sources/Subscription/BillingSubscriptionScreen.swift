@@ -323,7 +323,7 @@ private struct BillingHistorySheet: View {
 
 /// Tier ladder. Features gate against this instead of a boolean so new tiers slot in cleanly.
 enum SubscriptionTier: String, CaseIterable, Codable {
-    case free, premium, family, highPremium
+    case free, premium, family, highPremium, elite
 
     var displayName: String {
         switch self {
@@ -331,17 +331,19 @@ enum SubscriptionTier: String, CaseIterable, Codable {
         case .premium:      return "Premium"
         case .family:       return "Family"
         case .highPremium:  return "Pro (High Premium)"
+        case .elite:        return "Elite"
         }
     }
 
-    /// Numeric rank for `>=` checks. Family and HighPremium are both "above" Premium; HighPremium
-    /// is the top tier and unlocks everything.
+    /// Numeric rank for `>=` checks. Elite is the top tier and unlocks everything (Pro + its own
+    /// extras: hardware security key, dead-man wipe, encrypted vault backup).
     var rank: Int {
         switch self {
         case .free:        return 0
         case .premium:     return 1
         case .family:      return 2
         case .highPremium: return 3
+        case .elite:       return 4
         }
     }
 }
@@ -373,6 +375,9 @@ final class SubscriptionState: ObservableObject {
     var hasPremium: Bool { isActive && tier.rank >= SubscriptionTier.premium.rank }
     /// Convenience: does the current tier include every High Premium / Pro feature?
     var hasHighPremium: Bool { isActive && tier.rank >= SubscriptionTier.highPremium.rank }
+    /// Convenience: does the current tier include Elite features (hardware key, dead-man wipe,
+    /// encrypted vault backup)? Elite also unlocks everything Pro ships.
+    var hasElite: Bool { isActive && tier.rank >= SubscriptionTier.elite.rank }
 
     let invoiceHistory: [InvoiceEntry] = [
         .init(date: Date().addingTimeInterval(-365 * 86400), description: "Premium yearly", amountCents: 499),

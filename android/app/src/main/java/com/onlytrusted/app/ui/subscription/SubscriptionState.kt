@@ -17,12 +17,13 @@ import java.util.Locale
  * All reads/writes go through [SubscriptionState.get] so the Billing and Upgrade screens
  * share the same source of truth.
  */
-/** Tier ladder — mirrors iOS `SubscriptionTier`. HighPremium (Pro) unlocks everything. */
+/** Tier ladder — mirrors iOS `SubscriptionTier`. Elite is the top tier and unlocks everything. */
 enum class SubscriptionTier(val displayName: String, val rank: Int) {
     FREE("Free", 0),
     PREMIUM("Premium", 1),
     FAMILY("Family", 2),
-    HIGH_PREMIUM("Pro (High Premium)", 3);
+    HIGH_PREMIUM("Pro (High Premium)", 3),
+    ELITE("Elite", 4);
 
     companion object {
         fun fromKey(key: String?): SubscriptionTier =
@@ -65,6 +66,10 @@ object SubscriptionState {
     /** True only if the user is on HighPremium (Pro). Gates the batch-1 security features. */
     fun hasHighPremium(ctx: Context): Boolean =
         isActive(ctx) && tier(ctx).rank >= SubscriptionTier.HIGH_PREMIUM.rank
+
+    /** True only if the user is on Elite. Gates hardware-key + dead-man wipe + encrypted backup. */
+    fun hasElite(ctx: Context): Boolean =
+        isActive(ctx) && tier(ctx).rank >= SubscriptionTier.ELITE.rank
 
     fun planName(ctx: Context): String =
         prefs(ctx).getString(KEY_PLAN_NAME, null) ?: "Premium"
