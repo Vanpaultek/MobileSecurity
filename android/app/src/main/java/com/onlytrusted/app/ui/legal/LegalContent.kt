@@ -251,6 +251,40 @@ If anything on any screen is hard to use with TalkBack, Switch Access, a large f
 
     data class LegalSection(val title: String, val body: String)
 
+    val duressAndLaw = """
+# Duress Mode & law
+
+Duress Mode is a Pro feature designed for the real-world situation where you cannot refuse to unlock your phone — a mugger, an abusive partner, an unlawful demand at a border. The secondary PIN unlocks a decoy vault that looks like a tidy but boring list of trusted contacts, and sends a silent SOS text to one trusted recipient so they know what just happened.
+
+## What it is for
+
+- Protecting the location of your real family roster from someone who physically has your phone and your attention.
+- Buying you time: the coercer sees a believable, dull vault; your emergency contact gets a signal.
+- Giving you a way out of a situation without having to explain anything on screen.
+
+## What it is NOT for
+
+- Hiding information from a lawful search where you have a legal obligation to disclose. Depending on your country, lying to law enforcement, obstructing a border inspection, or destroying evidence may be a crime. OnlyTrusted does not advise you on when any of those apply to you.
+- Operating on someone else's phone. The owner must set up Duress Mode themselves.
+
+## Legal reality
+
+Laws about compelled unlock, decoy data, and whether you must disclose a second PIN differ widely:
+
+- US — the current body of case law is mixed. Several federal and state courts treat biometric compulsion differently from passcode compulsion. There is no universal answer.
+- UK — RIPA s.49 can require you to disclose a key or passphrase; refusal is itself an offence.
+- EU — member states vary. Border searches and compelled-disclosure powers differ by country.
+- Many other jurisdictions — unknown or evolving.
+
+Before you enable Duress Mode, check what your local law actually permits. If you are being coerced by an abusive partner or trafficker, your safest step is usually to contact a domestic-violence or anti-trafficking hotline that knows your country's legal landscape, not to rely on any app alone.
+
+## What this app will NOT do
+
+- We will not help an attacker, a stalker, or a trafficker use Duress Mode to conceal activity from a victim.
+- We will not add network callbacks that would phone home when duress is triggered. Alerting runs through `SmsManager` on this device, with the owner's chosen recipient; nothing goes to us.
+- We will not change the behaviour of Duress Mode in a silent update. If the mechanism changes, the "last updated" date above moves and the full text ships inside the new version of the app.
+    """.trimIndent()
+
     val sections = listOf(
         LegalSection("Audience", audienceStatement),
         LegalSection("Non-interference", nonInterferencePledge),
@@ -259,6 +293,7 @@ If anything on any screen is hard to use with TalkBack, Switch Access, a large f
         LegalSection("Terms of use", termsOfUse),
         LegalSection("Honest claims", honestClaims),
         LegalSection("Data principles", dataPrinciples),
-        LegalSection("Accessibility", accessibilityStatement)
+        LegalSection("Accessibility", accessibilityStatement),
+        LegalSection("Duress Mode & law", duressAndLaw)
     )
 }

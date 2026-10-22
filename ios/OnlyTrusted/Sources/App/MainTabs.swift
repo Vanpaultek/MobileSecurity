@@ -9,32 +9,150 @@ struct MainTabs: View {
     enum Tab: Hashable { case home, contacts, blocked, log, settings }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationStack {
-                DashboardScreen(onNavigate: { selectedTab = $0 })
+        ZStack(alignment: .bottomTrailing) {
+            TabView(selection: $selectedTab) {
+                NavigationStack {
+                    DashboardScreen(onNavigate: { selectedTab = $0 })
+                }
+                .tabItem { Label("Home", systemImage: "house.fill") }
+                .tag(Tab.home)
+
+                NavigationStack { VaultScreen() }
+                    .tabItem { Label("Contacts", systemImage: "person.2.fill") }
+                    .tag(Tab.contacts)
+
+                NavigationStack { BlockListScreen() }
+                    .tabItem { Label("Blocked", systemImage: "nosign") }
+                    .tag(Tab.blocked)
+
+                NavigationStack { EventsScreen() }
+                    .tabItem { Label("Log", systemImage: "doc.text.fill") }
+                    .tag(Tab.log)
+
+                NavigationStack { SettingsScreen() }
+                    .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                    .tag(Tab.settings)
             }
-            .tabItem { Label("Home", systemImage: "house.fill") }
-            .tag(Tab.home)
+            .tint(Color.appAccent)
+            .toolbarBackground(Color.appScreenBackground, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
 
-            NavigationStack { VaultScreen() }
-                .tabItem { Label("Contacts", systemImage: "person.2.fill") }
-                .tag(Tab.contacts)
-
-            NavigationStack { BlockListScreen() }
-                .tabItem { Label("Blocked", systemImage: "nosign") }
-                .tag(Tab.blocked)
-
-            NavigationStack { EventsScreen() }
-                .tabItem { Label("Log", systemImage: "doc.text.fill") }
-                .tag(Tab.log)
-
-            NavigationStack { SettingsScreen() }
-                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-                .tag(Tab.settings)
+            // F1 — Panic quick-dial. Floating red circular SOS button, shown only on Home
+            // so it doesn't collide with destructive actions deeper in the app. Sits above
+            // the tab bar (lift by 100pt to clear the bar + bottom inset).
+            if selectedTab == .home {
+                PanicSOSButton(onNavigateToContacts: { selectedTab = .contacts })
+                    .padding(.trailing, 18)
+                    .padding(.bottom, 100)
+            }
         }
-        .tint(Color.appAccent)
-        .toolbarBackground(Color.appScreenBackground, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
+    }
+}
+
+// MARK: - F1 Panic SOS button
+
+/// Floating circular red button on Home. One tap triggers a confirmation sheet; the
+/// user then taps "Call now" to open `tel:` for the first trusted contact and (if
+/// available) a pre-filled Messages composer with the panic text. Pure deep links,
+/// no network.
+private struct PanicSOSButton: View {
+    let onNavigateToContacts: () -> Void
+
+    @State private var confirming = false
+    @State private var showNoContactAlert = false
+    @State private var showSMSComposer = false
+    @State private var smsBody: String = ""
+    @State private var smsRecipient: String = ""
+
+    var body: some View {
+        Button(action: { tapped() }) {
+            ZStack {
+                Circle()
+                    .fill(Color.appDanger)
+                    .frame(width: 64, height: 64)
+                    .shadow(color: Color.appDanger.opacity(0.6), radius: 14, x: 0, y: 0)
+                VStack(spacing: 0) {
+                    Image(systemName: "phone.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text("SOS")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .tracking(0.5)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Panic — call first trusted contact")
+        .accessibilityAddTraits(.isButton)
+        .confirmationDialog("Panic alert?", isPresented: $confirming, titleVisibility: .visible) {
+            if let name = PanicContact.firstTrustedContactName() {
+                Button("Call \(name) now", role: .destructive) { triggerPanic() }
+                if MessageComposerView.canSendText {
+                    Button("Only send Messages alert") { prepareSMSOnly() }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if let name = PanicContact.firstTrustedContactName() {
+                Text("This will dial \(name) and open a pre-filled panic SMS. iOS requires you to tap Send on the SMS.")
+            } else {
+                Text("Add a trusted contact first.")
+            }
+        }
+        .alert("Add a trusted contact first", isPresented: $showNoContactAlert) {
+            Button("Open Contacts") { onNavigateToContacts() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The SOS button dials your first trusted contact. Add one in the Contacts tab to use this.")
+        }
+        .sheet(isPresented: $showSMSComposer) {
+            MessageComposerView(
+                recipients: [smsRecipient],
+                body: smsBody,
+                onFinish: { _ in showSMSComposer = false }
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private func tapped() {
+        guard PanicContact.firstTrustedContactNumber() != nil else {
+            showNoContactAlert = true
+            return
+        }
+        confirming = true
+    }
+
+    private func triggerPanic() {
+        guard let number = PanicContact.firstTrustedContactNumber(),
+              let name = PanicContact.firstTrustedContactName()
+        else { return }
+        // Dial via tel: — iOS has no silent-call API; the Phone app opens with the number
+        // preloaded and the call starts on confirmation.
+        if let url = URL(string: "tel:\(number)") {
+            UIApplication.shared.open(url)
+        }
+        // iOS limitation: there is no silent SMS send. We open the system Messages
+        // composer with recipient + body pre-filled; the user must tap Send.
+        if MessageComposerView.canSendText {
+            smsRecipient = number
+            smsBody = "\u{26A0}\u{FE0F} OnlyTrusted panic alert from \(name): I need help."
+            // Give the Phone app a beat to come forward before presenting SMS so both
+            // actions complete cleanly from a single tap.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                showSMSComposer = true
+            }
+        }
+    }
+
+    private func prepareSMSOnly() {
+        guard let number = PanicContact.firstTrustedContactNumber(),
+              let name = PanicContact.firstTrustedContactName()
+        else { return }
+        smsRecipient = number
+        smsBody = "\u{26A0}\u{FE0F} OnlyTrusted panic alert from \(name): I need help."
+        showSMSComposer = true
     }
 }
 
@@ -45,9 +163,17 @@ struct DashboardScreen: View {
 
     @EnvironmentObject private var gate: AppGate
     @StateObject private var vault = VaultStore.shared
+    @StateObject private var duress = DuressState.shared
     @State private var blockedToday: Int = 0
     @State private var blockedWeek: Int = 0
     @State private var showHonestLimitsSheet = false
+    @State private var confirmDuressExit = false
+
+    // F4 weekly digest + F5 honest-limits refresher banner state.
+    @State private var showWeeklyDigest = false
+    @State private var weeklyDigestCounts = WeeklyDigestCounts(callsBlocked: 0, textsBlocked: 0)
+    @State private var showHonestLimitsRefresher = false
+    @State private var showReports = false
 
     private var protectionActive: Bool { !vault.contacts.isEmpty }
 
@@ -62,7 +188,35 @@ struct DashboardScreen: View {
                     name: nil,
                     onSettings: { onNavigate(.settings) }
                 )
+                // F4 weekly digest banner (Monday first open, once per week).
+                if showWeeklyDigest {
+                    WeeklyDigestBanner(
+                        callCount: weeklyDigestCounts.callsBlocked,
+                        textCount: weeklyDigestCounts.textsBlocked,
+                        onDismiss: dismissWeeklyDigest,
+                        onSeeReport: {
+                            dismissWeeklyDigest()
+                            showReports = true
+                        }
+                    )
+                }
+                // F5 honest-limits monthly refresher.
+                if showHonestLimitsRefresher {
+                    HonestLimitsRefresherBanner(
+                        onLearnMore: {
+                            dismissHonestLimitsRefresher()
+                            showHonestLimitsSheet = true
+                        },
+                        onDismiss: dismissHonestLimitsRefresher
+                    )
+                }
+                // Triple-tap the shield card to panic-exit a duress session. Deliberately
+                // hidden: no label, no visible affordance — the gesture only matters while a
+                // duress session is live, and we show the confirm dialog only then.
                 ProtectionActiveCard(isActive: protectionActive)
+                    .onTapGesture(count: 3) {
+                        if duress.isDuressSession { confirmDuressExit = true }
+                    }
                 statsRow
                 quickActionsSection
                 HonestLimitsCallout(onTap: { showHonestLimitsSheet = true })
@@ -72,14 +226,25 @@ struct DashboardScreen: View {
         }
         .background(Color.appScreenBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .navigationDestination(isPresented: $showReports) { ReportsScreen() }
         .task {
             await vault.reload()
             refreshStats()
+            refreshBanners()
         }
         .sheet(isPresented: $showHonestLimitsSheet) {
             NavigationStack {
                 HonestLimitsSheet()
             }
+        }
+        .confirmationDialog("Exit duress mode?", isPresented: $confirmDuressExit, titleVisibility: .visible) {
+            Button("Exit", role: .destructive) {
+                duress.isDuressSession = false
+                gate.panic()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You'll be returned to the lock screen. Unlock with your real credential to see the real vault.")
         }
     }
 
@@ -139,6 +304,149 @@ struct DashboardScreen: View {
         let startOfWeek = cal.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
         blockedToday = all.filter { $0.addedAt >= startOfToday }.count
         blockedWeek  = all.filter { $0.addedAt >= startOfWeek }.count
+    }
+
+    private func refreshBanners() {
+        if HomeBannerPrefs.shouldShowWeeklyDigest() {
+            weeklyDigestCounts = WeeklyDigestCounts.compute()
+            showWeeklyDigest = true
+        }
+        if HomeBannerPrefs.shouldShowHonestLimitsRefresher() {
+            showHonestLimitsRefresher = true
+        }
+    }
+
+    private func dismissWeeklyDigest() {
+        showWeeklyDigest = false
+        HomeBannerPrefs.markWeeklyDigestShown()
+    }
+
+    private func dismissHonestLimitsRefresher() {
+        showHonestLimitsRefresher = false
+        HomeBannerPrefs.markHonestLimitsRefresherShown()
+    }
+}
+
+// MARK: - F4 Weekly digest banner
+
+private struct WeeklyDigestBanner: View {
+    let callCount: Int
+    let textCount: Int
+    let onDismiss: () -> Void
+    let onSeeReport: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "chart.bar.xaxis")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.appBrightCyan)
+                .frame(width: 44, height: 44)
+                .background(
+                    Color.appBrightCyan.opacity(0.18),
+                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                )
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Your week in protection")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.appPrimaryText)
+                Text(summary)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 12) {
+                    Button(action: onSeeReport) {
+                        Text("See full report")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.appBrightCyan)
+                    }
+                    .buttonStyle(.plain)
+                    Button(action: onDismiss) {
+                        Text("Dismiss")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.appSecondaryText)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.appElevatedSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.appBrightCyan.opacity(0.35), lineWidth: 1)
+                )
+        )
+    }
+
+    private var summary: String {
+        if callCount == 0 && textCount == 0 {
+            return "No blocked activity in the last 7 days. Everything's quiet."
+        }
+        return "This week we blocked \(callCount) call\(callCount == 1 ? "" : "s") and \(textCount) text\(textCount == 1 ? "" : "s") for you."
+    }
+}
+
+// MARK: - F5 Honest-limits refresher banner
+
+private struct HonestLimitsRefresherBanner: View {
+    let onLearnMore: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.appWarning)
+                .frame(width: 44, height: 44)
+                .background(
+                    Color.appWarning.opacity(0.18),
+                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                )
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("A monthly reminder")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.appPrimaryText)
+                Text("This app cannot monitor other apps' microphone or camera use.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 12) {
+                    Button(action: onLearnMore) {
+                        Text("Learn more")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.appWarning)
+                    }
+                    .buttonStyle(.plain)
+                    Button(action: onDismiss) {
+                        Text("Dismiss")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.appSecondaryText)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.appWarning.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.appWarning.opacity(0.4), lineWidth: 1)
+                )
+        )
     }
 }
 

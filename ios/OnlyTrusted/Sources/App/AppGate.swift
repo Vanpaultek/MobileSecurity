@@ -52,4 +52,30 @@ final class AppGate: ObservableObject {
             if !newValue { isLocked = false }
         }
     }
+
+    /// Called from `OnlyTrustedApp` when the scene moves to the background. Records a
+    /// timestamp so we can compute inactivity on return. No lock happens here.
+    func noteDidEnterBackground() {
+        AutoLockPrefs.markBackgroundedNow()
+    }
+
+    /// Called when the scene becomes active. If the configured auto-lock window has
+    /// elapsed and App Lock is on, re-arm the lock screen. The user still has to
+    /// authenticate through `AppLockGate` to unlock.
+    func maybeAutoLock() {
+        guard appLockEnabled else {
+            AutoLockPrefs.clearBackgroundTimestamp()
+            return
+        }
+        let seconds = AutoLockPrefs.currentSeconds
+        guard seconds > 0 else {
+            AutoLockPrefs.clearBackgroundTimestamp()
+            return
+        }
+        guard let elapsed = AutoLockPrefs.elapsedSinceBackground() else { return }
+        if elapsed >= TimeInterval(seconds) {
+            isLocked = true
+        }
+        AutoLockPrefs.clearBackgroundTimestamp()
+    }
 }

@@ -73,7 +73,17 @@ final class VaultStore: ObservableObject {
 
     @Published private(set) var contacts: [MaskedContact] = []
 
+    /// Live mode flag. When flipped to `.duress`, all reads/writes route through
+    /// `DuressVaultStore` so the UI shows (and only mutates) the decoy data. Set by
+    /// `DuressState.isDuressSession`.
+    var activeMode: VaultMode = .real {
+        didSet {
+            if oldValue != activeMode { reloadSync() }
+        }
+    }
+
     private let storageURL: URL
+    private let duress = DuressVaultStore.shared
 
     init(storageURL: URL? = nil) {
         if let storageURL {
@@ -87,10 +97,22 @@ final class VaultStore: ObservableObject {
     }
 
     func reload() async {
-        contacts = loadRecords().map { $0.toMasked() }
+        reloadSync()
+    }
+
+    private func reloadSync() {
+        switch activeMode {
+        case .real:
+            contacts = loadRecords().map { $0.toMasked() }
+        case .duress:
+            contacts = duress.loadMasked()
+        }
     }
 
     func reveal(id: UUID) throws -> RevealedContact? {
+        if activeMode == .duress {
+            return try duress.reveal(id: id)
+        }
         guard let record = loadRecords().first(where: { $0.id == id }) else { return nil }
         return RevealedContact(
             id: record.id,
@@ -104,6 +126,11 @@ final class VaultStore: ObservableObject {
     }
 
     func save(_ draft: TrustedContactDraft) throws {
+        if activeMode == .duress {
+            try duress.save(draft)
+            contacts = duress.loadMasked()
+            return
+        }
         var records = loadRecords()
         let now = Date()
         let id = draft.id ?? UUID()
@@ -138,14 +165,26 @@ final class VaultStore: ObservableObject {
     }
 
     func delete(id: UUID) throws {
+        if activeMode == .duress {
+            try duress.delete(id: id)
+            contacts = duress.loadMasked()
+            return
+        }
         var records = loadRecords()
         records.removeAll { $0.id == id }
         try persist(records)
         contacts = records.map { $0.toMasked() }
     }
 
+    /// Reads the real list regardless of `activeMode`. Used by the duress setup picker so the
+    /// owner can select from their real trusted-contact roster before enabling the feature.
+    func realContactsForSetup() -> [MaskedContact] {
+        loadRecords().map { $0.toMasked() }
+    }
+
     func wipe() throws {
         try? FileManager.default.removeItem(at: storageURL)
+        duress.wipe()
         contacts = []
     }
 

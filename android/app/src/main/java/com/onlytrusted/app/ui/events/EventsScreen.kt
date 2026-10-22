@@ -32,9 +32,13 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PhonePaused
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +64,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.onlytrusted.app.OnlyTrustedApp
 import com.onlytrusted.app.data.db.entities.SecurityEvent
+import com.onlytrusted.app.data.repository.MaskedContact
+import com.onlytrusted.app.ui.safety.CallerLookup
+import com.onlytrusted.app.ui.safety.ReportScam
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.DangerDark
@@ -157,6 +164,8 @@ fun EventsScreen() {
         initializer { EventsViewModel(app) }
     })
     val events by vm.events.collectAsStateWithLifecycle()
+    val trustedContacts by app.trustedContacts.maskedList()
+        .collectAsStateWithLifecycle(initialValue = emptyList())
     var filter by remember { mutableStateOf(EventFilter.All) }
     var chainOk by remember { mutableStateOf<Boolean?>(null) }
     val scope = rememberCoroutineScope()
@@ -211,7 +220,7 @@ fun EventsScreen() {
                 EmptyState(filter = filter)
             } else {
                 grouped.forEach { (group, rows) ->
-                    DaySection(title = group.title, rows = rows)
+                    DaySection(title = group.title, rows = rows, trustedContacts = trustedContacts)
                 }
             }
         }
@@ -402,7 +411,7 @@ private fun EmptyState(filter: EventFilter) {
 // MARK: - Day section (large header + standalone row cards)
 
 @Composable
-private fun DaySection(title: String, rows: List<SecurityEvent>) {
+private fun DaySection(title: String, rows: List<SecurityEvent>, trustedContacts: List<MaskedContact>) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = title,
@@ -412,7 +421,7 @@ private fun DaySection(title: String, rows: List<SecurityEvent>) {
         )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             rows.forEach { event ->
-                EventRow(event = event)
+                EventRow(event = event, trustedContacts = trustedContacts)
             }
         }
     }
@@ -421,11 +430,18 @@ private fun DaySection(title: String, rows: List<SecurityEvent>) {
 // MARK: - Event row (standalone surface, solid-filled icon chip, cyan timestamp)
 
 @Composable
-private fun EventRow(event: SecurityEvent) {
+private fun EventRow(event: SecurityEvent, trustedContacts: List<MaskedContact>) {
+    val context = LocalContext.current
     val category = EventCategory.of(event.type)
     val tint = tintFor(event.type, category)
     val icon = iconFor(event.type, category)
     val timeFormatter = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
+
+    // F3 — resolve trusted-contact name for the subtitle + show a "Trusted" chip.
+    val trustedName = remember(event.detail, trustedContacts) {
+        CallerLookup.nameForNumber(event.detail, trustedContacts)
+    }
+    var menuOpen by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -454,13 +470,31 @@ private fun EventRow(event: SecurityEvent) {
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = humanLabel(event.type),
-                color = PrimaryTextDark,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            val subtitle = event.detail?.takeIf { it.isNotBlank() }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = humanLabel(event.type),
+                    color = PrimaryTextDark,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (trustedName != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(BrandCyanDark)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            "Trusted",
+                            color = MidnightBackground,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            val subtitle = trustedName
+                ?: event.detail?.takeIf { it.isNotBlank() }
                 ?: event.packageName?.takeIf { it.isNotBlank() }
                 ?: "Unknown number"
             Text(
@@ -479,6 +513,30 @@ private fun EventRow(event: SecurityEvent) {
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold
         )
+
+        // F7 — Overflow menu for Report scam on blocked entries.
+        if (category == EventCategory.Blocked) {
+            Box {
+                IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = "More",
+                        tint = SecondaryTextDark,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Report scam") },
+                        onClick = {
+                            menuOpen = false
+                            val number = Regex("\\+?\\d{7,}").find(event.detail.orEmpty())?.value.orEmpty()
+                            ReportScam.share(context, number, event.timestamp)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 

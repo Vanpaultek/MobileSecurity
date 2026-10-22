@@ -7,6 +7,7 @@ import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CallEnd
@@ -36,6 +42,8 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -45,7 +53,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +80,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.onlytrusted.app.OnlyTrustedApp
 import com.onlytrusted.app.R
+import com.onlytrusted.app.data.db.entities.SecurityEvent
+import com.onlytrusted.app.ui.safety.HomeBannerPrefs
+import com.onlytrusted.app.ui.safety.PanicContact
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.BrandPrimaryTeal
@@ -88,8 +102,14 @@ fun DashboardScreen(
     onGoToVault: () -> Unit = {},
     onGoToSettings: () -> Unit = {},
     onGoToBlockList: () -> Unit = {},
-    onGoToEvents: () -> Unit = {}
+    onGoToEvents: () -> Unit = {},
+    onGoToReports: () -> Unit = {}
 ) {
+    val duressActive by com.onlytrusted.app.ui.duress.DuressState.isDuressSession
+        .collectAsStateWithLifecycle()
+    var confirmDuressExit by remember { mutableStateOf(false) }
+    var tapCount by remember { mutableStateOf(0) }
+    var lastTapAt by remember { mutableStateOf(0L) }
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
     val vm: DashboardViewModel = viewModel(factory = viewModelFactory {
@@ -98,10 +118,31 @@ fun DashboardScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val runtime by vm.runtimeState.collectAsStateWithLifecycle()
     var showHonestLimitsSheet by remember { mutableStateOf(false) }
+    var showNoContactAlert by remember { mutableStateOf(false) }
+    var confirmPanic by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // F4 weekly digest + F5 refresher state.
+    var showWeeklyDigest by remember { mutableStateOf(false) }
+    var showHonestLimitsRefresher by remember { mutableStateOf(false) }
+    var weeklyCallsBlocked by remember { mutableStateOf(0) }
+    var weeklyTextsBlocked by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         vm.refreshRuntime()
         vm.verifyAuditChain()
+        if (HomeBannerPrefs.shouldShowWeeklyDigest(context)) {
+            // Compute from EventStore for the last 7 days.
+            val weekAgo = System.currentTimeMillis() - 7L * 24L * 60L * 60L * 1000L
+            val events = app.database.eventDao().recent(limit = 10_000).first()
+                .filter { it.timestamp >= weekAgo }
+            weeklyCallsBlocked = events.count { it.type == SecurityEvent.TYPE_CALL_BLOCKED }
+            weeklyTextsBlocked = events.count { it.type == SecurityEvent.TYPE_SMS_FLAGGED }
+            showWeeklyDigest = true
+        }
+        if (HomeBannerPrefs.shouldShowHonestLimitsRefresher(context)) {
+            showHonestLimitsRefresher = true
+        }
     }
     LaunchedEffect(state.trustedContactCount) {
         vm.setHasAnyTrustedContact(state.trustedContactCount > 0)
@@ -109,32 +150,180 @@ fun DashboardScreen(
 
     val protectionActive = state.trustedContactCount > 0 && runtime.trustedOnlyCalls
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MidnightBackground)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 18.dp)
-            .padding(bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        CinematicHeader_Unused(name = null, onSettings = onGoToSettings)
-        ProtectionActiveCard(isActive = protectionActive)
-        StatsRow(
-            trusted = state.trustedContactCount,
-            blockedToday = state.blockedCalls24h,
-            blockedWeek = state.flaggedSms24h
-        )
-        QuickActionsSection(
-            onAddContact = onGoToVault,
-            onBlockNumber = onGoToBlockList,
-            onViewLog = onGoToEvents
-        )
-        HonestLimitsCallout(onTap = { showHonestLimitsSheet = true })
+    Box(modifier = Modifier.fillMaxSize().background(MidnightBackground)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp)
+                .padding(bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CinematicHeader_Unused(name = null, onSettings = onGoToSettings)
 
-        // --- Android-only advanced protections (preserved) ---
-        androidx.compose.material3.Card { TrustedModeContent(vm, state, runtime, onGoToVault) }
-        androidx.compose.material3.Card { SensorOwnershipContent(context, runtime) }
+            // F4 — Weekly digest banner (Monday first open).
+            if (showWeeklyDigest) {
+                WeeklyDigestBanner(
+                    callCount = weeklyCallsBlocked,
+                    textCount = weeklyTextsBlocked,
+                    onDismiss = {
+                        showWeeklyDigest = false
+                        HomeBannerPrefs.markWeeklyDigestShown(context)
+                    },
+                    onSeeReport = {
+                        showWeeklyDigest = false
+                        HomeBannerPrefs.markWeeklyDigestShown(context)
+                        onGoToReports()
+                    }
+                )
+            }
+
+            // F5 — Monthly Honest Limits refresher.
+            if (showHonestLimitsRefresher) {
+                HonestLimitsRefresherBanner(
+                    onLearnMore = {
+                        showHonestLimitsRefresher = false
+                        HomeBannerPrefs.markHonestLimitsRefresherShown(context)
+                        showHonestLimitsSheet = true
+                    },
+                    onDismiss = {
+                        showHonestLimitsRefresher = false
+                        HomeBannerPrefs.markHonestLimitsRefresherShown(context)
+                    }
+                )
+            }
+
+            Box(
+                modifier = Modifier.clickable {
+                    // Hidden triple-tap panic exit for Duress Mode. Only reacts while a duress
+                    // session is live; otherwise this behaves like a no-op decorative shell.
+                    if (!duressActive) return@clickable
+                    val now = System.currentTimeMillis()
+                    tapCount = if (now - lastTapAt < 600) tapCount + 1 else 1
+                    lastTapAt = now
+                    if (tapCount >= 3) {
+                        tapCount = 0
+                        confirmDuressExit = true
+                    }
+                }
+            ) {
+                ProtectionActiveCard(isActive = protectionActive)
+            }
+            StatsRow(
+                trusted = state.trustedContactCount,
+                blockedToday = state.blockedCalls24h,
+                blockedWeek = state.flaggedSms24h
+            )
+            QuickActionsSection(
+                onAddContact = onGoToVault,
+                onBlockNumber = onGoToBlockList,
+                onViewLog = onGoToEvents
+            )
+            HonestLimitsCallout(onTap = { showHonestLimitsSheet = true })
+
+            // --- Android-only advanced protections (preserved) ---
+            androidx.compose.material3.Card { TrustedModeContent(vm, state, runtime, onGoToVault) }
+            androidx.compose.material3.Card { SensorOwnershipContent(context, runtime) }
+        }
+
+        // F1 — Panic quick-dial floating button, bottom-right above the bottom nav.
+        FloatingActionButton(
+            onClick = {
+                val list = runtime.contactNumbers // may be empty
+                if (list.isEmpty()) {
+                    showNoContactAlert = true
+                } else {
+                    confirmPanic = true
+                }
+            },
+            containerColor = DangerDark,
+            contentColor = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 18.dp, bottom = 24.dp)
+                .size(64.dp)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Filled.Phone, contentDescription = "Panic — call trusted contact", modifier = Modifier.size(22.dp))
+                Text("SOS", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+
+    if (confirmPanic) {
+        val name = runtime.contactNames.firstOrNull() ?: "trusted contact"
+        AlertDialog(
+            onDismissRequest = { confirmPanic = false },
+            title = { Text("Panic alert?", color = PrimaryTextDark) },
+            text = {
+                Text(
+                    "This will dial $name and send a pre-filled panic SMS. If SMS send permission isn't granted, Android will open your Messages app with the text pre-filled.",
+                    color = SecondaryTextDark
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmPanic = false
+                    val number = runtime.contactNumbers.firstOrNull() ?: return@TextButton
+                    PanicContact.dial(context, number)
+                    val body = "⚠️ OnlyTrusted panic alert from $name: I need help."
+                    PanicContact.sendPanicSms(context, number, body)
+                }) { Text("Call & send SMS", color = DangerDark) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmPanic = false }) { Text("Cancel") }
+            },
+            containerColor = MidnightCard
+        )
+    }
+    if (showNoContactAlert) {
+        AlertDialog(
+            onDismissRequest = { showNoContactAlert = false },
+            title = { Text("Add a trusted contact first", color = PrimaryTextDark) },
+            text = {
+                Text(
+                    "The SOS button dials your first trusted contact. Add one in the Contacts tab to use this.",
+                    color = SecondaryTextDark
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNoContactAlert = false
+                    onGoToVault()
+                }) { Text("Open Contacts", color = BrandAccentDark) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNoContactAlert = false }) { Text("Cancel") }
+            },
+            containerColor = MidnightCard
+        )
+    }
+
+    if (confirmDuressExit) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmDuressExit = false },
+            title = { Text("Exit duress mode?", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    "You'll be returned to the lock screen. Unlock with your real credential " +
+                        "to see the real vault.",
+                    color = SecondaryTextDark
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDuressExit = false
+                    com.onlytrusted.app.ui.duress.DuressState.setDuressSession(false)
+                    onPanic()
+                }) { Text("Exit", color = DangerDark) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDuressExit = false }) {
+                    Text("Cancel", color = SecondaryTextDark)
+                }
+            },
+            containerColor = MidnightCard
+        )
     }
 
     if (showHonestLimitsSheet) {
@@ -526,6 +715,109 @@ private fun HonestLimitBullet(text: String) {
                 .background(WarningDark, CircleShape)
         )
         Text(text, color = PrimaryTextDark, fontSize = 13.sp, lineHeight = 18.sp)
+    }
+}
+
+// MARK: - F4 Weekly digest banner
+
+@Composable
+private fun WeeklyDigestBanner(
+    callCount: Int,
+    textCount: Int,
+    onDismiss: () -> Unit,
+    onSeeReport: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MidnightElevated)
+            .border(1.dp, BrandCyanDark.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(44.dp)
+                .background(BrandCyanDark.copy(alpha = 0.18f), RoundedCornerShape(11.dp))
+        ) {
+            Icon(Icons.Filled.BarChart, contentDescription = null, tint = BrandCyanDark, modifier = Modifier.size(20.dp))
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                "Your week in protection",
+                color = PrimaryTextDark,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                if (callCount == 0 && textCount == 0)
+                    "No blocked activity in the last 7 days. Everything's quiet."
+                else
+                    "This week we blocked $callCount call${if (callCount == 1) "" else "s"} and $textCount text${if (textCount == 1) "" else "s"} for you.",
+                color = SecondaryTextDark,
+                fontSize = 13.sp
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                TextButton(onClick = onSeeReport, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                    Text("See full report", color = BrandCyanDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+                TextButton(onClick = onDismiss, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                    Text("Dismiss", color = SecondaryTextDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - F5 Honest Limits monthly refresher banner
+
+@Composable
+private fun HonestLimitsRefresherBanner(
+    onLearnMore: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(WarningDark.copy(alpha = 0.08f))
+            .border(1.dp, WarningDark.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(44.dp)
+                .background(WarningDark.copy(alpha = 0.18f), RoundedCornerShape(11.dp))
+        ) {
+            Icon(Icons.Filled.Info, contentDescription = null, tint = WarningDark, modifier = Modifier.size(20.dp))
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                "A monthly reminder",
+                color = PrimaryTextDark,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "This app cannot monitor other apps' microphone or camera use.",
+                color = SecondaryTextDark,
+                fontSize = 13.sp
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                TextButton(onClick = onLearnMore, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                    Text("Learn more", color = WarningDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+                TextButton(onClick = onDismiss, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                    Text("Dismiss", color = SecondaryTextDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
     }
 }
 

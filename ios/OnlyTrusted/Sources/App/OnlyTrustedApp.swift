@@ -5,6 +5,7 @@ import SwiftUI
 @main
 struct OnlyTrustedApp: App {
     @StateObject private var gate = AppGate()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -15,6 +16,19 @@ struct OnlyTrustedApp: App {
                 // scheme (defined in Color tokens) remains available for future opt-in but is
                 // not currently exposed to users. Change this to .none to let users switch.
                 .preferredColorScheme(.dark)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // F2 — Scheduled auto-lock. Note the background timestamp when we move away,
+            // then on return compute elapsed time against the user-chosen window and
+            // re-arm the lock gate if the threshold was crossed.
+            switch newPhase {
+            case .background:
+                gate.noteDidEnterBackground()
+            case .active:
+                gate.maybeAutoLock()
+            default:
+                break
+            }
         }
     }
 }

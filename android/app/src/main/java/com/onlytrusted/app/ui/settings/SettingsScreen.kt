@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -35,7 +36,10 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
@@ -74,10 +78,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.onlytrusted.app.OnlyTrustedApp
+import com.onlytrusted.app.export.CSVExporter
 import com.onlytrusted.app.export.DataExporter
 import com.onlytrusted.app.export.EvidenceExporter
 import com.onlytrusted.app.security.AppLockManager
+import com.onlytrusted.app.ui.duress.DuressState
 import com.onlytrusted.app.ui.lock.BiometricPrompter
+import com.onlytrusted.app.ui.safety.AutoLockPrefs
+import com.onlytrusted.app.ui.safety.CarrierSpamReport
+import com.onlytrusted.app.ui.subscription.SubscriptionState
 import com.onlytrusted.app.ui.subscription.subGold
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
@@ -106,7 +115,8 @@ fun SettingsScreen(
     onOpenNotifications: () -> Unit = {},
     onOpenReports: () -> Unit = {},
     onOpenBilling: () -> Unit = {},
-    onOpenUpgrade: () -> Unit = {}
+    onOpenUpgrade: () -> Unit = {},
+    onOpenDuress: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -123,6 +133,8 @@ fun SettingsScreen(
     var lastExport by remember { mutableStateOf<(() -> Unit)?>(null) }
     var themeSheetOpen by remember { mutableStateOf(false) }
     val themeSheetState = rememberModalBottomSheetState()
+    var duressUpsellOpen by remember { mutableStateOf(false) }
+    val duressEnabled = remember { DuressState.isEnabled(context) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -144,6 +156,23 @@ fun SettingsScreen(
                 .onFailure { exportError = it.message ?: "unknown error" }
         }
     }
+    // F6 — CSV export launcher (SAF CreateDocument with text/csv).
+    val csvLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            runCatching { CSVExporter.exportTo(context, uri) }
+                .onSuccess { snackbarHostState.showSnackbar("Exported $it rows to CSV.") }
+                .onFailure { exportError = it.message ?: "unknown error" }
+        }
+    }
+    // F2 — Auto-lock state + picker visibility.
+    var autoLockEnabled by remember { mutableStateOf(AutoLockPrefs.isEnabled(context)) }
+    var autoLockSeconds by remember { mutableStateOf(AutoLockPrefs.currentSeconds(context)) }
+    var showAutoLockPicker by remember { mutableStateOf(false) }
+    // F8 — Carrier spam report chooser.
+    var showCarrierPicker by remember { mutableStateOf(false) }
 
     if (exportError != null) {
         com.onlytrusted.app.ui.common.ErrorStateView(
@@ -332,6 +361,42 @@ fun SettingsScreen(
                     checked = state.screenshotProtectionEnabled,
                     onChange = vm::setScreenshotProtection
                 )
+                // F2 — Auto-lock after inactivity (toggle + submenu).
+                RowDivider()
+                ToggleRow(
+                    icon = Icons.Filled.Timer,
+                    tint = BrandAccentDark,
+                    title = "Auto-lock after inactivity",
+                    detail = if (autoLockEnabled)
+                        "Re-lock after ${AutoLockPrefs.label(autoLockSeconds)} in the background."
+                    else
+                        "Only lock when you choose Panic lock.",
+                    checked = autoLockEnabled,
+                    onChange = { enable ->
+                        autoLockEnabled = enable
+                        AutoLockPrefs.setEnabled(context, enable)
+                        if (enable) {
+                            if (autoLockSeconds == 0) autoLockSeconds = 60
+                            AutoLockPrefs.setSeconds(context, autoLockSeconds)
+                            AppLockManager.setGraceSeconds(context, autoLockSeconds)
+                        } else {
+                            // Set grace to effectively "never prompt on resume" so the
+                            // lock gate stays open until the user chooses Panic lock.
+                            AppLockManager.setGraceSeconds(context, 600)
+                        }
+                    }
+                )
+                if (autoLockEnabled) {
+                    RowDivider()
+                    SettingsNavRow(
+                        icon = Icons.Filled.Timer,
+                        tint = BrandAccentDark,
+                        title = "Inactivity window",
+                        value = AutoLockPrefs.label(autoLockSeconds),
+                        onClick = { showAutoLockPicker = true }
+                    )
+                }
+
                 RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.FileUpload,
@@ -341,6 +406,21 @@ fun SettingsScreen(
                     onClick = {
                         val action = {
                             exportLauncher.launch("onlytrusted-${System.currentTimeMillis()}.json")
+                        }
+                        lastExport = action
+                        action()
+                    }
+                )
+                // F6 — CSV export row.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.TableChart,
+                    tint = BrandAccentDark,
+                    title = "Export as CSV",
+                    showChevron = false,
+                    onClick = {
+                        val action = {
+                            csvLauncher.launch("onlytrusted-${System.currentTimeMillis()}.csv")
                         }
                         lastExport = action
                         action()
@@ -360,6 +440,14 @@ fun SettingsScreen(
                         action()
                     }
                 )
+                // F8 — Carrier spam report shortcut.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Campaign,
+                    tint = BrandAccentDark,
+                    title = "Carrier spam report",
+                    onClick = { showCarrierPicker = true }
+                )
                 RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.Lock,
@@ -377,6 +465,20 @@ fun SettingsScreen(
                     titleTint = DangerDark,
                     showChevron = false,
                     onClick = { confirmWipe = true }
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Warning,
+                    tint = if (duressEnabled) BrandAccentDark else subGold,
+                    title = "Duress Mode (Pro)",
+                    value = if (duressEnabled) "On" else null,
+                    onClick = {
+                        if (SubscriptionState.hasHighPremium(context)) {
+                            onOpenDuress()
+                        } else {
+                            duressUpsellOpen = true
+                        }
+                    }
                 )
             }
 
@@ -494,6 +596,30 @@ fun SettingsScreen(
             )
         }
 
+        if (duressUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { duressUpsellOpen = false },
+                title = { Text("Duress Mode is a Pro feature", color = PrimaryTextDark, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "A secondary PIN that unlocks a decoy vault and silently alerts a " +
+                            "trusted contact. Available on Pro.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        duressUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Pro", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { duressUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
         if (themeSheetOpen) {
             ModalBottomSheet(
                 onDismissRequest = { themeSheetOpen = false },
@@ -524,6 +650,72 @@ fun SettingsScreen(
                     RadioOption("Light", false)
                 }
             }
+        }
+
+        // F2 — Auto-lock window picker.
+        if (showAutoLockPicker) {
+            AlertDialog(
+                onDismissRequest = { showAutoLockPicker = false },
+                title = { Text("Auto-lock after", color = PrimaryTextDark) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        AutoLockPrefs.options.forEach { opt ->
+                            TextButton(onClick = {
+                                autoLockSeconds = opt
+                                AutoLockPrefs.setSeconds(context, opt)
+                                // Keep AppLockManager's grace in sync so the biometric gate
+                                // actually re-arms. 0 ("Never") maps to a long grace so the
+                                // auto-lock never fires on resume.
+                                AppLockManager.setGraceSeconds(
+                                    context,
+                                    if (opt == 0) 600 else opt
+                                )
+                                showAutoLockPicker = false
+                            }) {
+                                val isSelected = autoLockSeconds == opt
+                                Text(
+                                    text = (if (isSelected) "• " else "   ") + AutoLockPrefs.label(opt),
+                                    color = if (isSelected) BrandAccentDark else PrimaryTextDark
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAutoLockPicker = false }) { Text("Close") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        // F8 — Carrier spam report chooser.
+        if (showCarrierPicker) {
+            AlertDialog(
+                onDismissRequest = { showCarrierPicker = false },
+                title = { Text("Carrier spam report", color = PrimaryTextDark) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            "Open your carrier's spam-report app to flag the number. If the app isn't installed we'll take you to the Play Store.",
+                            fontSize = 12.sp,
+                            color = SecondaryTextDark
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        CarrierSpamReport.Carrier.entries.forEach { carrier ->
+                            TextButton(onClick = {
+                                showCarrierPicker = false
+                                CarrierSpamReport.open(context, carrier)
+                            }) {
+                                Text(carrier.label, color = PrimaryTextDark)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showCarrierPicker = false }) { Text("Cancel") }
+                },
+                containerColor = MidnightCard
+            )
         }
     }
 }

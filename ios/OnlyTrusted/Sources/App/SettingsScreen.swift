@@ -6,6 +6,8 @@ import LocalAuthentication
 struct SettingsScreen: View {
     @EnvironmentObject private var gate: AppGate
     @StateObject private var store = VaultStore.shared
+    @StateObject private var sub = SubscriptionState.shared
+    @StateObject private var duress = DuressState.shared
 
     @State private var appLockToggle = false
     @State private var showLockDeniedAlert = false
@@ -15,6 +17,15 @@ struct SettingsScreen: View {
     @State private var exportError: String?
     @State private var lastExport: (() throws -> URL)?
     @State private var showThemeSheet = false
+    @State private var showDuressUpsell = false
+    @State private var showDuressSetup = false
+    @State private var showUpgradeSheet = false
+    // F2 Auto-lock inactivity
+    @State private var autoLockToggle = false
+    @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
+    @State private var showAutoLockPicker = false
+    // F8 Carrier spam report chooser
+    @State private var showCarrierPicker = false
 
     private var canUseAuth: Bool {
         var err: NSError?
@@ -62,7 +73,22 @@ struct SettingsScreen: View {
         }
         .appBackdrop()
         .navigationBarHidden(true)
-        .onAppear { appLockToggle = gate.appLockEnabled }
+        .onAppear {
+            appLockToggle = gate.appLockEnabled
+            autoLockSeconds = AutoLockPrefs.currentSeconds
+            autoLockToggle = autoLockSeconds > 0
+        }
+        .sheet(isPresented: $showAutoLockPicker) {
+            NavigationStack { AutoLockPickerSheet(seconds: $autoLockSeconds, onDone: { showAutoLockPicker = false }) }
+        }
+        .confirmationDialog("Carrier spam report", isPresented: $showCarrierPicker, titleVisibility: .visible) {
+            ForEach(CarrierSpamReport.Carrier.allCases) { carrier in
+                Button(carrier.rawValue) { CarrierSpamReport.open(carrier) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Open the carrier app to report scam calls or texts. If the app isn't installed we'll take you to the App Store.")
+        }
         .alert("Set up a passcode first", isPresented: $showLockDeniedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -87,6 +113,22 @@ struct SettingsScreen: View {
             Text("This will delete every trusted contact, every blocked number, every event, and every setting stored by this app. It cannot be undone.")
         }
         .sheet(isPresented: $showThemeSheet) { ThemeSelectorSheet() }
+        .sheet(isPresented: $showDuressSetup) {
+            NavigationStack { DuressSetupScreen() }
+        }
+        .sheet(isPresented: $showDuressUpsell) {
+            DuressUpsellSheet(
+                onUpgrade: {
+                    showDuressUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showDuressUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showUpgradeSheet) {
+            NavigationStack { UpgradeToPremiumScreen() }
+        }
         .sheet(item: Binding(get: { shareURL.map(IdentifiableURL.init) },
                              set: { shareURL = $0?.value })) { wrap in
             ShareSheet(activityItems: [wrap.value])
@@ -239,16 +281,70 @@ struct SettingsScreen: View {
                     gate.appLockEnabled = now
                 }
 
+                // F2 — Auto-lock after inactivity.
+                SettingsDivider()
+                Toggle(isOn: $autoLockToggle) {
+                    HStack(spacing: 14) {
+                        settingsIcon("clock.fill", tint: Color.appAccent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Auto-lock after inactivity")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.appPrimaryText)
+                            Text(autoLockToggle
+                                 ? "Re-lock after \(AutoLockPrefs.label(for: autoLockSeconds)) in the background."
+                                 : "Only lock when you choose Panic lock.")
+                                .font(.caption)
+                                .foregroundStyle(Color.appSecondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .tint(Color.appAccent)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .onChange(of: autoLockToggle) { _, now in
+                    if now {
+                        if autoLockSeconds == 0 { autoLockSeconds = 60 }
+                        AutoLockPrefs.setSeconds(autoLockSeconds)
+                    } else {
+                        autoLockSeconds = 0
+                        AutoLockPrefs.setSeconds(0)
+                    }
+                }
+                if autoLockToggle {
+                    SettingsDivider()
+                    Button { showAutoLockPicker = true } label: {
+                        SettingsNavRow(icon: "timer", iconTint: Color.appAccent,
+                                       label: "Inactivity window",
+                                       value: AutoLockPrefs.label(for: autoLockSeconds))
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 SettingsDivider()
                 Button { runExport { try DataExporter.write() } } label: {
                     SettingsNavRow(icon: "square.and.arrow.up", iconTint: Color.appAccent,
                                    label: "Export my data as JSON", chevron: false)
                 }
                 .buttonStyle(.plain)
+                // F6 — CSV export of events + contacts + blocked numbers.
+                SettingsDivider()
+                Button { runExport { try CSVExporter.write() } } label: {
+                    SettingsNavRow(icon: "tablecells", iconTint: Color.appAccent,
+                                   label: "Export as CSV", chevron: false)
+                }
+                .buttonStyle(.plain)
                 SettingsDivider()
                 Button { runExport { try EvidenceExporter.write() } } label: {
                     SettingsNavRow(icon: "doc.badge.plus", iconTint: Color.appAccent,
                                    label: "Export evidence pack", chevron: false)
+                }
+                .buttonStyle(.plain)
+                // F8 — Carrier spam report shortcut.
+                SettingsDivider()
+                Button { showCarrierPicker = true } label: {
+                    SettingsNavRow(icon: "megaphone.fill", iconTint: Color.appAccent,
+                                   label: "Carrier spam report")
                 }
                 .buttonStyle(.plain)
                 SettingsDivider()
@@ -261,6 +357,23 @@ struct SettingsScreen: View {
                 Button { confirmWipe = true } label: {
                     SettingsNavRow(icon: "trash.fill", iconTint: Color.appDanger,
                                    label: "Wipe everything", chevron: false, labelTint: Color.appDanger)
+                }
+                .buttonStyle(.plain)
+
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium {
+                        showDuressSetup = true
+                    } else {
+                        showDuressUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: duress.isEnabled ? "exclamationmark.shield.fill" : "exclamationmark.shield",
+                        iconTint: duress.isEnabled ? Color.appSuccess : Color.subGold,
+                        label: "Duress Mode (Pro)",
+                        value: duress.isEnabled ? "On" : nil
+                    )
                 }
                 .buttonStyle(.plain)
             }
@@ -530,4 +643,80 @@ private struct IdentifiableURL: Identifiable {
     let value: URL
     var id: URL { value }
     init(_ value: URL) { self.value = value }
+}
+
+/// Pro upsell sheet shown when a non-Pro user taps "Duress Mode (Pro)". Explains the feature
+/// in plain language and sends the user to the Upgrade screen.
+struct DuressUpsellSheet: View {
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.shield.fill")
+                .font(.system(size: 46, weight: .semibold))
+                .foregroundStyle(Color.subGold)
+                .padding(.top, 28)
+            Text("Duress Mode")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Color.appPrimaryText)
+            Text("A secondary PIN that unlocks a decoy vault and silently alerts a trusted contact. Included in Pro.")
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer(minLength: 0)
+            Button(action: onUpgrade) {
+                Text("Upgrade to Pro")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 48)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color.subGold)
+            .padding(.horizontal, 24)
+            Button("Not now", action: onDismiss)
+                .foregroundStyle(Color.appSecondaryText)
+                .padding(.bottom, 20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appBackdrop()
+    }
+}
+
+// MARK: - F2 Auto-lock inactivity window picker
+
+struct AutoLockPickerSheet: View {
+    @Binding var seconds: Int
+    let onDone: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            PremiumCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    CardHeader(icon: "clock.fill", title: "Auto-lock after")
+                    Text("Re-arm App Lock after this long in the background. Panic lock still locks immediately regardless of this setting.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(AutoLockPrefs.options, id: \.self) { opt in
+                        RadioRow(label: AutoLockPrefs.label(for: opt), isSelected: seconds == opt) {
+                            seconds = opt
+                            AutoLockPrefs.setSeconds(opt)
+                        }
+                    }
+                }
+            }
+            Spacer()
+        }
+        .padding(20)
+        .appBackdrop()
+        .navigationTitle("Auto-lock")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done", action: onDone)
+                    .tint(Color.appAccent)
+            }
+        }
+    }
 }

@@ -112,6 +112,11 @@ fun ReportsScreen(onBack: () -> Unit = {}) {
         app.trustedContacts.count
     }.collectAsStateWithLifecycle(initialValue = 0)
 
+    // F3 — vault snapshot for resolving caller names in the recent-activity rows.
+    val trustedContacts by remember {
+        app.trustedContacts.maskedList()
+    }.collectAsStateWithLifecycle(initialValue = emptyList())
+
     var filter by remember { mutableStateOf(ReportFilter.All) }
 
     val defaultRange = remember {
@@ -305,7 +310,7 @@ fun ReportsScreen(onBack: () -> Unit = {}) {
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                val rows = buildRecentRows(events)
+                val rows = buildRecentRows(events, trustedContacts)
                 rows.forEach { row -> RecentActivityRow(row) }
             }
         }
@@ -726,7 +731,10 @@ private fun buildXLabels(rangeStart: Long, rangeEnd: Long): List<Pair<Long, Stri
     return labels
 }
 
-private fun buildRecentRows(events: List<SecurityEvent>): List<RecentRow> {
+private fun buildRecentRows(
+    events: List<SecurityEvent>,
+    trustedContacts: List<com.onlytrusted.app.data.repository.MaskedContact>
+): List<RecentRow> {
     if (events.isEmpty()) {
         return listOf(
             RecentRow(
@@ -752,8 +760,12 @@ private fun buildRecentRows(events: List<SecurityEvent>): List<RecentRow> {
         val cat = category(ev.type)
         val isBlocked = cat == Category.Blocked
         val tint = if (isBlocked) DangerDark else BrandAccentDark
+        // F3 — show trusted display name when the detail matches a vault entry.
+        val display = com.onlytrusted.app.ui.safety.CallerLookup.nameForNumber(ev.detail, trustedContacts)
+            ?: ev.detail
+            ?: "Unknown number"
         RecentRow(
-            number = ev.detail ?: "Unknown number",
+            number = display,
             status = if (isBlocked) "Blocked" else "Allowed",
             statusTint = tint,
             icon = if (isBlocked) Icons.Filled.Block else Icons.Filled.Phone,

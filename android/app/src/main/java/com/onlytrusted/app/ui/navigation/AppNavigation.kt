@@ -33,6 +33,7 @@ import androidx.navigation.navArgument
 import com.onlytrusted.app.ui.about.AboutScreen
 import com.onlytrusted.app.ui.blocklist.BlockListScreen
 import com.onlytrusted.app.ui.dashboard.DashboardScreen
+import com.onlytrusted.app.ui.duress.DuressSetupScreen
 import com.onlytrusted.app.ui.events.EventsScreen
 import com.onlytrusted.app.ui.legal.LegalScreen
 import com.onlytrusted.app.ui.notifications.NotificationsScreen
@@ -65,6 +66,7 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object Reports : Destination("reports", "Reports", Icons.AutoMirrored.Filled.ShowChart)
     data object BillingSubscription : Destination("billing_subscription", "Billing", Icons.Filled.CreditCard)
     data object UpgradePremium : Destination("upgrade_premium", "Premium", Icons.Filled.WorkspacePremium)
+    data object DuressSetup : Destination("duress_setup", "Duress", Icons.Filled.Security)
     data object VaultEdit : Destination("vault/edit?id={id}", "Vault edit", Icons.Filled.Security) {
         fun route(id: Long?) = "vault/edit?id=${id ?: -1L}"
     }
@@ -137,7 +139,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onGoToVault = { navController.navigate(Destination.Vault.route) },
                     onGoToSettings = { navController.navigate(Destination.Settings.route) },
                     onGoToBlockList = { navController.navigate(Destination.BlockList.route) },
-                    onGoToEvents = { navController.navigate(Destination.Events.route) }
+                    onGoToEvents = { navController.navigate(Destination.Events.route) },
+                    onGoToReports = { navController.navigate(Destination.Reports.route) }
                 )
             }
             composable(Destination.Vault.route) {
@@ -168,8 +171,12 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenNotifications = { navController.navigate(Destination.Notifications.route) },
                     onOpenReports = { navController.navigate(Destination.Reports.route) },
                     onOpenBilling = { navController.navigate(Destination.BillingSubscription.route) },
-                    onOpenUpgrade = { navController.navigate(Destination.UpgradePremium.route) }
+                    onOpenUpgrade = { navController.navigate(Destination.UpgradePremium.route) },
+                    onOpenDuress = { navController.navigate(Destination.DuressSetup.route) }
                 )
+            }
+            composable(Destination.DuressSetup.route) {
+                DuressSetupScreen(onDone = { navController.popBackStack() })
             }
             composable(Destination.Reports.route) {
                 ReportsScreen(onBack = { navController.popBackStack() })

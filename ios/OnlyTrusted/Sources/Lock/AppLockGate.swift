@@ -2,13 +2,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 import LocalAuthentication
+import MessageUI
 
 struct AppLockGate: View {
     let onUnlocked: () -> Void
 
     @EnvironmentObject private var gate: AppGate
+    @StateObject private var duress = DuressState.shared
+    @StateObject private var vault = VaultStore.shared
+
     @State private var error: String?
     @State private var canAuthenticate: Bool = false
+    @State private var showPinSheet = false
+    @State private var pin: String = ""
+    @State private var pinError: String?
+    @State private var showSOSComposer = false
+    @State private var sosRecipients: [String] = []
+    @State private var sosBody: String = ""
 
     var body: some View {
         VStack(spacing: 20) {
@@ -40,6 +50,15 @@ struct AppLockGate: View {
                 .tint(Color.appAccent)
                 .controlSize(.large)
                 .padding(.horizontal, 32)
+
+                Button {
+                    showPinSheet = true
+                } label: {
+                    Text("Enter PIN instead")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(Color.appSecondaryText)
+                }
+                .buttonStyle(.plain)
             } else {
                 let lockWasOn = gate.appLockEnabled
                 VStack(spacing: 10) {
@@ -68,7 +87,105 @@ struct AppLockGate: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.appScreenBackground)
         .onAppear(perform: setup)
+        .sheet(isPresented: $showPinSheet) { pinSheet }
+        .sheet(isPresented: $showSOSComposer) {
+            if DuressSMSComposer.canSendText {
+                DuressSMSComposer(
+                    recipients: sosRecipients,
+                    body: sosBody,
+                    onFinish: { _ in
+                        showSOSComposer = false
+                        // Regardless of send result, continue into the decoy vault so coercion
+                        // is not obvious.
+                        onUnlocked()
+                    }
+                )
+            } else {
+                VStack(spacing: 16) {
+                    Text("This device cannot send SMS.")
+                        .font(.body)
+                    Button("Continue") {
+                        showSOSComposer = false
+                        onUnlocked()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appAccent)
+                }
+                .padding(24)
+            }
+        }
     }
+
+    // MARK: - PIN sheet (hosts duress unlock + eventually a real-PIN fallback)
+
+    private var pinSheet: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                Text("Enter PIN")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Color.appPrimaryText)
+                SecureField("PIN", text: $pin)
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .multilineTextAlignment(.center)
+                    .padding(16)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.appElevatedSurface))
+                if let pinError {
+                    Text(pinError)
+                        .font(.footnote)
+                        .foregroundStyle(Color.appDanger)
+                }
+                Button {
+                    submitPin()
+                } label: {
+                    Text("Unlock")
+                        .font(.body.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.appAccent)
+                Spacer()
+            }
+            .padding(24)
+            .appBackdrop()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel") { showPinSheet = false; pin = ""; pinError = nil }
+                }
+            }
+        }
+    }
+
+    private func submitPin() {
+        pinError = nil
+        if duress.matches(pin: pin) {
+            // Duress unlock: swap to decoy, prepare SOS, dismiss PIN sheet, present composer.
+            pin = ""
+            showPinSheet = false
+            duress.isDuressSession = true
+            prepareSOS()
+        } else {
+            pinError = "Incorrect PIN."
+        }
+    }
+
+    private func prepareSOS() {
+        guard
+            let alertId = duress.alertContactId,
+            let contact = VaultStore.shared.realContactsForSetup().first(where: { $0.id == alertId }),
+            let number = contact.normalisedNumbers.first
+        else {
+            // No alert contact configured — still enter the decoy vault silently.
+            onUnlocked()
+            return
+        }
+        sosRecipients = [number]
+        sosBody = DuressSOS.body(ownerName: duress.ownerName)
+        showSOSComposer = true
+    }
+
+    // MARK: - Setup / normal auth
 
     private func setup() {
         var err: NSError?
@@ -82,6 +199,8 @@ struct AppLockGate: View {
                            localizedReason: "Unlock OnlyTrusted") { ok, err in
             Task { @MainActor in
                 if ok {
+                    // Real unlock — always clear duress session.
+                    duress.isDuressSession = false
                     onUnlocked()
                 } else if let err {
                     error = err.localizedDescription

@@ -304,10 +304,23 @@ private struct EventDaySection: View {
     }
 }
 
+// MARK: - F7 Report-scam share wrapper
+
+private struct ActivityShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
 // MARK: - Event row (solid-filled icon chip + title + subtitle + cyan timestamp)
 
 private struct EventRow: View {
     let record: SecurityEventRecord
+
+    @State private var showScamShare = false
+    @State private var scamShareItems: [Any] = []
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -330,9 +343,20 @@ private struct EventRow: View {
             .decorativeAccessibility()
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(humanLabel(record.type))
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.appPrimaryText)
+                HStack(spacing: 6) {
+                    Text(humanLabel(record.type))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                    if trustedName != nil {
+                        // F3 — small "Trusted" chip when the number resolves to a vault entry.
+                        Text("Trusted")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color.appScreenBackground)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.appBrightCyan, in: Capsule())
+                    }
+                }
                 Text(subtitle)
                     .font(.system(size: 13))
                     .foregroundStyle(Color.appSecondaryText)
@@ -356,11 +380,56 @@ private struct EventRow: View {
                         .stroke(Color.appBrightCyan.opacity(0.1), lineWidth: 1)
                 )
         )
+        // F7 — Long-press on a blocked log entry triggers the Report-Scam share sheet.
+        .contextMenu {
+            if category == .blocked {
+                Button {
+                    presentScamShare()
+                } label: {
+                    Label("Report scam", systemImage: "exclamationmark.bubble.fill")
+                }
+            }
+        }
+        .sheet(isPresented: $showScamShare) {
+            ActivityShareSheet(items: scamShareItems)
+        }
+    }
+
+    private func presentScamShare() {
+        let text = ReportScam.buildMessage(
+            number: extractedNumber ?? "",
+            timestamp: record.timestampMillis
+        )
+        var items: [Any] = [text]
+        // Pre-fill the carrier spam shortcode as a sms: URL so iOS surfaces Messages at
+        // the top of the share sheet. The user still picks the destination.
+        if let url = URL(string: "sms:\(ReportScam.usSmsShortcode)&body=\(text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
+            items.append(url)
+        }
+        scamShareItems = items
+        showScamShare = true
     }
 
     private var subtitle: String {
+        if let name = trustedName { return name }
         if let d = record.detail, !d.isEmpty { return d }
         return "Unknown number"
+    }
+
+    /// Vault lookup — nil if the detail doesn't match any trusted contact.
+    private var trustedName: String? {
+        CallerLookup.contactNameForNumber(record.detail)
+    }
+
+    private var extractedNumber: String? {
+        guard let d = record.detail, !d.isEmpty else { return nil }
+        let ns = d as NSString
+        let r = NSRange(location: 0, length: ns.length)
+        if let regex = try? NSRegularExpression(pattern: "\\+?\\d{7,}"),
+           let m = regex.firstMatch(in: d, range: r) {
+            return ns.substring(with: m.range)
+        }
+        return nil
     }
 
     private var category: EventCategory { EventCategory.of(record.type) }

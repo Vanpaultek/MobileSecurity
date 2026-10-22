@@ -108,7 +108,17 @@ fun VaultScreen(
     val vm: VaultViewModel = viewModel(factory = viewModelFactory {
         initializer { VaultViewModel(app) }
     })
-    val contacts by vm.contacts.collectAsStateWithLifecycle()
+    val realContacts by vm.contacts.collectAsStateWithLifecycle()
+    val duressActive by com.onlytrusted.app.ui.duress.DuressState.isDuressSession
+        .collectAsStateWithLifecycle()
+    val decoyContacts by com.onlytrusted.app.ui.duress.DuressVaultStore.contacts
+        .collectAsStateWithLifecycle()
+    // Pull the decoy snapshot into the StateFlow on first composition during a duress session
+    // so switching tabs post-unlock shows seeded data even before any add/edit.
+    androidx.compose.runtime.LaunchedEffect(duressActive) {
+        if (duressActive) com.onlytrusted.app.ui.duress.DuressVaultStore.refresh(context)
+    }
+    val contacts = if (duressActive) decoyContacts else realContacts
 
     var query by rememberSaveable { mutableStateOf("") }
     var tab by rememberSaveable { mutableStateOf(ContactTab.All) }

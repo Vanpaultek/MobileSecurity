@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -70,7 +71,10 @@ class DashboardViewModel(private val app: OnlyTrustedApp) : AndroidViewModel(app
         val isDefaultCallScreener: Boolean,
         val hasAnyTrustedContact: Boolean,
         val canDrawOverlays: Boolean,
-        val ownerTag: String
+        val ownerTag: String,
+        /** Normalised numbers of trusted contacts, used by the panic SOS button. */
+        val contactNumbers: List<String> = emptyList(),
+        val contactNames: List<String> = emptyList()
     )
 
     private fun initialRuntimeState(): RuntimeState = RuntimeState(
@@ -104,6 +108,14 @@ class DashboardViewModel(private val app: OnlyTrustedApp) : AndroidViewModel(app
     fun setHasAnyTrustedContact(value: Boolean) {
         if (_runtimeState.value.hasAnyTrustedContact != value) {
             _runtimeState.value = _runtimeState.value.copy(hasAnyTrustedContact = value)
+        }
+        // Also refresh the panic-contact snapshot used by the F1 SOS button.
+        viewModelScope.launch {
+            val list = trusted.maskedList().first()
+            _runtimeState.value = _runtimeState.value.copy(
+                contactNumbers = list.flatMap { it.normalisedNumbers },
+                contactNames = list.map { it.displayName }
+            )
         }
     }
 

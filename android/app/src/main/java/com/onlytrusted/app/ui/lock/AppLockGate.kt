@@ -2,16 +2,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.onlytrusted.app.ui.lock
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,9 +29,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import com.onlytrusted.app.OnlyTrustedApp
 import com.onlytrusted.app.security.AppLockManager
+import com.onlytrusted.app.ui.duress.DuressSmsSender
+import com.onlytrusted.app.ui.duress.DuressState
+import com.onlytrusted.app.ui.duress.DuressVaultStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun AppLockGate(
@@ -34,6 +53,30 @@ fun AppLockGate(
     var attempted by remember { mutableStateOf(false) }
     val canAuth = remember { BiometricPrompter.canAuthenticate(context) }
     val lockEnabled = remember { AppLockManager.isEnabled(context) }
+    var pinSheet by remember { mutableStateOf(false) }
+    var pin by remember { mutableStateOf("") }
+    var pinError by remember { mutableStateOf<String?>(null) }
+
+    // Permission launcher used by the duress-SMS path. If the user denies, the SMS send is
+    // skipped silently; the decoy vault still opens.
+    val scope = rememberCoroutineScopeCompat()
+    var pendingSOSNumber by remember { mutableStateOf<String?>(null) }
+    var pendingSOSBody by remember { mutableStateOf<String?>(null) }
+    val smsPermLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val n = pendingSOSNumber
+        val b = pendingSOSBody
+        if (granted && n != null && b != null) {
+            DuressSmsSender.send(context, n, b)
+        }
+        pendingSOSNumber = null
+        pendingSOSBody = null
+        // Enter the decoy vault either way so coercion is not detectable.
+        DuressState.setDuressSession(true)
+        AppLockManager.markUnlocked(context)
+        onUnlocked()
+    }
 
     LaunchedEffect(Unit) {
         val activity = context as? FragmentActivity ?: return@LaunchedEffect
@@ -51,7 +94,11 @@ fun AppLockGate(
             activity = activity,
             title = "Unlock OnlyTrusted",
             subtitle = "Use your biometric or device PIN",
-            onSuccess = onUnlocked,
+            onSuccess = {
+                // Real unlock: always clear any duress session that was active.
+                DuressState.setDuressSession(false)
+                onUnlocked()
+            },
             onFailure = { error = it }
         )
     }
@@ -84,16 +131,21 @@ fun AppLockGate(
                         activity = activity,
                         title = "Unlock OnlyTrusted",
                         subtitle = "Use your biometric or device PIN",
-                        onSuccess = onUnlocked,
+                        onSuccess = {
+                            DuressState.setDuressSession(false)
+                            onUnlocked()
+                        },
                         onFailure = { error = it }
                     )
                 },
                 modifier = Modifier.padding(top = 24.dp)
             ) { Text(if (attempted) "Try again" else "Unlock") }
+
+            TextButton(
+                onClick = { pinSheet = true },
+                modifier = Modifier.padding(top = 8.dp)
+            ) { Text("Enter PIN instead") }
         } else {
-            // No biometric / PIN enrolled. Two cases:
-            //  - App Lock was explicitly on → disable it so the owner isn't stuck.
-            //  - App Lock was never on (e.g. Panic lock) → just let them back in.
             Button(
                 onClick = {
                     if (lockEnabled) {
@@ -106,4 +158,94 @@ fun AppLockGate(
             ) { Text(if (lockEnabled) "Disable App Lock and continue" else "Return to app") }
         }
     }
+
+    if (pinSheet) {
+        AlertDialog(
+            onDismissRequest = { pinSheet = false; pin = ""; pinError = null },
+            title = { Text("Enter PIN") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = pin,
+                        onValueChange = { pin = it },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        visualTransformation = PasswordVisualTransformation(),
+                        label = { Text("PIN") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    pinError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (DuressState.matches(context, pin)) {
+                        pinSheet = false
+                        pin = ""
+                        pinError = null
+                        triggerDuressUnlock(
+                            context = context,
+                            scope = scope,
+                            onReady = { number, body ->
+                                if (number == null || body == null) {
+                                    DuressState.setDuressSession(true)
+                                    AppLockManager.markUnlocked(context)
+                                    onUnlocked()
+                                } else if (DuressSmsSender.hasSendSmsPermission(context)) {
+                                    DuressSmsSender.send(context, number, body)
+                                    DuressState.setDuressSession(true)
+                                    AppLockManager.markUnlocked(context)
+                                    onUnlocked()
+                                } else {
+                                    pendingSOSNumber = number
+                                    pendingSOSBody = body
+                                    smsPermLauncher.launch(Manifest.permission.SEND_SMS)
+                                }
+                            }
+                        )
+                    } else {
+                        pinError = "Incorrect PIN."
+                    }
+                }) { Text("Unlock") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pinSheet = false; pin = ""; pinError = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
+
+/**
+ * Resolves the alert contact phone number and SOS body, then calls `onReady` with them. Runs
+ * the DB lookup off the main thread so the lock-screen tap doesn't block.
+ */
+private fun triggerDuressUnlock(
+    context: android.content.Context,
+    scope: CoroutineScope,
+    onReady: (phoneNumber: String?, body: String?) -> Unit
+) {
+    val alertId = DuressState.alertContactId(context)
+    if (alertId == null) {
+        onReady(null, null); return
+    }
+    val app = context.applicationContext as OnlyTrustedApp
+    // Hydrate the decoy vault's in-memory flow so the Contacts tab shows something immediately.
+    DuressVaultStore.refresh(context)
+    scope.launch {
+        val record = withContext(Dispatchers.IO) {
+            app.trustedContacts.reveal(alertId)
+        }
+        val number = record?.numbers?.firstOrNull()?.normalisedNumber
+        val body = DuressSmsSender.buildBody(DuressState.ownerName(context))
+        onReady(number, body)
+    }
+}
+
+@Composable
+private fun rememberCoroutineScopeCompat(): CoroutineScope =
+    androidx.compose.runtime.rememberCoroutineScope()

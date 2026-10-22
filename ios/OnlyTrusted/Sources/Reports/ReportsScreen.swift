@@ -353,8 +353,10 @@ struct ReportsScreen: View {
             let cat = EventCategory.of(e.type)
             let tint: Color = cat == .blocked ? Color.appDanger : Color.appAccent
             let status = cat == .blocked ? "Blocked" : "Allowed"
+            // F3 — resolve trusted-contact name when the detail matches a vault entry.
+            let display = CallerLookup.contactNameForNumber(e.detail) ?? e.detail ?? "Unknown number"
             return RecentRow(
-                number: e.detail ?? "Unknown number",
+                number: display,
                 status: status,
                 statusTint: tint,
                 icon: cat == .blocked ? "nosign" : "phone.fill",

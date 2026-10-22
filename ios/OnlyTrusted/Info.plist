@@ -22,6 +22,14 @@
     <string>2</string>
     <key>NSFaceIDUsageDescription</key>
     <string>OnlyTrusted uses Face ID to unlock the app and the family vault.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>callerid</string>
+        <string>com.att.mobilesecurity</string>
+        <string>vzcallfilter</string>
+        <string>tel</string>
+        <string>sms</string>
+    </array>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
     <key>UILaunchScreen</key>
