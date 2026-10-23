@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  System-splash "icon" that is deliberately invisible. Android 12+ ALWAYS renders a
+  splash-screen icon on top of windowSplashScreenBackground; when
+  windowSplashScreenAnimatedIcon is not set, the system falls back to the manifest's
+  android:icon, which includes the OnlyTrusted wordmark text and gets clipped by the
+  circular splash mask (reported from device as "shield + partial yTru… behind").
+
+  Pointing windowSplashScreenAnimatedIcon at this flat midnight drawable means the
+  system renders midnight on midnight for ~500ms, after which our Compose SplashScreen
+  takes over and paints the full SplashHero lakescape + wordmark + loading indicator.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/midnight_background" />
+</shape>

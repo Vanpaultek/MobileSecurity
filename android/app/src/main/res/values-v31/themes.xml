@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 12+ system splash is deliberately minimal: a flat midnight background
-         with NO windowSplashScreenAnimatedIcon. The system splash API only supports a
-         centered icon on a flat color — it cannot render a full-screen bitmap. Showing
-         the launcher-icon badge here briefly before our cinematic Compose splash looked
-         broken, so we skip it entirely. The Compose `SplashScreen` composable paints
-         the SplashHero lakescape + wordmark + loading indicator as the first screen
-         the user sees after our activity resumes. -->
+    <!-- Android 12+ system splash is deliberately BLANK: midnight-on-midnight so no
+         fragment of the launcher icon (which contains the "OnlyTrusted" wordmark and
+         gets clipped awkwardly by the circular splash mask) ever appears. Our Compose
+         `SplashScreen` composable renders the full SplashHero lakescape + wordmark +
+         loading indicator as the first screen the user actually sees. -->
     <style name="Theme.OnlyTrusted" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/midnight_background</item>
         <item name="android:statusBarColor">@color/midnight_background</item>
         <item name="android:navigationBarColor">@color/midnight_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowSplashScreenBackground">@color/midnight_background</item>
+        <!-- Flat midnight drawable so the system splash shows nothing visible. See
+             drawable/splash_icon_midnight.xml for why we don't use @null. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_midnight</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/midnight_background</item>
     </style>
 
     <style name="Theme.OnlyTrusted.Splash" parent="Theme.OnlyTrusted" />
