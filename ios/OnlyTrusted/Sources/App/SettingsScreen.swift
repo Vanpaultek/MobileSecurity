@@ -130,9 +130,6 @@ struct SettingsScreen: View {
                     tierSectionHeader("Premium Features", chipText: "PREMIUM", chipColor: Color.appAccent)
                     premiumFeaturesCard
 
-                    tierSectionHeader("Elite Features", chipText: "ELITE", chipColor: Color.subGold)
-                    eliteFeaturesCard
-
                     sectionHeader("Account")
                     premiumCard
 
@@ -141,6 +138,12 @@ struct SettingsScreen: View {
 
                     sectionHeader("Device & data")
                     securityCard
+
+                    tierSectionHeader("Pro Features", chipText: "PRO", chipColor: Color.subGold)
+                    proFeaturesCard
+
+                    tierSectionHeader("Elite Features", chipText: "ELITE", chipColor: Color.subGold)
+                    eliteFeaturesCard
 
                     sectionHeader("More")
                     moreCard
@@ -710,20 +713,100 @@ struct SettingsScreen: View {
         }
     }
 
-    /// Elite ($29.99/yr) marquee row that lives at the top of the Elite grouping on both
-    /// platforms. The remaining Elite features (vault, Shamir, witness, border mode,
-    /// panic lockdown, hardware key, voice bio, face lock, geofence, dead-man wipe,
-    /// signed log, rogue network, threat intel, encrypted backup) still live inside the
-    /// `securityCard` lower down. That card has its own tier dividers now.
+    /// Pro ($19.99/yr) exclusives — monitoring + anti-scam + safety features that need a
+    /// paid tier but no backend. All seven rows gate their navigation via `sub.hasHighPremium`.
+    private var proFeaturesCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                Button {
+                    if sub.hasHighPremium { showDuressSetup = true } else { showDuressUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: duress.isEnabled ? "exclamationmark.shield.fill" : "exclamationmark.shield",
+                        iconTint: duress.isEnabled ? Color.appSuccess : Color.subGold,
+                        label: "Duress Mode",
+                        value: duress.isEnabled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showSimSwapSetup = true } else { showSimSwapUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "simcard.fill",
+                        iconTint: simswap.isEnabled ? Color.appSuccess : Color.subGold,
+                        label: "SIM-Swap Alarm",
+                        value: simswap.isEnabled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showWangiriSettings = true } else { showWangiriUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "phone.down.waveform.fill",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Wangiri Protection"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showCheckInSettings = true } else { showCheckInUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.fill.viewfinder",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Safety Check-In"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showWatchdog = true } else { showWatchdogUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "lock.shield.fill",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "App Permission Watchdog"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showTrackerFinder = true } else { showTrackerFinderUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.magnifyingglass",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Tracker Finder"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasHighPremium { showSmartLinkGuard = true } else { showSmartLinkGuardUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "shield.lefthalf.filled",
+                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
+                        label: "Smart Link Guard"
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    /// Elite ($29.99/yr) exclusives — App Shield + the 15 heavy security features. All
+    /// rows gate via `sub.hasElite`; Free users see upsell sheets.
     private var eliteFeaturesCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
                 Button {
-                    if sub.hasElite {
-                        showAppShieldSetup = true
-                    } else {
-                        showAppShieldUpsell = true
-                    }
+                    if sub.hasElite { showAppShieldSetup = true } else { showAppShieldUpsell = true }
                 } label: {
                     SettingsNavRow(
                         icon: "app.badge.checkmark.fill",
@@ -733,6 +816,189 @@ struct SettingsScreen: View {
                         value: sub.hasElite && appShield.enabled && appShield.shieldedCount > 0
                             ? "On · \(appShield.shieldedCount)"
                             : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showBorderModeSetup = true } else { showBorderModeUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "airplane.departure",
+                        iconTint: borderMode.isArmed ? Color.appDanger : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Border Mode",
+                        value: borderMode.isArmed ? "Armed" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showPanicLockdownSetup = true } else { showPanicLockdownUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "exclamationmark.octagon.fill",
+                        iconTint: panicLockdown.isArmed
+                            ? Color.appDanger
+                            : (sub.hasElite ? Color.appDanger : Color.subGold),
+                        label: "Panic Lockdown",
+                        value: panicLockdown.isArmed ? "ARMED" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showHardwareKeySetup = true } else { showHardwareKeyUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "key.horizontal.fill",
+                        iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
+                        label: "Hardware Security Key",
+                        value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showVoiceBioSetup = true } else { showVoiceBioUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "waveform.and.mic",
+                        iconTint: sub.hasElite ? Color.appBrightCyan : Color.subGold,
+                        label: "Voice Biometric",
+                        value: sub.hasElite && !VoiceBioState.shared.enrolledContactIDs.isEmpty
+                            ? "\(VoiceBioState.shared.enrolledContactIDs.count) enrolled"
+                            : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showFaceLockSetup = true } else { showFaceLockUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "face.dashed",
+                        iconTint: sub.hasElite && faceLock.isEnrolled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Face-Change Lock",
+                        value: sub.hasElite && faceLock.isEnrolled ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showGeofenceSetup = true } else { showGeofenceUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "location.circle.fill",
+                        iconTint: geofence.isEnabled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Geo-fence Auto-Lock",
+                        value: geofence.isEnabled ? "On · \(geofence.geofences.count)" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showDeadmanWipeSetup = true } else { showDeadmanWipeUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "clock.badge.exclamationmark",
+                        iconTint: deadman.isEnabled ? Color.appDanger : Color.subGold,
+                        label: "Dead-Man Wipe",
+                        value: deadman.isEnabled ? "On · \(deadman.intervalDays)d" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showEncryptedBackupSetup = true } else { showEncryptedBackupUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "externaldrive.badge.icloud",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Encrypted vault backup"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showBackupRestore = true } else { showBackupRestoreUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "arrow.down.doc",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Restore from backup"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showShamirSetup = true } else { showShamirUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "rectangle.split.3x1",
+                        iconTint: ShamirState.shared.mySplit != nil ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Shamir Split",
+                        value: ShamirState.shared.mySplit.map { "\($0.threshold)-of-\($0.total)" }
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showTrustedWitnessSetup = true } else { showTrustedWitnessUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "person.2.wave.2",
+                        iconTint: trustedWitness.featureEnabled ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Trusted Witness",
+                        value: trustedWitness.featureEnabled ? "On · \(trustedWitness.witnesses.count)" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showStegoVaultSetup = true } else { showStegoVaultUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "photo.badge.plus",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Steganographic Vault"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showSignedLogSetup = true } else { showSignedLogUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "signature",
+                        iconTint: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey
+                            ? Color.appSuccess
+                            : (sub.hasElite ? Color.appAccent : Color.subGold),
+                        label: "Signed Audit Log",
+                        value: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showRogueNetworkSetup = true } else { showRogueNetworkUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "wifi.exclamationmark",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Rogue Network Scanner"
+                    )
+                }
+                .buttonStyle(.plain)
+                SettingsDivider()
+                Button {
+                    if sub.hasElite { showThreatIntelSetup = true } else { showThreatIntelUpsell = true }
+                } label: {
+                    SettingsNavRow(
+                        icon: "shield.lefthalf.filled",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Offline Threat Intel"
                     )
                 }
                 .buttonStyle(.plain)
@@ -919,430 +1185,11 @@ struct SettingsScreen: View {
                                    label: "Wipe everything", chevron: false, labelTint: Color.appDanger)
                 }
                 .buttonStyle(.plain)
+                // Pro + Elite feature rows that USED to live here have been lifted into
+                // dedicated `proFeaturesCard` and `eliteFeaturesCard` properties so Settings
+                // reads top-to-bottom by subscription tier. See `tierSectionHeader` call
+                // sites in `body` for the new placement.
 
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showDuressSetup = true
-                    } else {
-                        showDuressUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: duress.isEnabled ? "exclamationmark.shield.fill" : "exclamationmark.shield",
-                        iconTint: duress.isEnabled ? Color.appSuccess : Color.subGold,
-                        label: "Duress Mode",
-                        value: duress.isEnabled ? "On" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showSimSwapSetup = true
-                    } else {
-                        showSimSwapUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "simcard.fill",
-                        iconTint: simswap.isEnabled ? Color.appSuccess : Color.subGold,
-                        label: "SIM-Swap Alarm",
-                        value: simswap.isEnabled ? "On" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Wangiri Protection (Pro)
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showWangiriSettings = true
-                    } else {
-                        showWangiriUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "phone.down.waveform.fill",
-                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Wangiri Protection"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Safety Check-In (Pro)
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showCheckInSettings = true
-                    } else {
-                        showCheckInUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "location.fill.viewfinder",
-                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Safety Check-In"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // App Permission Watchdog (Pro)
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showWatchdog = true
-                    } else {
-                        showWatchdogUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "lock.shield.fill",
-                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "App Permission Watchdog"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Tracker Finder (Pro) — scan nearby BLE for AirTag / Tile / SmartTag
-                // and flag persistent followers.
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showTrackerFinder = true
-                    } else {
-                        showTrackerFinderUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "location.magnifyingglass",
-                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Tracker Finder"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Smart Link Guard (Pro) — on-device URL inspection for QR codes +
-                // links shared via the system share sheet.
-                SettingsDivider()
-                Button {
-                    if sub.hasHighPremium {
-                        showSmartLinkGuard = true
-                    } else {
-                        showSmartLinkGuardUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "shield.lefthalf.filled",
-                        iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Smart Link Guard"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Border Mode (Elite) — one-tap preset for high-risk crossings. Placed at
-                // the top of Elite rows per the brief. Toggles every defensive layer at once
-                // (Dead-Man Wipe 7d, Duress active, biometric off, screenshot + shield on,
-                // auto-lock 30s, cover identity swap).
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showBorderModeSetup = true
-                    } else {
-                        showBorderModeUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "airplane.departure",
-                        iconTint: borderMode.isArmed ? Color.appDanger : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Border Mode",
-                        value: borderMode.isArmed ? "Armed" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Panic Lockdown (Elite) — the "I'm in trouble RIGHT NOW" companion to Border
-                // Mode. Single tap locks the app, arms Duress for the next unlock, forces
-                // aggressive sensor monitoring, disables the share extension, and switches to
-                // PIN-only. Placed directly below Border Mode per the brief so the two
-                // Elite emergency presets live together.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showPanicLockdownSetup = true
-                    } else {
-                        showPanicLockdownUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "exclamationmark.octagon.fill",
-                        iconTint: panicLockdown.isArmed
-                            ? Color.appDanger
-                            : (sub.hasElite ? Color.appDanger : Color.subGold),
-                        label: "Panic Lockdown",
-                        value: panicLockdown.isArmed ? "ARMED" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
-                // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
-                // backup export, Dead-Man Wipe disable) behind a physical key tap.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showHardwareKeySetup = true
-                    } else {
-                        showHardwareKeyUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "key.horizontal.fill",
-                        iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
-                        label: "Hardware Security Key",
-                        value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Voice Biometric (Elite) — enroll trusted contacts' voice fingerprints to catch
-                // AI-cloned deepfake callers. 10s enrollment per contact; comparison happens on
-                // every incoming call via CallKit. Keychain-stored 20-dim MFCC descriptor.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showVoiceBioSetup = true
-                    } else {
-                        showVoiceBioUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "waveform.and.mic",
-                        iconTint: sub.hasElite ? Color.appBrightCyan : Color.subGold,
-                        label: "Voice Biometric",
-                        value: sub.hasElite && !VoiceBioState.shared.enrolledContactIDs.isEmpty
-                            ? "\(VoiceBioState.shared.enrolledContactIDs.count) enrolled"
-                            : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Face-Change Shoulder-Surfing Lock (Elite) — front camera watches for faces
-                // while sensitive screens are open. Blurs when the owner walks away; locks
-                // instantly if a stranger or additional face appears.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showFaceLockSetup = true
-                    } else {
-                        showFaceLockUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "face.dashed",
-                        iconTint: sub.hasElite && faceLock.isEnrolled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Face-Change Lock",
-                        value: sub.hasElite && faceLock.isEnrolled ? "On" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Geo-fence Auto-Lock (Elite) — up to 5 trusted locations. The device
-                // auto-locks and (optionally) sends an SMS alert when it leaves every
-                // trusted zone. iOS requires "Always" location authorization to fire the
-                // background region monitor; the setup screen surfaces that caveat.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showGeofenceSetup = true
-                    } else {
-                        showGeofenceUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "location.circle.fill",
-                        iconTint: geofence.isEnabled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Geo-fence Auto-Lock",
-                        value: geofence.isEnabled ? "On · \(geofence.geofences.count)" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Dead-Man Wipe (Elite) — auto-wipe after N days of no unlock. Tapping
-                // opens the setup screen (with toggle, interval picker, timer status, and
-                // reset button). The value shown here collapses the toggle state + interval
-                // into a short "On · 30d" / "Off" label so the row doubles as toggle info.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showDeadmanWipeSetup = true
-                    } else {
-                        showDeadmanWipeUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "clock.badge.exclamationmark",
-                        iconTint: deadman.isEnabled ? Color.appDanger : Color.subGold,
-                        label: "Dead-Man Wipe",
-                        value: deadman.isEnabled ? "On · \(deadman.intervalDays)d" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Encrypted vault backup (Elite) — AES-256-GCM blob exported via the
-                // standard share sheet; user saves to iCloud / Drive / wherever.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showEncryptedBackupSetup = true
-                    } else {
-                        showEncryptedBackupUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "externaldrive.badge.icloud",
-                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Encrypted vault backup"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Restore from backup (Elite) — pick a `.ot2bak`, enter passphrase,
-                // overwrite everything in the app.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showBackupRestore = true
-                    } else {
-                        showBackupRestoreUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "arrow.down.doc",
-                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Restore from backup"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Shamir Split (Elite) — split the vault master key K-of-N across trusted
-                // contacts via short-range Bluetooth. If the user loses access they gather
-                // K contacts in person to reconstruct the key.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showShamirSetup = true
-                    } else {
-                        showShamirUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "rectangle.split.3x1",
-                        iconTint: ShamirState.shared.mySplit != nil ? Color.appSuccess
-                            : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Shamir Split",
-                        value: ShamirState.shared.mySplit.map { "\($0.threshold)-of-\($0.total)" }
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Trusted Witness (Elite) — require a trusted contact's physical proximity +
-                // explicit approval before the most dangerous actions (Wipe, Disarm Duress,
-                // Disable Dead-Man Wipe, Vault export, Change master PIN). Wired into the
-                // Wipe confirmation above.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showTrustedWitnessSetup = true
-                    } else {
-                        showTrustedWitnessUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "person.2.wave.2",
-                        iconTint: trustedWitness.featureEnabled ? Color.appSuccess
-                            : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Trusted Witness",
-                        value: trustedWitness.featureEnabled ? "On · \(trustedWitness.witnesses.count)" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Steganographic Vault (Elite) — hide the vault inside an innocuous PNG or
-                // PDF decoy. Opens an on-screen wizard with create + load flows.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showStegoVaultSetup = true
-                    } else {
-                        showStegoVaultUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "photo.badge.plus",
-                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Steganographic Vault"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Signed Audit Log (Elite) — hardware-key-signed events + Merkle commits +
-                // tamper-evident evidence pack export + verifier. Requires an enrolled key.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showSignedLogSetup = true
-                    } else {
-                        showSignedLogUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "signature",
-                        iconTint: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey
-                            ? Color.appSuccess
-                            : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Signed Audit Log",
-                        value: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Rogue Network Scanner (Elite) — IMSI-catcher + 2G downgrade + lookalike
-                // Wi-Fi detector. 100% on-device; no network calls.
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showRogueNetworkSetup = true
-                    } else {
-                        showRogueNetworkUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "wifi.exclamationmark",
-                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Rogue Network Scanner"
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // Offline Threat Intel (Elite) — bundled scam / phishing / breach / IoC
-                // feeds consulted on-device. Dashboard, "check my vault", "scan sandbox".
-                SettingsDivider()
-                Button {
-                    if sub.hasElite {
-                        showThreatIntelSetup = true
-                    } else {
-                        showThreatIntelUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "shield.lefthalf.filled",
-                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Offline Threat Intel"
-                    )
-                }
-                .buttonStyle(.plain)
             }
         }
     }
