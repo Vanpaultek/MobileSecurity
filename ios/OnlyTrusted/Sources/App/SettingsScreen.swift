@@ -124,11 +124,8 @@ struct SettingsScreen: View {
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
-                    tierSectionHeader("Free Features", chipText: "FREE", chipColor: Color.settingsBlue)
-                    freeFeaturesCard
-
-                    tierSectionHeader("Premium Features", chipText: "PREMIUM", chipColor: Color.appAccent)
-                    premiumFeaturesCard
+                    sectionHeader("Device & data")
+                    securityCard
 
                     sectionHeader("Account")
                     premiumCard
@@ -136,8 +133,11 @@ struct SettingsScreen: View {
                     sectionHeader("Appearance")
                     appearanceCard
 
-                    sectionHeader("Device & data")
-                    securityCard
+                    tierSectionHeader("Free Features", chipText: "FREE", chipColor: Color.settingsBlue)
+                    freeFeaturesCard
+
+                    tierSectionHeader("Premium Features", chipText: "PREMIUM", chipColor: Color.appAccent)
+                    premiumFeaturesCard
 
                     tierSectionHeader("Pro Features", chipText: "PRO", chipColor: Color.subGold)
                     proFeaturesCard

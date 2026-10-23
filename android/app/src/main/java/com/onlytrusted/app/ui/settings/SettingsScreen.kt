@@ -336,157 +336,6 @@ fun SettingsScreen(
                     .padding(top = 4.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // --- FREE Features (always available — core comms + system settings) ---
-            TierSectionHeader("Free Features", chipText = "FREE", chipColor = settingsBlue)
-            SettingsCard {
-                SettingsNavRow(
-                    icon = Icons.Filled.PersonSearch,
-                    tint = settingsBlue,
-                    title = "Data Removal Scan",
-                    onClick = onOpenDataRemoval
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Shield,
-                    tint = settingsBlue,
-                    title = "Blocking & Unknown",
-                    onClick = onOpenPermissions
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Notifications,
-                    tint = settingsBlue,
-                    title = "Notifications",
-                    onClick = onOpenNotifications
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Phone,
-                    tint = settingsBlue,
-                    title = "Call Handling",
-                    onClick = onOpenPermissions
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.AutoMirrored.Filled.Message,
-                    tint = settingsBlue,
-                    title = "Text Handling",
-                    onClick = onOpenPermissions
-                )
-            }
-
-            // --- PREMIUM Features ($4.99/yr — privacy & identity monitoring) ---
-            // Privacy Shield, Breach Watch, Private Aliases, Identity Protection were in
-            // Free Features through v0.2.0; moved to Premium per product repositioning
-            // so Free covers calls/SMS/system settings only and Premium covers active
-            // privacy monitoring. Each screen also enforces the gate internally so
-            // Free users deep-linking in see the upsell card.
-            TierSectionHeader("Premium Features", chipText = "PREMIUM", chipColor = BrandAccentDark)
-            SettingsCard {
-                SettingsNavRow(
-                    icon = Icons.Filled.Security,
-                    tint = BrandAccentDark,
-                    title = "Privacy Shield",
-                    onClick = onOpenPrivacyShield
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.MarkEmailUnread,
-                    tint = BrandAccentDark,
-                    title = "Breach Watch",
-                    onClick = onOpenBreachWatch
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.AlternateEmail,
-                    tint = BrandAccentDark,
-                    title = "Private Aliases",
-                    onClick = onOpenAliases
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.VerifiedUser,
-                    tint = BrandAccentDark,
-                    title = "Identity Protection",
-                    onClick = onOpenIdentityProtection
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Description,
-                    tint = BrandAccentDark,
-                    title = "Weekly Digest",
-                    onClick = onOpenWeeklyDigest
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.FilterList,
-                    tint = BrandAccentDark,
-                    title = "Advanced Blocking",
-                    onClick = onOpenAdvancedBlocking
-                )
-            }
-
-            // --- Account & reports (not tier-exclusive — plan management) ---
-            SectionHeader("Account")
-            SettingsCard {
-                SettingsNavRow(
-                    icon = Icons.AutoMirrored.Filled.ShowChart,
-                    tint = settingsBlue,
-                    title = "Reports",
-                    onClick = onOpenReports
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.CreditCard,
-                    tint = settingsBlue,
-                    title = "Billing & Subscription",
-                    onClick = onOpenBilling
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.EmojiEvents,
-                    tint = subGold,
-                    title = "Upgrade",
-                    onClick = onOpenUpgrade
-                )
-            }
-
-            // --- Appearance (iOS-aligned: PURPLE gradient chips) ---
-            SectionHeader("Appearance")
-            SettingsCard {
-                SettingsNavRow(
-                    icon = Icons.Filled.Palette,
-                    tint = settingsPurple,
-                    title = "App Theme",
-                    value = "Dark (System)",
-                    onClick = { themeSheetOpen = true }
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Language,
-                    tint = settingsPurple,
-                    title = "Language",
-                    value = "English",
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_LOCALE_SETTINGS)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        runCatching { context.startActivity(intent) }
-                    }
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.TextFields,
-                    tint = settingsPurple,
-                    title = "Text Size",
-                    value = "System",
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        runCatching { context.startActivity(intent) }
-                    }
-                )
-            }
-
             // --- Security & data (Android-preserved functionality) ---
             SectionHeader("Device & data")
             SettingsCard {
@@ -639,6 +488,157 @@ fun SettingsScreen(
                     titleTint = DangerDark,
                     showChevron = false,
                     onClick = { confirmWipe = true }
+                )
+            }
+
+            // --- Account & reports (not tier-exclusive — plan management) ---
+            SectionHeader("Account")
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.AutoMirrored.Filled.ShowChart,
+                    tint = settingsBlue,
+                    title = "Reports",
+                    onClick = onOpenReports
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.CreditCard,
+                    tint = settingsBlue,
+                    title = "Billing & Subscription",
+                    onClick = onOpenBilling
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.EmojiEvents,
+                    tint = subGold,
+                    title = "Upgrade",
+                    onClick = onOpenUpgrade
+                )
+            }
+
+            // --- Appearance (iOS-aligned: PURPLE gradient chips) ---
+            SectionHeader("Appearance")
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Palette,
+                    tint = settingsPurple,
+                    title = "App Theme",
+                    value = "Dark (System)",
+                    onClick = { themeSheetOpen = true }
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Language,
+                    tint = settingsPurple,
+                    title = "Language",
+                    value = "English",
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_LOCALE_SETTINGS)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        runCatching { context.startActivity(intent) }
+                    }
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.TextFields,
+                    tint = settingsPurple,
+                    title = "Text Size",
+                    value = "System",
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        runCatching { context.startActivity(intent) }
+                    }
+                )
+            }
+
+                // --- FREE Features (always available — core comms + system settings) ---
+            TierSectionHeader("Free Features", chipText = "FREE", chipColor = settingsBlue)
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.PersonSearch,
+                    tint = settingsBlue,
+                    title = "Data Removal Scan",
+                    onClick = onOpenDataRemoval
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Shield,
+                    tint = settingsBlue,
+                    title = "Blocking & Unknown",
+                    onClick = onOpenPermissions
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Notifications,
+                    tint = settingsBlue,
+                    title = "Notifications",
+                    onClick = onOpenNotifications
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Phone,
+                    tint = settingsBlue,
+                    title = "Call Handling",
+                    onClick = onOpenPermissions
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.AutoMirrored.Filled.Message,
+                    tint = settingsBlue,
+                    title = "Text Handling",
+                    onClick = onOpenPermissions
+                )
+            }
+
+            // --- PREMIUM Features ($4.99/yr — privacy & identity monitoring) ---
+            // Privacy Shield, Breach Watch, Private Aliases, Identity Protection were in
+            // Free Features through v0.2.0; moved to Premium per product repositioning
+            // so Free covers calls/SMS/system settings only and Premium covers active
+            // privacy monitoring. Each screen also enforces the gate internally so
+            // Free users deep-linking in see the upsell card.
+            TierSectionHeader("Premium Features", chipText = "PREMIUM", chipColor = BrandAccentDark)
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Security,
+                    tint = BrandAccentDark,
+                    title = "Privacy Shield",
+                    onClick = onOpenPrivacyShield
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.MarkEmailUnread,
+                    tint = BrandAccentDark,
+                    title = "Breach Watch",
+                    onClick = onOpenBreachWatch
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.AlternateEmail,
+                    tint = BrandAccentDark,
+                    title = "Private Aliases",
+                    onClick = onOpenAliases
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.VerifiedUser,
+                    tint = BrandAccentDark,
+                    title = "Identity Protection",
+                    onClick = onOpenIdentityProtection
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Description,
+                    tint = BrandAccentDark,
+                    title = "Weekly Digest",
+                    onClick = onOpenWeeklyDigest
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.FilterList,
+                    tint = BrandAccentDark,
+                    title = "Advanced Blocking",
+                    onClick = onOpenAdvancedBlocking
                 )
             }
 
