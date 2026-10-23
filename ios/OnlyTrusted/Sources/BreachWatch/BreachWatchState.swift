@@ -29,6 +29,14 @@ final class BreachWatchState: ObservableObject {
         didSet { Keychain.set(email, for: Keys.email) }
     }
 
+    /// Premium-only: up to 4 additional emails monitored in parallel with `email`. Total
+    /// cap is 5 across Free + Premium combined. Persisted as a JSON string array.
+    @Published var additionalEmails: [String] = [] {
+        didSet { persistAdditional() }
+    }
+
+    static let maxEmailsPremium = 5
+
     @Published var userName: String {
         didSet { Keychain.set(userName, for: Keys.userName) }
     }
@@ -61,10 +69,11 @@ final class BreachWatchState: ObservableObject {
     // MARK: - Keychain keys
 
     private enum Keys {
-        static let email       = "breach_watch.v1.email"
-        static let lastCheck   = "breach_watch.v1.last_check"
-        static let hitsJSON    = "breach_watch.v1.hits_json"
-        static let userName    = "breach_watch.v1.user_name"
+        static let email            = "breach_watch.v1.email"
+        static let additionalEmails = "breach_watch.v1.additional_emails"
+        static let lastCheck        = "breach_watch.v1.last_check"
+        static let hitsJSON         = "breach_watch.v1.hits_json"
+        static let userName         = "breach_watch.v1.user_name"
     }
 
     private let iso: ISO8601DateFormatter = {
@@ -87,6 +96,11 @@ final class BreachWatchState: ObservableObject {
            let decoded = try? JSONDecoder().decode([BreachHit].self, from: data) {
             self.hits = decoded
         }
+        if let json = Keychain.get(Keys.additionalEmails),
+           let data = json.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode([String].self, from: data) {
+            self.additionalEmails = decoded
+        }
     }
 
     // MARK: - Public API
@@ -100,23 +114,47 @@ final class BreachWatchState: ObservableObject {
         persistHits()
     }
 
-    /// Runs the local lookup against the bundled feed. Updates `hits` + `lastChecked`.
-    /// Returns the new hits so callers can show in-flow feedback (notification body etc.).
+    /// Premium: add another email to monitor (ignored if cap would be exceeded or
+    /// email is empty / already present). Returns true if added.
+    @discardableResult
+    func addAdditionalEmail(_ raw: String) -> Bool {
+        let normalised = BreachLookup.normalise(raw)
+        guard !normalised.isEmpty,
+              normalised != email,
+              !additionalEmails.contains(normalised),
+              (1 + additionalEmails.count) < Self.maxEmailsPremium else { return false }
+        additionalEmails.append(normalised)
+        return true
+    }
+
+    func removeAdditionalEmail(_ raw: String) {
+        additionalEmails.removeAll { $0 == raw }
+    }
+
+    /// All monitored emails as an ordered list, primary first.
+    var allEmails: [String] {
+        var out: [String] = []
+        if !email.isEmpty { out.append(email) }
+        out.append(contentsOf: additionalEmails)
+        return out
+    }
+
+    /// Runs the local lookup against the bundled feed for every monitored email.
+    /// Updates `hits` + `lastChecked`. Returns the new hits.
     @discardableResult
     func runCheck(now: Date = Date()) -> [BreachHit] {
-        guard !email.isEmpty else {
+        let emails = allEmails
+        guard !emails.isEmpty else {
             lastChecked = now
             return []
         }
-        let hit = BreachLookup.isEmailBreached(email)
-        if hit {
-            let existing = hits.first { $0.source == "A known breach list" }
-            if existing == nil {
-                hits = [BreachHit(source: "A known breach list", firstSeen: now)]
-            }
-        } else {
-            hits = []
+        // One BreachHit per matched email so the UI can list which address was found.
+        var newHits: [BreachHit] = []
+        for addr in emails where BreachLookup.isEmailBreached(addr) {
+            let existing = hits.first { $0.source == addr }
+            newHits.append(BreachHit(source: addr, firstSeen: existing?.firstSeen ?? now))
         }
+        hits = newHits
         lastChecked = now
         persistHits()
         return hits
@@ -124,10 +162,12 @@ final class BreachWatchState: ObservableObject {
 
     func clearAll() {
         email = ""
+        additionalEmails = []
         userName = ""
         hits = []
         lastChecked = nil
         Keychain.delete(Keys.email)
+        Keychain.delete(Keys.additionalEmails)
         Keychain.delete(Keys.userName)
         Keychain.delete(Keys.lastCheck)
         Keychain.delete(Keys.hitsJSON)
@@ -137,6 +177,12 @@ final class BreachWatchState: ObservableObject {
         let data = (try? JSONEncoder().encode(hits)) ?? Data()
         let str = String(data: data, encoding: .utf8) ?? "[]"
         Keychain.set(str, for: Keys.hitsJSON)
+    }
+
+    private func persistAdditional() {
+        let data = (try? JSONEncoder().encode(additionalEmails)) ?? Data()
+        let str = String(data: data, encoding: .utf8) ?? "[]"
+        Keychain.set(str, for: Keys.additionalEmails)
     }
 }
 

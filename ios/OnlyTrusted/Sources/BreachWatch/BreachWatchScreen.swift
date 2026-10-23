@@ -12,10 +12,12 @@ import SwiftUI
 struct BreachWatchScreen: View {
 
     @StateObject private var state = BreachWatchState.shared
+    @StateObject private var sub = SubscriptionState.shared
     @State private var draftEmail: String = ""
     @State private var draftName: String = ""
     @State private var editingEmail: Bool = false
     @State private var showNoNotifPerm: Bool = false
+    @State private var additionalDraft: String = ""
 
     private var isSaved: Bool { !state.email.isEmpty }
 
@@ -24,6 +26,7 @@ struct BreachWatchScreen: View {
             VStack(spacing: 16) {
                 heroCard
                 monitoredEmailCard
+                additionalEmailsCard
                 nameCard
                 statusCard
                 if !state.hits.isEmpty { hitsCard } else if isSaved { emptyStateCard }
@@ -123,6 +126,87 @@ struct BreachWatchScreen: View {
                         }
                         .foregroundStyle(Color.appAccent)
                     }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var additionalEmailsCard: some View {
+        if sub.hasPremium {
+            PremiumCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    CardHeader(icon: "envelope.badge.fill",
+                               title: "Additional emails (Premium)",
+                               tint: Color.appAccent)
+                    Text("Monitor up to \(BreachWatchState.maxEmailsPremium) emails in total. Checks run against all of them at once.")
+                        .font(.caption)
+                        .foregroundStyle(Color.appSecondaryText)
+                    ForEach(state.additionalEmails, id: \.self) { addr in
+                        HStack {
+                            Image(systemName: "at")
+                                .foregroundStyle(Color.appAccent)
+                            Text(addr)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.appPrimaryText)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer()
+                            Button {
+                                state.removeAdditionalEmail(addr)
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(Color.appDanger)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    let canAdd = (1 + state.additionalEmails.count) < BreachWatchState.maxEmailsPremium
+                    if canAdd {
+                        HStack {
+                            TextField("another@example.com", text: $additionalDraft)
+                                .keyboardType(.emailAddress)
+                                .textContentType(.emailAddress)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(Color.appScreenBackground)
+                                )
+                            Button {
+                                if state.addAdditionalEmail(additionalDraft) {
+                                    additionalDraft = ""
+                                    _ = state.runCheck()
+                                }
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(Color.appAccent)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(additionalDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                        }
+                    } else {
+                        Text("You've reached the \(BreachWatchState.maxEmailsPremium)-email cap.")
+                            .font(.caption)
+                            .foregroundStyle(Color.appSecondaryText)
+                    }
+                }
+            }
+        } else {
+            // Free upsell card — tappable, routes to Upgrade.
+            PremiumCard {
+                VStack(alignment: .leading, spacing: 10) {
+                    CardHeader(icon: "crown.fill",
+                               title: "Watch up to 5 emails (Premium)",
+                               tint: Color.subGold)
+                    Text("Premium ($4.99/yr) lets you monitor your work, side, and family emails against the same bundled breach list — all on-device.")
+                        .font(.caption)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }

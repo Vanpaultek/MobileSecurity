@@ -78,6 +78,9 @@ fun BreachWatchScreen(onBack: () -> Unit) {
     var editing by remember { mutableStateOf(email.isEmpty()) }
     var lastCheck by remember { mutableStateOf(BreachWatchState.lastCheckMillis(context)) }
     var hits by remember { mutableStateOf(BreachWatchState.hits(context)) }
+    var additionalEmails by remember { mutableStateOf(BreachWatchState.additionalEmails(context)) }
+    var additionalDraft by remember { mutableStateOf("") }
+    val isPremium = com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)
 
     LaunchedEffect(Unit) {
         if (email.isNotEmpty()) {
@@ -175,6 +178,97 @@ fun BreachWatchScreen(onBack: () -> Unit) {
                                 editing = true
                             }) { Text("Change", color = BrandAccentDark) }
                         }
+                    }
+                }
+            }
+
+            // Additional emails (Premium) — or upsell card for Free
+            if (isPremium) {
+                CardBox {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            "Additional emails (Premium)",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = PrimaryTextDark
+                        )
+                        Text(
+                            "Monitor up to ${BreachWatchState.MAX_EMAILS_PREMIUM} emails in " +
+                                "total. Checks run against all of them at once.",
+                            fontSize = 11.sp, color = SecondaryTextDark
+                        )
+                        additionalEmails.forEach { addr ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    addr,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = PrimaryTextDark,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TextButton(onClick = {
+                                    BreachWatchState.removeAdditionalEmail(context, addr)
+                                    additionalEmails = BreachWatchState.additionalEmails(context)
+                                }) { Text("Remove", color = DangerDark, fontSize = 12.sp) }
+                            }
+                        }
+                        val canAdd = (1 + additionalEmails.size) < BreachWatchState.MAX_EMAILS_PREMIUM
+                        if (canAdd) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = additionalDraft,
+                                    onValueChange = { additionalDraft = it },
+                                    singleLine = true,
+                                    placeholder = { Text("another@example.com") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Button(
+                                    onClick = {
+                                        if (BreachWatchState.addAdditionalEmail(context, additionalDraft)) {
+                                            additionalDraft = ""
+                                            additionalEmails = BreachWatchState.additionalEmails(context)
+                                            hits = BreachWatchState.runCheck(context)
+                                            lastCheck = BreachWatchState.lastCheckMillis(context)
+                                        }
+                                    },
+                                    enabled = additionalDraft.isNotBlank(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = BrandAccentDark,
+                                        contentColor = Color.White
+                                    )
+                                ) { Text("Add") }
+                            }
+                        } else {
+                            Text(
+                                "You've reached the ${BreachWatchState.MAX_EMAILS_PREMIUM}-email cap.",
+                                fontSize = 11.sp, color = SecondaryTextDark
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Free upsell card
+                CardBox {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.WorkspacePremium, null, tint = subGold)
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                "Watch up to 5 emails (Premium)",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PrimaryTextDark
+                            )
+                        }
+                        Text(
+                            "Premium (\$4.99/yr) lets you monitor your work, side, and family " +
+                                "emails against the same bundled breach list — all on-device.",
+                            fontSize = 11.sp, color = SecondaryTextDark
+                        )
                     }
                 }
             }

@@ -20,9 +20,13 @@ object BreachWatchState {
 
     private const val PREFS = "breach_watch_prefs_v1"
     private const val KEY_EMAIL = "email"
+    private const val KEY_ADDITIONAL_EMAILS = "additional_emails"
     private const val KEY_LAST_CHECK = "last_check"
     private const val KEY_HITS_JSON = "hits_json"
     private const val KEY_USER_NAME = "user_name"
+
+    /** Total email cap across Free (1) + Premium (up to 5). Shared with iOS. */
+    const val MAX_EMAILS_PREMIUM = 5
 
     data class BreachHit(
         val source: String,
@@ -43,6 +47,45 @@ object BreachWatchState {
     }
 
     fun email(ctx: Context): String = prefs(ctx).getString(KEY_EMAIL, "").orEmpty()
+
+    /** Premium-only additional emails (0..4 entries). Primary email stays in KEY_EMAIL. */
+    fun additionalEmails(ctx: Context): List<String> {
+        val raw = prefs(ctx).getString(KEY_ADDITIONAL_EMAILS, null) ?: return emptyList()
+        return runCatching {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }
+        }.getOrDefault(emptyList())
+    }
+
+    /** All monitored emails, primary first, additional after. */
+    fun allEmails(ctx: Context): List<String> {
+        val primary = email(ctx)
+        val extra = additionalEmails(ctx)
+        return (if (primary.isNotEmpty()) listOf(primary) else emptyList()) + extra
+    }
+
+    /** Returns true if added. Caller should check hasPremium before invoking. */
+    fun addAdditionalEmail(ctx: Context, raw: String): Boolean {
+        val normalised = BreachLookup.normalise(raw)
+        if (normalised.isEmpty()) return false
+        if (normalised == email(ctx)) return false
+        val current = additionalEmails(ctx).toMutableList()
+        if (current.contains(normalised)) return false
+        if (1 + current.size >= MAX_EMAILS_PREMIUM) return false
+        current.add(normalised)
+        persistAdditional(ctx, current)
+        return true
+    }
+
+    fun removeAdditionalEmail(ctx: Context, raw: String) {
+        val updated = additionalEmails(ctx).filterNot { it == raw }
+        persistAdditional(ctx, updated)
+    }
+
+    private fun persistAdditional(ctx: Context, list: List<String>) {
+        val arr = JSONArray().apply { list.forEach { put(it) } }
+        prefs(ctx).edit().putString(KEY_ADDITIONAL_EMAILS, arr.toString()).apply()
+    }
 
     fun userName(ctx: Context): String = prefs(ctx).getString(KEY_USER_NAME, "").orEmpty()
 
@@ -86,20 +129,26 @@ object BreachWatchState {
      * immediate notification when a new hit appears.
      */
     fun runCheck(ctx: Context, nowMillis: Long = System.currentTimeMillis()): List<BreachHit> {
-        val address = email(ctx)
-        if (address.isEmpty()) {
+        val addresses = allEmails(ctx)
+        if (addresses.isEmpty()) {
             prefs(ctx).edit().putLong(KEY_LAST_CHECK, nowMillis).apply()
             return emptyList()
         }
-        val isHit = BreachLookup.isEmailBreached(ctx, address)
         val currentHits = hits(ctx)
-        val updated: List<BreachHit> = if (isHit) {
-            val existing = currentHits.firstOrNull { it.source == "A known breach list" }
-            if (existing != null) currentHits else listOf(
-                BreachHit(source = "A known breach list", firstSeenMillis = nowMillis)
-            )
-        } else {
-            emptyList()
+        // One BreachHit per matched address — source == email address. First-seen preserved
+        // across repeated checks so we don't reset the "when it first appeared" clock.
+        val updated = buildList {
+            for (addr in addresses) {
+                if (BreachLookup.isEmailBreached(ctx, addr)) {
+                    val existing = currentHits.firstOrNull { it.source == addr }
+                    add(
+                        BreachHit(
+                            source = addr,
+                            firstSeenMillis = existing?.firstSeenMillis ?: nowMillis
+                        )
+                    )
+                }
+            }
         }
         persistHits(ctx, updated)
         prefs(ctx).edit().putLong(KEY_LAST_CHECK, nowMillis).apply()
