@@ -149,17 +149,14 @@ struct UpgradeToPremiumScreen: View {
     // MARK: - Plans grid
 
     private var plansGrid: some View {
+        // All plans render as full-width cards stacked vertically — matches the Elite
+        // card format which users liked. Keeps the layout consistent across every
+        // tier so comparing is easier.
         VStack(spacing: 10) {
-            HStack(alignment: .top, spacing: 10) {
-                planCard(.free)
-                planCard(.premium)
-            }
-            HStack(alignment: .top, spacing: 10) {
-                planCard(.family)
-                planCard(.highPremium)
-            }
-            // Elite sits alone, full-width — it's the "top shelf" tier so it earns the
-            // premium slot visually.
+            planCard(.free)
+            planCard(.premium)
+            planCard(.family)
+            planCard(.highPremium)
             planCard(.elite)
         }
     }
@@ -227,8 +224,8 @@ struct UpgradeToPremiumScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 6)
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, minHeight: 360, alignment: .top)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .top)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .fill(Color.clear)

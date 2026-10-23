@@ -428,22 +428,14 @@ private fun PlansGrid(
     selectedPlan: Plan,
     onSelect: (Plan) -> Unit
 ) {
+    // All plans render as full-width cards stacked vertically — matches the Elite card
+    // format which users liked. Keeps the layout consistent across every tier so
+    // comparing is easier.
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            PlanCard(Plan.Free, cadence, selectedPlan == Plan.Free, onSelect, Modifier.weight(1f))
-            PlanCard(Plan.Premium, cadence, selectedPlan == Plan.Premium, onSelect, Modifier.weight(1f))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            PlanCard(Plan.Family, cadence, selectedPlan == Plan.Family, onSelect, Modifier.weight(1f))
-            PlanCard(Plan.HighPremium, cadence, selectedPlan == Plan.HighPremium, onSelect, Modifier.weight(1f))
-        }
-        // Elite sits alone, full-width — the top-shelf tier gets its own slot.
+        PlanCard(Plan.Free, cadence, selectedPlan == Plan.Free, onSelect, Modifier.fillMaxWidth())
+        PlanCard(Plan.Premium, cadence, selectedPlan == Plan.Premium, onSelect, Modifier.fillMaxWidth())
+        PlanCard(Plan.Family, cadence, selectedPlan == Plan.Family, onSelect, Modifier.fillMaxWidth())
+        PlanCard(Plan.HighPremium, cadence, selectedPlan == Plan.HighPremium, onSelect, Modifier.fillMaxWidth())
         PlanCard(Plan.Elite, cadence, selectedPlan == Plan.Elite, onSelect, Modifier.fillMaxWidth())
     }
 }
