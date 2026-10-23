@@ -15,11 +15,11 @@ settings:
     CURRENT_PROJECT_VERSION: "2"
     SWIFT_STRICT_CONCURRENCY: complete
     GENERATE_INFOPLIST_FILE: NO
-    # 57Million LLC Apple Developer team — placeholder, unverified against Apple's
+    # VanPaulTek Inc Apple Developer team — placeholder, unverified against Apple's
     # provisioning service as of 2026-10-20 (Xcode has no Apple ID signed in on this
     # machine, so a device build cannot resolve profiles). Simulator builds work with
     # CODE_SIGNING_ALLOWED=NO regardless. When ready for a real-device build:
-    #   1) Xcode → Settings → Accounts → add the Apple ID for 57Million LLC.
+    #   1) Xcode → Settings → Accounts → add the Apple ID for VanPaulTek Inc.
     #   2) Confirm the 10-char Team ID matches the string below.
     #   3) xcodegen generate && xcodebuild ... build (drop CODE_SIGNING_ALLOWED=NO).
     DEVELOPMENT_TEAM: "H86SA2C3S5"

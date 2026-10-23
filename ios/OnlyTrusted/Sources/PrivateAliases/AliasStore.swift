@@ -116,8 +116,13 @@ final class AliasStore: ObservableObject {
     static func generatePrefix() -> String {
         // 3-3-4 split with hyphens — e.g. "q7m-elk-83vf". Alphabet avoids visually
         // ambiguous chars (0/O/1/l/i) so copying by eye works. Entropy: 31^10 ≈ 8.2×10¹⁴.
+        //
+        // `Array.randomElement()` on Apple platforms uses `SystemRandomNumberGenerator`,
+        // which is backed by `getentropy(2)` / Security framework — cryptographically
+        // secure. The alias prefix becomes a quasi-secret identifier so we want this
+        // not to be predictable even though it isn't a key.
         func chunk(_ n: Int) -> String {
-            String((0..<n).map { _ in prefixAlphabet.randomElement()! })
+            String((0..<n).compactMap { _ in prefixAlphabet.randomElement() })
         }
         return "\(chunk(3))-\(chunk(3))-\(chunk(4))"
     }

@@ -28,6 +28,7 @@ struct BreachWatchScreen: View {
                 statusCard
                 if !state.hits.isEmpty { hitsCard } else if isSaved { emptyStateCard }
                 upsellCard
+                attributionCard
             }
             .padding(20)
         }
@@ -332,6 +333,23 @@ struct BreachWatchScreen: View {
                 Text("Elite will let you monitor up to 10 emails + phone numbers with real-time alerts via the HIBP Enterprise feed. That requires a backend subscription, so it's not available in this build yet.")
                     .font(.caption)
                     .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var attributionCard: some View {
+        // HIBP CC-BY-4.0 attribution — the bundled breach_hashes.v1.txt feed is derived
+        // from Troy Hunt's Have I Been Pwned public dataset. Visible attribution is a
+        // license requirement for commercial use; keep this card wired into the view.
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Data attribution")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.appSecondaryText)
+                Text("Breach hashes bundled with this app are derived from the Have I Been Pwned public dataset (Troy Hunt, haveibeenpwned.com) under CC-BY-4.0. The lookup runs entirely on your device.")
+                    .font(.caption2)
+                    .foregroundStyle(Color.appTertiaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

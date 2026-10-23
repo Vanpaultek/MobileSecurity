@@ -8,8 +8,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.SecureRandom
 import java.util.UUID
-import kotlin.random.Random
 
 /**
  * EncryptedSharedPreferences-backed store for Private Email Aliases (FREE tier,
@@ -35,10 +35,19 @@ object AliasStore {
         val createdAtMillis: Long
     )
 
+    // Cache the MasterKey after the first build to avoid the Keystore round-trip on every
+    // prefs() call (every read / write / toggle). The key material lives in the Android
+    // Keystore; the MasterKey instance is just a thin handle, safe to retain for the
+    // process lifetime.
+    @Volatile private var cachedMasterKey: MasterKey? = null
+
     private fun prefs(ctx: Context): SharedPreferences {
-        val master = MasterKey.Builder(ctx)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        val master = cachedMasterKey ?: synchronized(this) {
+            cachedMasterKey ?: MasterKey.Builder(ctx.applicationContext)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+                .also { cachedMasterKey = it }
+        }
         return EncryptedSharedPreferences.create(
             ctx.applicationContext,
             PREFS,
@@ -153,11 +162,16 @@ object AliasStore {
 
     private const val PREFIX_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
 
+    // SecureRandom (not kotlin.random.Random) — the alias prefix becomes a quasi-secret
+    // identifier that lets third parties bill or spam the user, so prefix predictability
+    // is a privacy concern even though it isn't a crypto key.
+    private val secureRandom = SecureRandom()
+
     private fun generatePrefix(): String {
         // 3-3-4 split with hyphens, alphabet avoids visually ambiguous chars.
         // Entropy: 31^10 ≈ 8.2×10¹⁴.
         fun chunk(n: Int): String =
-            (1..n).map { PREFIX_ALPHABET[Random.nextInt(PREFIX_ALPHABET.length)] }
+            (1..n).map { PREFIX_ALPHABET[secureRandom.nextInt(PREFIX_ALPHABET.length)] }
                 .joinToString("")
         return "${chunk(3)}-${chunk(3)}-${chunk(4)}"
     }

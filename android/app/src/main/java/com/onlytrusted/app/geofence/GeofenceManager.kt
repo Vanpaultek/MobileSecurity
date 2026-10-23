@@ -55,6 +55,12 @@ object GeofenceManager {
             action = INTENT_ACTION
         }
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // FLAG_MUTABLE is REQUIRED here, not optional: Google Play Services fills in
+            // the GeofencingEvent extras on the Intent before delivering it to our
+            // receiver — a FLAG_IMMUTABLE PendingIntent would prevent that and we'd
+            // receive empty-extra broadcasts with no fence IDs or transition type. The
+            // receiver is declared `exported=false` in the manifest, so no third-party
+            // app can intercept and mutate this intent.
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT

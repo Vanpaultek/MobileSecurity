@@ -301,6 +301,26 @@ fun BreachWatchScreen(onBack: () -> Unit) {
                 }
             }
 
+            // HIBP CC-BY-4.0 attribution — bundled breach_hashes.v1.txt is derived from
+            // Troy Hunt's Have I Been Pwned public dataset. Visible attribution is a
+            // license requirement for commercial use.
+            CardBox {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "Data attribution",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SecondaryTextDark
+                    )
+                    Text(
+                        "Breach hashes bundled with this app are derived from the Have I Been " +
+                            "Pwned public dataset (Troy Hunt, haveibeenpwned.com) under " +
+                            "CC-BY-4.0. The lookup runs entirely on your device.",
+                        fontSize = 10.sp, color = TertiaryTextDark
+                    )
+                }
+            }
+
             Spacer(Modifier.height(8.dp))
         }
     }

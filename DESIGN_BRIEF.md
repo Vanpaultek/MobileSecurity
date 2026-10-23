@@ -1,7 +1,7 @@
 # OnlyTrusted — Design Brief
 
 **For:** external designers / design agencies evaluating or polishing the OnlyTrusted UI.
-**App owner:** 57Million LLC. Contact: `reddy@vanpaultek.com`.
+**App owner:** VanPaulTek Inc. Contact: `reddy@vanpaultek.com`.
 **Platforms:** native Android (Jetpack Compose + Material 3) and native iOS (SwiftUI).
 **Status:** functional product, both platforms building green. In-house visual pass complete: Midnight Cybersecurity palette + 14-screen mockup conformance. External designers are now engaged for incremental polish, custom glyph work, and illustrations — not a wholesale redesign.
 **Repository:** https://github.com/Vanpaultek/OnlyTrusted (public, AGPL-3.0).
@@ -30,7 +30,7 @@ Adults who need a quiet phone and strong privacy guarantees — small business o
 | Attribute | Value |
 |---|---|
 | **Product name** | `OnlyTrusted` (one word, two capitals; never `Only Trusted` or `OT`) |
-| **Legal owner** | 57Million LLC |
+| **Legal owner** | VanPaulTek Inc |
 | **Support email** | reddy@vanpaultek.com |
 | **License** | GNU AGPL-3.0 (visible footer in About + README) |
 | **Brand mark** | `BrandLogo` — glowing teal shield + checkmark + "OnlyTrusted" wordmark. Shipped as the launcher icon on both platforms (iOS AppIcon 1024² + Android adaptive icon + legacy mipmaps) and as the hero image on Splash + About. Source PNG at `ios/OnlyTrusted/Assets.xcassets/BrandLogo.imageset/BrandLogo@3x.png` (1254²) and `android/app/src/main/res/drawable-xxxhdpi/brand_logo.png`. |
@@ -194,7 +194,7 @@ Every screen the user can reach, in approximate reading order. Numbering follows
   - **Owner tag** input (24 chars, used in Shield watermark).
   - **Data** group: Export my data as JSON, Export evidence pack for carrier/bank/police, Clear event history, Wipe everything (destructive confirmation dialog).
   - **More** group: Permission audit (Android only), Device posture check (Android only), Privacy / terms / honest claims, About + attributions, Shield session log (Android only).
-  - **Footer.** © 2026 57Million LLC. AGPL-3.0. Support email.
+  - **Footer.** © 2026 VanPaulTek Inc. AGPL-3.0. Support email.
 - **State for App Lock toggle.** Must refuse to enable when the device has no biometric or passcode set, and show a snackbar explaining why. Already implemented; redesign must preserve.
 
 ### 5.6b Notifications preferences (reached from Settings → More → Notifications)
@@ -219,7 +219,7 @@ Every screen the user can reach, in approximate reading order. Numbering follows
 - **Purpose.** Version info + support contact + changelog + open-source attributions.
 - **Shows.**
   - Version + build.
-  - "A product of 57Million LLC." footer.
+  - "A product of VanPaulTek Inc." footer.
   - Support email with "Open email client" button.
   - Changelog (versioned list of bulleted features).
   - Open-source attributions list (AndroidX, Jetpack Compose, Room, SQLCipher, Kotlin, Swift/SwiftUI, CryptoKit, LocalAuthentication).
@@ -381,8 +381,8 @@ Current Android screenshots can be captured on a windowed AVD.
 - Changing the Midnight Cybersecurity palette (see §2.1 — it is locked and WCAG-validated).
 - Changing the font families (SF Pro on iOS, Inter on Android are locked unless a licensed replacement is proposed with clear reasoning).
 - Marketing website.
-- Play Store / App Store listing graphics (handled separately by 57Million).
-- Logo for 57Million LLC itself.
+- Play Store / App Store listing graphics (handled separately by VanPaulTek).
+- Logo for VanPaulTek Inc itself.
 - Documentation / help centre.
 
 ---

@@ -40,12 +40,16 @@ enum CallerLookup {
         return nil
     }
 
-    private static let numberRegex = try! NSRegularExpression(pattern: "\\+?\\d{7,}")
+    // Pattern is statically valid; the ?? sentinel makes this crash-free even if a
+    // future edit breaks the pattern — we just stop finding dialable numbers.
+    private static let numberRegex: NSRegularExpression? =
+        (try? NSRegularExpression(pattern: "\\+?\\d{7,}"))
 
     private static func extractDialable(from text: String) -> String? {
         let ns = text as NSString
         let range = NSRange(location: 0, length: ns.length)
-        guard let match = numberRegex.firstMatch(in: text, range: range) else { return nil }
+        guard let numberRegex,
+              let match = numberRegex.firstMatch(in: text, range: range) else { return nil }
         return ns.substring(with: match.range)
     }
 }

@@ -192,8 +192,15 @@ final class OTBluetoothPeerManager: NSObject, ObservableObject {
         var framed = Data()
         framed.append(kind.rawValue)
         framed.append(payload)
-        let box = try! AES.GCM.seal(framed, using: key)
-        return box.combined ?? Data()
+        // AES.GCM.seal throws only for invalid nonce/key sizes. We pass a 256-bit
+        // SymmetricKey and no custom nonce, so the throw path is unreachable in practice —
+        // but a crash in Elite P2P flows would be a worse failure than returning empty
+        // Data() and letting the peer surface a transport error.
+        guard let box = try? AES.GCM.seal(framed, using: key),
+              let combined = box.combined else {
+            return Data()
+        }
+        return combined
     }
 
     fileprivate func decrypt(ciphertext: Data, key: SymmetricKey) -> (PayloadKind, Data)? {

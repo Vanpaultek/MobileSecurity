@@ -74,9 +74,13 @@ enum DataExporter {
         return url
     }
 
-    private static let numberRegex = try! NSRegularExpression(pattern: "\\+?\\d{7,}")
+    // Pattern is statically valid; the ?? sentinel makes this crash-free even if a
+    // future edit breaks the pattern — we just skip masking.
+    private static let numberRegex: NSRegularExpression? =
+        (try? NSRegularExpression(pattern: "\\+?\\d{7,}"))
 
     private static func maskNumbers(_ input: String) -> String {
+        guard let numberRegex else { return input }
         let ns = input as NSString
         let range = NSRange(location: 0, length: ns.length)
         var result = ""

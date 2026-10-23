@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import org.json.JSONArray
 
 /**
  * Static catalog of identity-protection actions. Mirrors iOS `IdentityActionsCatalog`.
@@ -145,10 +146,16 @@ object IdentityActionsProgress {
     private const val PREFS = "identity_actions_prefs_v1"
     private const val KEY_DONE = "done_ids"
 
+    // Cache the MasterKey to avoid the Keystore round-trip on every prefs() call.
+    @Volatile private var cachedMasterKey: MasterKey? = null
+
     private fun prefs(ctx: Context): SharedPreferences {
-        val master = MasterKey.Builder(ctx)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        val master = cachedMasterKey ?: synchronized(this) {
+            cachedMasterKey ?: MasterKey.Builder(ctx.applicationContext)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+                .also { cachedMasterKey = it }
+        }
         return EncryptedSharedPreferences.create(
             ctx.applicationContext,
             PREFS,
@@ -158,14 +165,23 @@ object IdentityActionsProgress {
         )
     }
 
-    fun done(ctx: Context): Set<String> =
-        prefs(ctx).getString(KEY_DONE, "")?.split(",")?.filter { it.isNotEmpty() }?.toSet()
-            ?: emptySet()
+    fun done(ctx: Context): Set<String> {
+        val raw = prefs(ctx).getString(KEY_DONE, null) ?: return emptySet()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }.toSet()
+        } catch (_: Exception) {
+            // Fallback for prefs written by the earlier comma-join format — read once,
+            // discard any id containing a comma (hardcoded ids never do), rewrite as JSON.
+            raw.split(",").filter { it.isNotEmpty() && !it.contains(",") }.toSet()
+        }
+    }
 
     fun toggle(ctx: Context, id: String) {
         val current = done(ctx).toMutableSet()
         if (current.contains(id)) current.remove(id) else current.add(id)
-        prefs(ctx).edit().putString(KEY_DONE, current.sorted().joinToString(",")).apply()
+        val arr = JSONArray().apply { current.sorted().forEach { put(it) } }
+        prefs(ctx).edit().putString(KEY_DONE, arr.toString()).apply()
     }
 
     fun isDone(ctx: Context, id: String): Boolean = done(ctx).contains(id)

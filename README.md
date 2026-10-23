@@ -2,7 +2,7 @@
 
 A privacy-focused Android app that gives you visibility and control over who touches your microphone, camera, calls, and texts — with everything stored encrypted on your device.
 
-**A product of 57Million LLC.** Copyright © 2026 57Million LLC. Licensed under the **GNU Affero General Public License v3.0** — see [`LICENSE`](LICENSE). Support: `reddy@vanpaultek.com`.
+**A product of VanPaulTek Inc.** Copyright © 2026 VanPaulTek Inc. Licensed under the **GNU Affero General Public License v3.0** — see [`LICENSE`](LICENSE). Support: `reddy@vanpaultek.com`.
 
 > **If you deploy a modified version of this software — including over a network — you must publish the full source of your modifications to its users under the same license.** This is the AGPL-3.0 network clause. It prevents commercial forks from stripping the privacy guarantees without their users seeing the code.
 
@@ -95,11 +95,11 @@ The iOS app uses:
 
 **Simulator-only.** The app and both extensions build and install cleanly on the iPhone 17 Pro simulator. Real-device installation is not pursued today because:
 
-1. `com.apple.developer.callkit` and `com.apple.developer.identitylookup.message-filter` entitlements require a paid Apple Developer Program membership for 57Million LLC.
+1. `com.apple.developer.callkit` and `com.apple.developer.identitylookup.message-filter` entitlements require a paid Apple Developer Program membership for VanPaulTek Inc.
 2. Signing those entitlements requires an Apple ID signed into Xcode (`Xcode → Settings → Accounts`).
 3. Neither of the above is set up on this machine right now.
 
-To resume real-device work later: sign in to Xcode with the Apple ID that owns the 57Million LLC enrollment, confirm the Team ID in `Xcode → Settings → Accounts`, update `DEVELOPMENT_TEAM` in `ios/project.yml`, `xcodegen generate`, then build without `CODE_SIGNING_ALLOWED=NO`.
+To resume real-device work later: sign in to Xcode with the Apple ID that owns the VanPaulTek Inc enrollment, confirm the Team ID in `Xcode → Settings → Accounts`, update `DEVELOPMENT_TEAM` in `ios/project.yml`, `xcodegen generate`, then build without `CODE_SIGNING_ALLOWED=NO`.
 
 ### iOS feature gaps vs Android (platform limitations, not TODOs)
 
