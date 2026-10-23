@@ -61,6 +61,7 @@
 		5A587A0BE8D357F75567FE50 /* IdentityProtectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4412C36499A9161B1E9D24FA /* IdentityProtectionScreen.swift */; };
 		5B55298D0C056AB4FC7237EA /* DeadmanWipeSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F45B80EDAAA7B50465F2E0 /* DeadmanWipeSetupScreen.swift */; };
 		5F3A4A8B92CBCA4672369C31 /* ShamirSSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C18F7192B55359DB4F01021 /* ShamirSSS.swift */; };
+		619D10664FD5CCCF8D99E778 /* DataRemovalReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409661393923747F1B7FC48 /* DataRemovalReminders.swift */; };
 		63302E65BD76169E845C3814 /* TrackerFinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C66099C7EE48ABCF66D354FD /* TrackerFinderScreen.swift */; };
 		636BDD0135549321356A2CF3 /* ThreatIntelScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1E4647F6100EDB64A27C53 /* ThreatIntelScreen.swift */; };
 		68C1782A2C3E52DE72EF04A4 /* HardwareKeyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86ACF06C58669C735244AE6 /* HardwareKeyState.swift */; };
@@ -325,6 +326,7 @@
 		F0393312C797275B88012608 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
 		F05C5EC8158DDDBCF77B3257 /* VoiceBioState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBioState.swift; sourceTree = "<group>"; };
 		F1728B07C771A9794B257D74 /* SafetyFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyFeatures.swift; sourceTree = "<group>"; };
+		F409661393923747F1B7FC48 /* DataRemovalReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRemovalReminders.swift; sourceTree = "<group>"; };
 		F4E7C544A79123DD3E8F7D11 /* SmartLinkGuardRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartLinkGuardRules.swift; sourceTree = "<group>"; };
 		F86321B3D7ECFD06EC4746E3 /* NotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsScreen.swift; sourceTree = "<group>"; };
 		F8D8237C800B6BE3D6B1B5FA /* SmartLinkGuardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartLinkGuardScreen.swift; sourceTree = "<group>"; };
@@ -710,6 +712,7 @@
 		A8E4AC277A2AA60324A4B805 /* DataRemoval */ = {
 			isa = PBXGroup;
 			children = (
+				F409661393923747F1B7FC48 /* DataRemovalReminders.swift */,
 				5FA9EF383B50B59CAD6FDC0E /* DataRemovalScan.swift */,
 				9175C2D0C46ABCD5771CD716 /* DataRemovalScreen.swift */,
 			);
@@ -1031,6 +1034,7 @@
 				95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */,
 				C17DF555649579E8DF08C98A /* CyberBackground.swift in Sources */,
 				32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */,
+				619D10664FD5CCCF8D99E778 /* DataRemovalReminders.swift in Sources */,
 				A45D023551ECE303E393FB67 /* DataRemovalScan.swift in Sources */,
 				599CA7A18C864590B62C9DFA /* DataRemovalScreen.swift in Sources */,
 				5B55298D0C056AB4FC7237EA /* DeadmanWipeSetupScreen.swift in Sources */,

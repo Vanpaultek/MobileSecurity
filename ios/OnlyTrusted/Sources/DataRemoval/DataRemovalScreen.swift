@@ -17,6 +17,8 @@ import UIKit
 struct DataRemovalScreen: View {
 
     @StateObject private var state = DataRemovalState.shared
+    @StateObject private var reminders = DataRemovalReminders.shared
+    @StateObject private var sub = SubscriptionState.shared
     @State private var sitesVisible: Bool = false
     @State private var statePickerOpen: Bool = false
 
@@ -269,34 +271,76 @@ struct DataRemovalScreen: View {
 
     private func siteRow(_ site: DataRemovalSite, form: DataRemovalForm) -> some View {
         let url = DataRemovalCatalog.renderURL(site: site, mode: state.searchMode, form: form)
-        return HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(site.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.appPrimaryText)
-                Text(url?.host ?? site.template(for: state.searchMode) ?? "")
-                    .font(.caption)
-                    .foregroundStyle(Color.appSecondaryText)
-                    .lineLimit(1)
+        let isRequested = reminders.isRequested(site: site.name)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(site.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                    Text(url?.host ?? site.template(for: state.searchMode) ?? "")
+                        .font(.caption)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .lineLimit(1)
+                }
+                Spacer()
+                Button {
+                    if let url { UIApplication.shared.open(url) }
+                } label: {
+                    Text("Check")
+                        .font(.footnote.weight(.semibold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(url == nil ? Color.appElevatedSurface : Color.appAccent)
+                        )
+                        .foregroundStyle(url == nil ? Color.appSecondaryText : .white)
+                }
+                .buttonStyle(.plain)
+                .disabled(url == nil)
             }
-            Spacer()
-            Button {
-                if let url { UIApplication.shared.open(url) }
-            } label: {
-                Text("Check")
-                    .font(.footnote.weight(.semibold))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(url == nil ? Color.appElevatedSurface : Color.appAccent)
-                    )
-                    .foregroundStyle(url == nil ? Color.appSecondaryText : .white)
+
+            // Premium: per-site "Mark as removal requested" + status badge.
+            if sub.hasPremium {
+                HStack(spacing: 8) {
+                    if isRequested, let when = reminders.requestedAt(site: site.name) {
+                        Image(systemName: "clock.badge.checkmark")
+                            .foregroundStyle(Color.appSuccess)
+                        Text("Requested \(dayLabel(when)). Re-check reminder in \(daysUntilCheck(when)) days.")
+                            .font(.caption2)
+                            .foregroundStyle(Color.appSecondaryText)
+                        Spacer()
+                        Button("Clear") { reminders.unmark(site: site.name) }
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(Color.appSecondaryText)
+                    } else {
+                        Button {
+                            BreachWatchScheduler.requestPermissionIfNeeded { _ in }
+                            reminders.markRequested(site: site.name)
+                        } label: {
+                            Label("Mark as removal requested", systemImage: "flag.badge.ellipsis")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(Color.appAccent)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
-            .buttonStyle(.plain)
-            .disabled(url == nil)
         }
         .padding(.vertical, 6)
+    }
+
+    private func dayLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f.string(from: date)
+    }
+
+    private func daysUntilCheck(_ requestedAt: Date) -> Int {
+        let elapsed = Date().timeIntervalSince(requestedAt) / 86400
+        let remaining = DataRemovalReminders.reminderDays - elapsed
+        return max(0, Int(remaining.rounded()))
     }
 
     private var paidToolsCard: some View {

@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
@@ -292,11 +294,16 @@ fun DataRemovalScreen(onBack: () -> Unit) {
                         }
                         val form = currentForm()
                         visibleSites.forEach { site ->
-                            SiteRow(site = site, mode = mode, form = form) { uri ->
-                                val intent = Intent(Intent.ACTION_VIEW, uri)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                runCatching { context.startActivity(intent) }
-                            }
+                            SiteRow(
+                                site = site,
+                                mode = mode,
+                                form = form,
+                                onOpen = { uri ->
+                                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    runCatching { context.startActivity(intent) }
+                                }
+                            )
                         }
                     }
                 }
@@ -402,32 +409,93 @@ private fun SiteRow(
     form: DataRemovalForm,
     onOpen: (android.net.Uri) -> Unit
 ) {
+    val context = LocalContext.current
     val uri = DataRemovalCatalog.renderUrl(site, mode, form)
-    Row(
+    val isPremium = com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)
+    var requestedAt by remember(site.name) {
+        mutableStateOf(DataRemovalReminders.requestedAt(context, site.name))
+    }
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(site.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = PrimaryTextDark)
-            Text(
-                uri?.host.orEmpty().ifEmpty { site.template(mode).orEmpty() },
-                fontSize = 10.sp,
-                color = SecondaryTextDark,
-                maxLines = 1
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(site.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = PrimaryTextDark)
+                Text(
+                    uri?.host.orEmpty().ifEmpty { site.template(mode).orEmpty() },
+                    fontSize = 10.sp,
+                    color = SecondaryTextDark,
+                    maxLines = 1
+                )
+            }
+            Button(
+                enabled = uri != null,
+                onClick = { if (uri != null) onOpen(uri) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BrandAccentDark,
+                    disabledContainerColor = MidnightElevated,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Check")
+            }
         }
-        Button(
-            enabled = uri != null,
-            onClick = { if (uri != null) onOpen(uri) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = BrandAccentDark,
-                disabledContainerColor = MidnightElevated,
-                contentColor = Color.White
-            )
-        ) {
-            Text("Check")
+        // Premium: mark-as-requested + status badge + 90-day re-check reminder
+        if (isPremium) {
+            val requested = requestedAt
+            if (requested != null) {
+                val fmt = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+                val whenStr = fmt.format(java.util.Date(requested))
+                val remaining = DataRemovalReminders.REMINDER_DAYS -
+                    ((System.currentTimeMillis() - requested) / (24L * 60 * 60 * 1000))
+                val remainingDays = remaining.coerceAtLeast(0L)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = BrandAccentDark,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.size(6.dp))
+                    Text(
+                        "Requested $whenStr. Re-check reminder in $remainingDays days.",
+                        fontSize = 10.sp,
+                        color = SecondaryTextDark,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = {
+                        DataRemovalReminders.unmark(context, site.name)
+                        requestedAt = null
+                    }) {
+                        Text("Clear", color = SecondaryTextDark, fontSize = 10.sp)
+                    }
+                }
+            } else {
+                TextButton(
+                    onClick = {
+                        DataRemovalReminders.markRequested(context, site.name)
+                        requestedAt = DataRemovalReminders.requestedAt(context, site.name)
+                    },
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Flag,
+                        contentDescription = null,
+                        tint = BrandAccentDark,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        "Mark as removal requested",
+                        fontSize = 10.sp,
+                        color = BrandAccentDark,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
