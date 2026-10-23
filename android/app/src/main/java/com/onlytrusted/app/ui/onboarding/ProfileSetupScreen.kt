@@ -1,0 +1,252 @@
+// SPDX-FileCopyrightText: 2026 VanPaulTek Inc
+// SPDX-License-Identifier: AGPL-3.0-or-later
+package com.onlytrusted.app.ui.onboarding
+
+import androidx.biometric.BiometricManager
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
+import com.onlytrusted.app.ui.lock.BiometricPrompter
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
+import com.onlytrusted.app.ui.theme.BrandAccentDark
+import com.onlytrusted.app.ui.theme.DangerDark
+import com.onlytrusted.app.ui.theme.MidnightElevated
+import com.onlytrusted.app.ui.theme.PrimaryTextDark
+import com.onlytrusted.app.ui.theme.SecondaryTextDark
+
+/**
+ * Mandatory first-launch profile setup — Android counterpart of iOS `ProfileSetupScreen`.
+ * Three sequential sub-steps gated behind an in-screen enum: Email → PIN → Biometric.
+ * Writes to [ProfileStore]; calls [onComplete] when the user finishes the biometric step.
+ */
+@Composable
+fun ProfileSetupScreen(onComplete: () -> Unit) {
+    val context = LocalContext.current
+    var step by remember { mutableStateOf(Step.Email) }
+    var emailDraft by remember { mutableStateOf("") }
+    var pinDraft by remember { mutableStateOf("") }
+    var pinConfirm by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    AppBackdropScaffold { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Header(step = step)
+            when (step) {
+                Step.Email -> EmailStep(
+                    draft = emailDraft,
+                    onDraft = { emailDraft = it },
+                    onNext = {
+                        val normalised = emailDraft.trim().lowercase()
+                        if (!normalised.contains("@") || !normalised.contains(".")) {
+                            errorMessage = "That doesn't look like an email address."
+                        } else {
+                            ProfileStore.setEmail(context, normalised)
+                            errorMessage = null
+                            step = Step.Pin
+                        }
+                    }
+                )
+                Step.Pin -> PinStep(
+                    pin = pinDraft,
+                    confirm = pinConfirm,
+                    onPin = { pinDraft = it.filter(Char::isDigit).take(6) },
+                    onConfirm = { pinConfirm = it.filter(Char::isDigit).take(6) },
+                    onNext = {
+                        if (pinDraft.length < 4) {
+                            errorMessage = "PIN must be 4 to 6 digits."
+                        } else if (pinDraft != pinConfirm) {
+                            errorMessage = "PINs don't match."
+                        } else {
+                            ProfileStore.setPIN(context, pinDraft)
+                            pinDraft = ""
+                            pinConfirm = ""
+                            errorMessage = null
+                            step = Step.Biometric
+                        }
+                    }
+                )
+                Step.Biometric -> BiometricStep(
+                    onEnable = {
+                        val activity = context as? FragmentActivity
+                        if (activity != null && BiometricPrompter.canAuthenticate(activity)) {
+                            BiometricPrompter.prompt(
+                                activity,
+                                title = "Enable biometric unlock",
+                                subtitle = "OnlyTrusted uses this to unlock the app faster.",
+                                onSuccess = {
+                                    ProfileStore.setBiometricEnabled(context, true)
+                                    finish(context, onComplete)
+                                },
+                                onFailure = {
+                                    ProfileStore.setBiometricEnabled(context, false)
+                                    finish(context, onComplete)
+                                }
+                            )
+                        } else {
+                            ProfileStore.setBiometricEnabled(context, false)
+                            errorMessage = "Biometric isn't available on this device — continuing with PIN only."
+                            finish(context, onComplete)
+                        }
+                    },
+                    onSkip = {
+                        ProfileStore.setBiometricEnabled(context, false)
+                        finish(context, onComplete)
+                    }
+                )
+            }
+            errorMessage?.let {
+                Text(it, fontSize = 12.sp, color = DangerDark)
+            }
+        }
+    }
+}
+
+private enum class Step { Email, Pin, Biometric }
+
+@Composable
+private fun Header(step: Step) {
+    val (icon, title, subtitle) = when (step) {
+        Step.Email -> Triple(
+            Icons.Filled.Email,
+            "Your email",
+            "Stored on this device only. OnlyTrusted does not have a server, so your email is never transmitted anywhere."
+        )
+        Step.Pin -> Triple(
+            Icons.Filled.Lock,
+            "Set a 4-6 digit PIN",
+            "Protects your app contents if your phone is lost or stolen. PBKDF2-hashed before storing — we can't read it back."
+        )
+        Step.Biometric -> Triple(
+            Icons.Filled.Face,
+            "Enable fingerprint / face unlock?",
+            "Faster unlock. Falls back to PIN if biometric fails. Uses hardware-backed Keystore; your biometric never leaves this device."
+        )
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Surface(shape = RoundedCornerShape(50), color = BrandAccentDark.copy(alpha = 0.15f)) {
+            Icon(icon, null, tint = BrandAccentDark, modifier = Modifier.padding(20.dp).size(32.dp))
+        }
+        Text(title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = PrimaryTextDark)
+        Text(subtitle, fontSize = 13.sp, color = SecondaryTextDark)
+    }
+}
+
+@Composable
+private fun EmailStep(draft: String, onDraft: (String) -> Unit, onNext: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedTextField(
+            value = draft,
+            onValueChange = onDraft,
+            singleLine = true,
+            placeholder = { Text("you@example.com") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = onNext,
+            enabled = draft.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(containerColor = BrandAccentDark),
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) { Text("Continue", color = Color.White, fontWeight = FontWeight.SemiBold) }
+    }
+}
+
+@Composable
+private fun PinStep(
+    pin: String,
+    confirm: String,
+    onPin: (String) -> Unit,
+    onConfirm: (String) -> Unit,
+    onNext: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedTextField(
+            value = pin,
+            onValueChange = onPin,
+            singleLine = true,
+            placeholder = { Text("4-6 digit PIN") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = confirm,
+            onValueChange = onConfirm,
+            singleLine = true,
+            placeholder = { Text("Confirm PIN") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = onNext,
+            enabled = pin.length >= 4,
+            colors = ButtonDefaults.buttonColors(containerColor = BrandAccentDark),
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) { Text("Set PIN", color = Color.White, fontWeight = FontWeight.SemiBold) }
+    }
+}
+
+@Composable
+private fun BiometricStep(onEnable: () -> Unit, onSkip: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Button(
+            onClick = onEnable,
+            colors = ButtonDefaults.buttonColors(containerColor = BrandAccentDark),
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) { Text("Enable biometric unlock", color = Color.White, fontWeight = FontWeight.SemiBold) }
+        OutlinedButton(
+            onClick = onSkip,
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) { Text("Skip — PIN only", color = BrandAccentDark, fontWeight = FontWeight.SemiBold) }
+    }
+}
+
+private fun finish(ctx: android.content.Context, onComplete: () -> Unit) {
+    ProfileStore.markSetupComplete(ctx)
+    onComplete()
+}

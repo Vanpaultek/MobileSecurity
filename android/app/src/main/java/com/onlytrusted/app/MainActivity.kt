@@ -28,6 +28,8 @@ import com.onlytrusted.app.ui.lock.AppLockGate
 import com.onlytrusted.app.ui.navigation.AppNavigation
 import com.onlytrusted.app.ui.onboarding.ConsentScreen
 import com.onlytrusted.app.ui.onboarding.OnboardingScreen
+import com.onlytrusted.app.ui.onboarding.ProfileSetupScreen
+import com.onlytrusted.app.ui.onboarding.ProfileStore
 import com.onlytrusted.app.ui.settings.SettingsViewModel
 import com.onlytrusted.app.ui.splash.SplashScreen
 import com.onlytrusted.app.ui.theme.OnlyTrustedTheme
@@ -61,6 +63,7 @@ class MainActivity : FragmentActivity() {
                 var splashDone by remember { mutableStateOf(false) }
                 var onboarded by remember { mutableStateOf(OnboardingState.hasOnboarded(this)) }
                 var consented by remember { mutableStateOf(OnboardingState.hasAccepted(this)) }
+                var profileSetup by remember { mutableStateOf(ProfileStore.isSetupComplete(this)) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 var unlocked by remember { mutableStateOf(!AppLockManager.shouldPrompt(this)) }
 
@@ -80,6 +83,7 @@ class MainActivity : FragmentActivity() {
                     !splashDone -> SplashScreen(onDone = { splashDone = true })
                     !onboarded -> OnboardingScreen(onContinue = { onboarded = true })
                     !consented -> ConsentScreen(onConfirmed = { consented = true })
+                    !profileSetup -> ProfileSetupScreen(onComplete = { profileSetup = true })
                     !unlocked -> AppLockGate(onUnlocked = {
                         AppLockManager.markUnlocked(this)
                         unlocked = true

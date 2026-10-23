@@ -10,6 +10,7 @@ final class AppGate: ObservableObject {
     @Published private(set) var splashDone: Bool = false
     @Published private(set) var onboardingComplete: Bool
     @Published private(set) var consentComplete: Bool
+    @Published private(set) var profileSetupComplete: Bool
     @Published private(set) var isLocked: Bool
 
     private let onboardingKey = "onboarding.v1.accepted"
@@ -20,7 +21,15 @@ final class AppGate: ObservableObject {
         let defaults = UserDefaults.standard
         self.onboardingComplete = defaults.bool(forKey: onboardingKey)
         self.consentComplete = defaults.bool(forKey: consentKey)
+        self.profileSetupComplete = ProfileStore.shared.isSetupComplete
         self.isLocked = defaults.bool(forKey: appLockEnabledKey)
+    }
+
+    /// Called by ProfileSetupScreen once the three-step flow (email → PIN → biometric)
+    /// is complete. The flag itself is persisted inside ProfileStore; this just re-reads
+    /// so the RootView can advance.
+    func markProfileSetupComplete() {
+        self.profileSetupComplete = ProfileStore.shared.isSetupComplete
     }
 
     func markSplashDone() { splashDone = true }

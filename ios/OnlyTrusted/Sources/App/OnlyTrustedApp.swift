@@ -104,6 +104,8 @@ struct RootView: View {
                     OnboardingScreen { gate.markOnboardingComplete() }
                 } else if !gate.consentComplete {
                     ConsentScreen { gate.markConsentComplete() }
+                } else if !gate.profileSetupComplete {
+                    ProfileSetupScreen { gate.markProfileSetupComplete() }
                 } else if gate.isLocked {
                     AppLockGate(onUnlocked: { gate.markUnlocked() })
                 } else {
