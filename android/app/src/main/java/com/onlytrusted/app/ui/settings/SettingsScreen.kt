@@ -336,13 +336,9 @@ fun SettingsScreen(
                     .padding(top = 4.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // --- Protection (iOS-aligned: BLUE gradient chips) ---
-            SectionHeader("Protection")
+                // --- FREE Features (always available) ---
+            TierSectionHeader("Free Features", chipText = "FREE", chipColor = settingsBlue)
             SettingsCard {
-                // Auto Privacy Shield (free tier) lives at the top of Protection per the
-                // Phase 1 brief. Only "App Recording Shutdown" (card #1 on the dashboard)
-                // is actually enforced by this app; the other two cards tell the honest
-                // story about what Android/iOS let us do and don't.
                 SettingsNavRow(
                     icon = Icons.Filled.Security,
                     tint = settingsBlue,
@@ -350,8 +346,6 @@ fun SettingsScreen(
                     onClick = onOpenPrivacyShield
                 )
                 RowDivider()
-                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
-                // feed. Monthly WorkManager recheck + ad-hoc "Check now" from the screen.
                 SettingsNavRow(
                     icon = Icons.Filled.MarkEmailUnread,
                     tint = settingsBlue,
@@ -359,9 +353,6 @@ fun SettingsScreen(
                     onClick = onOpenBreachWatch
                 )
                 RowDivider()
-                // Data Removal Scan (FREE, visibility-only). Opens search URLs on common
-                // people-search sites; cannot and does not remove data. The "view only"
-                // caveat lives on the detail screen hero + footer, not on the row.
                 SettingsNavRow(
                     icon = Icons.Filled.PersonSearch,
                     tint = settingsBlue,
@@ -369,8 +360,6 @@ fun SettingsScreen(
                     onClick = onOpenDataRemoval
                 )
                 RowDivider()
-                // Private Aliases (FREE, unlimited). On-device alias generator; user's
-                // chosen relay provider does the forwarding. Honest claim lives inside.
                 SettingsNavRow(
                     icon = Icons.Filled.AlternateEmail,
                     tint = settingsBlue,
@@ -378,51 +367,11 @@ fun SettingsScreen(
                     onClick = onOpenAliases
                 )
                 RowDivider()
-                // Identity Protection (FREE). Deep-link checklist of credit freezes, fraud
-                // alerts, HIBP enrollment, FTC report, SSA block. Local checkmarks only.
                 SettingsNavRow(
                     icon = Icons.Filled.VerifiedUser,
                     tint = settingsBlue,
                     title = "Identity Protection",
                     onClick = onOpenIdentityProtection
-                )
-                RowDivider()
-                // Weekly Digest (Premium). One-page on-device PDF summary generated from
-                // the signed audit log and shared via the system share sheet.
-                SettingsNavRow(
-                    icon = Icons.Filled.Description,
-                    tint = settingsBlue,
-                    title = "Weekly Digest",
-                    onClick = onOpenWeeklyDigest
-                )
-                RowDivider()
-                // Advanced Blocking (Premium). Quiet-hours window + NANP area-code allowlist.
-                SettingsNavRow(
-                    icon = Icons.Filled.FilterList,
-                    tint = settingsBlue,
-                    title = "Advanced Blocking",
-                    onClick = onOpenAdvancedBlocking
-                )
-                RowDivider()
-                // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users
-                // see the upsell dialog; Elite users jump to the guided Wellbeing walkthrough.
-                SettingsNavRow(
-                    icon = Icons.Filled.Shield,
-                    tint = when {
-                        SubscriptionState.hasElite(context) && appShieldConfigured -> BrandAccentDark
-                        SubscriptionState.hasElite(context) -> settingsBlue
-                        else -> subGold
-                    },
-                    title = "App Shield (Elite)",
-                    value = if (SubscriptionState.hasElite(context) && appShieldConfigured)
-                        "On · $appShieldCount" else null,
-                    onClick = {
-                        if (SubscriptionState.hasElite(context)) {
-                            onOpenAppShield()
-                        } else {
-                            appShieldUpsellOpen = true
-                        }
-                    }
                 )
                 RowDivider()
                 SettingsNavRow(
@@ -454,8 +403,26 @@ fun SettingsScreen(
                 )
             }
 
-            // --- Premium (BLUE chips, with the Upgrade row using gold tint) ---
-            SectionHeader("Premium")
+            // --- PREMIUM Features ($4.99/yr) ---
+            TierSectionHeader("Premium Features", chipText = "PREMIUM", chipColor = BrandAccentDark)
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Description,
+                    tint = BrandAccentDark,
+                    title = "Weekly Digest",
+                    onClick = onOpenWeeklyDigest
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.FilterList,
+                    tint = BrandAccentDark,
+                    title = "Advanced Blocking",
+                    onClick = onOpenAdvancedBlocking
+                )
+            }
+
+            // --- Account & reports (not tier-exclusive — plan management) ---
+            SectionHeader("Account")
             SettingsCard {
                 SettingsNavRow(
                     icon = Icons.AutoMirrored.Filled.ShowChart,
@@ -474,7 +441,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.EmojiEvents,
                     tint = subGold,
-                    title = "Upgrade to Premium",
+                    title = "Upgrade",
                     onClick = onOpenUpgrade
                 )
             }
@@ -516,7 +483,7 @@ fun SettingsScreen(
             }
 
             // --- Security & data (Android-preserved functionality) ---
-            SectionHeader("Security & data")
+            SectionHeader("Device & data")
             SettingsCard {
                 ToggleRow(
                     icon = Icons.Filled.Lock,
@@ -668,11 +635,15 @@ fun SettingsScreen(
                     showChevron = false,
                     onClick = { confirmWipe = true }
                 )
-                RowDivider()
+            }
+
+            // --- PRO Features ($19.99/yr) ---
+            TierSectionHeader("Pro Features", chipText = "PRO", chipColor = subGold)
+            SettingsCard {
                 SettingsNavRow(
                     icon = Icons.Filled.Warning,
                     tint = if (duressEnabled) BrandAccentDark else subGold,
-                    title = "Duress Mode (Pro)",
+                    title = "Duress Mode",
                     value = if (duressEnabled) "On" else null,
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
@@ -686,7 +657,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.VerifiedUser,
                     tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
-                    title = "App Permission Watchdog (Pro)",
+                    title = "App Permission Watchdog",
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
                             onOpenPermWatchdog()
@@ -699,7 +670,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.SimCard,
                     tint = if (simSwapEnabled) BrandAccentDark else subGold,
-                    title = "SIM-Swap Alarm (Pro)",
+                    title = "SIM-Swap Alarm",
                     value = if (simSwapEnabled) "On" else null,
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
@@ -714,7 +685,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.PhoneDisabled,
                     tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
-                    title = "Wangiri Protection (Pro)",
+                    title = "Wangiri Protection",
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
                             onOpenWangiri()
@@ -728,7 +699,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.LocationSearching,
                     tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
-                    title = "Safety Check-In (Pro)",
+                    title = "Safety Check-In",
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
                             onOpenCheckIn()
@@ -742,7 +713,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.LinkOff,
                     tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
-                    title = "Smart Link Guard (Pro)",
+                    title = "Smart Link Guard",
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
                             onOpenSmartLinkGuard()
@@ -756,7 +727,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.BluetoothSearching,
                     tint = if (SubscriptionState.hasHighPremium(context)) BrandAccentDark else subGold,
-                    title = "Tracker Finder (Pro)",
+                    title = "Tracker Finder",
                     onClick = {
                         if (SubscriptionState.hasHighPremium(context)) {
                             onOpenTrackerFinder()
@@ -765,11 +736,29 @@ fun SettingsScreen(
                         }
                     }
                 )
+            }
 
-                // Border Mode (Elite) — one-tap preset for high-risk crossings. Placed at
-                // the top of Elite rows per the brief. Toggles every defensive layer at
-                // once (Dead-Man Wipe 7d, Duress active, biometric off, screenshot + shield
-                // on, pocket-dial on, auto-lock 30s, cover identity swap).
+            // --- ELITE Features ($29.99/yr) ---
+            TierSectionHeader("Elite Features", chipText = "ELITE", chipColor = subGold)
+            SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Shield,
+                    tint = when {
+                        SubscriptionState.hasElite(context) && appShieldConfigured -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> settingsBlue
+                        else -> subGold
+                    },
+                    title = "App Shield",
+                    value = if (SubscriptionState.hasElite(context) && appShieldConfigured)
+                        "On · $appShieldCount" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenAppShield()
+                        } else {
+                            appShieldUpsellOpen = true
+                        }
+                    }
+                )
                 RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.FlightTakeoff,
@@ -778,7 +767,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> BrandAccentDark
                         else -> subGold
                     },
-                    title = "Border Mode (Elite)",
+                    title = "Border Mode",
                     value = if (borderModeArmed) "Armed" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -802,7 +791,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> DangerDark
                         else -> subGold
                     },
-                    title = "Panic Lockdown (Elite)",
+                    title = "Panic Lockdown",
                     value = if (panicLockdownArmed) "ARMED" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -820,7 +809,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.VpnKey,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Hardware Security Key (Elite)",
+                    title = "Hardware Security Key",
                     value = if (SubscriptionState.hasElite(context) && hardwareKeyActive) "On" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -838,7 +827,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.MicNone,
                     tint = if (SubscriptionState.hasElite(context)) BrandCyanDark else subGold,
-                    title = "Voice Biometric (Elite)",
+                    title = "Voice Biometric",
                     value = if (SubscriptionState.hasElite(context) && voiceBioEnrolledCount > 0)
                         "$voiceBioEnrolledCount enrolled" else null,
                     onClick = {
@@ -861,7 +850,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> BrandAccentDark
                         else -> subGold
                     },
-                    title = "Face-Change Lock (Elite)",
+                    title = "Face-Change Lock",
                     value = if (SubscriptionState.hasElite(context) && faceLockEnrolled) "On" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -880,7 +869,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.LocationOn,
                     tint = if (geofenceEnabled) BrandAccentDark else subGold,
-                    title = "Geo-fence Auto-Lock (Elite)",
+                    title = "Geo-fence Auto-Lock",
                     value = if (geofenceEnabled) "On · $geofenceCount" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -896,7 +885,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.Timelapse,
                     tint = if (deadmanEnabled) DangerDark else subGold,
-                    title = "Dead-Man Wipe (Elite)",
+                    title = "Dead-Man Wipe",
                     value = if (deadmanEnabled) "On · ${deadmanInterval}d" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -913,7 +902,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.CloudUpload,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Encrypted vault backup (Elite)",
+                    title = "Encrypted vault backup",
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
                             onOpenEncryptedBackup()
@@ -928,7 +917,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.CloudDownload,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Restore from backup (Elite)",
+                    title = "Restore from backup",
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
                             onOpenBackupRestore()
@@ -947,7 +936,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> BrandAccentDark
                         else -> subGold
                     },
-                    title = "Shamir Split (Elite)",
+                    title = "Shamir Split",
                     value = shamirSplitStatus?.let { "${it.threshold}-of-${it.total}" },
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -963,7 +952,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.PhotoLibrary,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Steganographic Vault (Elite)",
+                    title = "Steganographic Vault",
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
                             onOpenStegoVault()
@@ -983,7 +972,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> BrandAccentDark
                         else -> subGold
                     },
-                    title = "Signed Audit Log (Elite)",
+                    title = "Signed Audit Log",
                     value = if (signEveryEnabled && hardwareKeyActive) "On" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -1003,7 +992,7 @@ fun SettingsScreen(
                         SubscriptionState.hasElite(context) -> BrandAccentDark
                         else -> subGold
                     },
-                    title = "Trusted Witness (Elite)",
+                    title = "Trusted Witness",
                     value = if (trustedWitnessEnabled) "On · $trustedWitnessCount" else null,
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
@@ -1020,7 +1009,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.NetworkCheck,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Rogue Network Scanner (Elite)",
+                    title = "Rogue Network Scanner",
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
                             onOpenRogueNetwork()
@@ -1036,7 +1025,7 @@ fun SettingsScreen(
                 SettingsNavRow(
                     icon = Icons.Filled.Security,
                     tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
-                    title = "Offline Threat Intel (Elite)",
+                    title = "Offline Threat Intel",
                     onClick = {
                         if (SubscriptionState.hasElite(context)) {
                             onOpenThreatIntel()
@@ -1832,6 +1821,38 @@ private fun SectionHeader(title: String) {
         color = SecondaryTextDark,
         modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
     )
+}
+
+/**
+ * Header for a tier-grouped Settings section. Renders a colored tier badge next to the
+ * subtitle so the user can see at a glance which features their current plan unlocks.
+ */
+@Composable
+private fun TierSectionHeader(title: String, chipText: String, chipColor: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(6.dp),
+            color = chipColor.copy(alpha = 0.18f)
+        ) {
+            Text(
+                chipText,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = chipColor,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+            )
+        }
+        Text(
+            text = title,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = SecondaryTextDark
+        )
+    }
 }
 
 @Composable

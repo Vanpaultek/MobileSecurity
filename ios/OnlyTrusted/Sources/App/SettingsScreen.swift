@@ -124,16 +124,22 @@ struct SettingsScreen: View {
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
-                    sectionHeader("Protection")
-                    protectionCard
+                    tierSectionHeader("Free Features", chipText: "FREE", chipColor: Color.settingsBlue)
+                    freeFeaturesCard
 
-                    sectionHeader("Premium")
+                    tierSectionHeader("Premium Features", chipText: "PREMIUM", chipColor: Color.appAccent)
+                    premiumFeaturesCard
+
+                    tierSectionHeader("Elite Features", chipText: "ELITE", chipColor: Color.subGold)
+                    eliteFeaturesCard
+
+                    sectionHeader("Account")
                     premiumCard
 
                     sectionHeader("Appearance")
                     appearanceCard
 
-                    sectionHeader("Security & data")
+                    sectionHeader("Device & data")
                     securityCard
 
                     sectionHeader("More")
@@ -591,14 +597,29 @@ struct SettingsScreen: View {
             .padding(.top, 4)
     }
 
-    // MARK: - Protection (mockup-aligned)
+    /// Tier-grouped section header with a coloured chip ("FREE" / "PREMIUM" / "PRO" /
+    /// "ELITE") so the user can see at a glance which features their current plan unlocks.
+    private func tierSectionHeader(_ title: String, chipText: String, chipColor: Color) -> some View {
+        HStack(spacing: 10) {
+            Text(chipText)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundStyle(chipColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(chipColor.opacity(0.18), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            Text(title)
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.appSecondaryText)
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+    }
 
-    private var protectionCard: some View {
+    // MARK: - Tier-grouped feature cards
+
+    private var freeFeaturesCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
-                // Auto Privacy Shield (free-tier) — lives at the top of Protection per the
-                // Phase 1 brief. Opens the 3-card dashboard; app-recording shutdown is the
-                // only part this app enforces, the other two cards are honest about scope.
                 NavigationLink { PrivacyShieldDashboard() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled.badge.checkmark",
                                    iconTint: Color.settingsBlue, label: "Privacy Shield")
@@ -645,49 +666,6 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
-                // Weekly Digest (Premium). Generates a one-page on-device PDF from the
-                // signed audit log and offers it to the system share sheet.
-                NavigationLink { WeeklyDigestScreen() } label: {
-                    SettingsNavRow(
-                        icon: "doc.text.image",
-                        iconTint: Color.settingsBlue,
-                        label: "Weekly Digest"
-                    )
-                }
-                SettingsDivider()
-                // Advanced Blocking (Premium). Quiet-hours window + NANP area-code
-                // allowlist. Enforced by call/SMS routing paths that query the rules at
-                // decision time.
-                NavigationLink { AdvancedBlockingScreen() } label: {
-                    SettingsNavRow(
-                        icon: "line.horizontal.3.decrease.circle",
-                        iconTint: Color.settingsBlue,
-                        label: "Advanced Blocking"
-                    )
-                }
-                SettingsDivider()
-                // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
-                // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
-                // to the setup wizard.
-                Button {
-                    if sub.hasElite {
-                        showAppShieldSetup = true
-                    } else {
-                        showAppShieldUpsell = true
-                    }
-                } label: {
-                    SettingsNavRow(
-                        icon: "app.badge.checkmark.fill",
-                        iconTint: sub.hasElite && appShield.enabled ? Color.appSuccess
-                            : (sub.hasElite ? Color.settingsBlue : Color.subGold),
-                        label: "App Shield (Elite)",
-                        value: sub.hasElite && appShield.enabled && appShield.shieldedCount > 0
-                            ? "On · \(appShield.shieldedCount)"
-                            : nil
-                    )
-                }
-                .buttonStyle(.plain)
-                SettingsDivider()
                 NavigationLink { BlockListScreen() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
                 }
@@ -703,6 +681,61 @@ struct SettingsScreen: View {
                 NavigationLink { TextHandlingScreen() } label: {
                     SettingsNavRow(icon: "message.fill", iconTint: Color.settingsBlue, label: "Text Handling")
                 }
+            }
+        }
+    }
+
+    /// Premium ($4.99/yr) exclusives: Weekly Digest + Advanced Blocking. The rows
+    /// themselves gate their Premium content internally — tapping a row from a Free
+    /// account lands on an upsell card inside the destination screen.
+    private var premiumFeaturesCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                NavigationLink { WeeklyDigestScreen() } label: {
+                    SettingsNavRow(
+                        icon: "doc.text.image",
+                        iconTint: Color.appAccent,
+                        label: "Weekly Digest"
+                    )
+                }
+                SettingsDivider()
+                NavigationLink { AdvancedBlockingScreen() } label: {
+                    SettingsNavRow(
+                        icon: "line.horizontal.3.decrease.circle",
+                        iconTint: Color.appAccent,
+                        label: "Advanced Blocking"
+                    )
+                }
+            }
+        }
+    }
+
+    /// Elite ($29.99/yr) marquee row that lives at the top of the Elite grouping on both
+    /// platforms. The remaining Elite features (vault, Shamir, witness, border mode,
+    /// panic lockdown, hardware key, voice bio, face lock, geofence, dead-man wipe,
+    /// signed log, rogue network, threat intel, encrypted backup) still live inside the
+    /// `securityCard` lower down. That card has its own tier dividers now.
+    private var eliteFeaturesCard: some View {
+        PremiumCard {
+            VStack(spacing: 0) {
+                Button {
+                    if sub.hasElite {
+                        showAppShieldSetup = true
+                    } else {
+                        showAppShieldUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "app.badge.checkmark.fill",
+                        iconTint: sub.hasElite && appShield.enabled ? Color.appSuccess
+                            : (sub.hasElite ? Color.settingsBlue : Color.subGold),
+                        label: "App Shield",
+                        value: sub.hasElite && appShield.enabled && appShield.shieldedCount > 0
+                            ? "On · \(appShield.shieldedCount)"
+                            : nil
+                    )
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -898,7 +931,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: duress.isEnabled ? "exclamationmark.shield.fill" : "exclamationmark.shield",
                         iconTint: duress.isEnabled ? Color.appSuccess : Color.subGold,
-                        label: "Duress Mode (Pro)",
+                        label: "Duress Mode",
                         value: duress.isEnabled ? "On" : nil
                     )
                 }
@@ -915,7 +948,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "simcard.fill",
                         iconTint: simswap.isEnabled ? Color.appSuccess : Color.subGold,
-                        label: "SIM-Swap Alarm (Pro)",
+                        label: "SIM-Swap Alarm",
                         value: simswap.isEnabled ? "On" : nil
                     )
                 }
@@ -933,7 +966,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "phone.down.waveform.fill",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Wangiri Protection (Pro)"
+                        label: "Wangiri Protection"
                     )
                 }
                 .buttonStyle(.plain)
@@ -950,7 +983,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "location.fill.viewfinder",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Safety Check-In (Pro)"
+                        label: "Safety Check-In"
                     )
                 }
                 .buttonStyle(.plain)
@@ -967,7 +1000,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "lock.shield.fill",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "App Permission Watchdog (Pro)"
+                        label: "App Permission Watchdog"
                     )
                 }
                 .buttonStyle(.plain)
@@ -985,7 +1018,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "location.magnifyingglass",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Tracker Finder (Pro)"
+                        label: "Tracker Finder"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1003,7 +1036,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "shield.lefthalf.filled",
                         iconTint: sub.hasHighPremium ? Color.appAccent : Color.subGold,
-                        label: "Smart Link Guard (Pro)"
+                        label: "Smart Link Guard"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1023,7 +1056,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "airplane.departure",
                         iconTint: borderMode.isArmed ? Color.appDanger : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Border Mode (Elite)",
+                        label: "Border Mode",
                         value: borderMode.isArmed ? "Armed" : nil
                     )
                 }
@@ -1047,7 +1080,7 @@ struct SettingsScreen: View {
                         iconTint: panicLockdown.isArmed
                             ? Color.appDanger
                             : (sub.hasElite ? Color.appDanger : Color.subGold),
-                        label: "Panic Lockdown (Elite)",
+                        label: "Panic Lockdown",
                         value: panicLockdown.isArmed ? "ARMED" : nil
                     )
                 }
@@ -1067,7 +1100,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "key.horizontal.fill",
                         iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
-                        label: "Hardware Security Key (Elite)",
+                        label: "Hardware Security Key",
                         value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
                     )
                 }
@@ -1087,7 +1120,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "waveform.and.mic",
                         iconTint: sub.hasElite ? Color.appBrightCyan : Color.subGold,
-                        label: "Voice Biometric (Elite)",
+                        label: "Voice Biometric",
                         value: sub.hasElite && !VoiceBioState.shared.enrolledContactIDs.isEmpty
                             ? "\(VoiceBioState.shared.enrolledContactIDs.count) enrolled"
                             : nil
@@ -1109,7 +1142,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "face.dashed",
                         iconTint: sub.hasElite && faceLock.isEnrolled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Face-Change Lock (Elite)",
+                        label: "Face-Change Lock",
                         value: sub.hasElite && faceLock.isEnrolled ? "On" : nil
                     )
                 }
@@ -1130,7 +1163,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "location.circle.fill",
                         iconTint: geofence.isEnabled ? Color.appSuccess : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Geo-fence Auto-Lock (Elite)",
+                        label: "Geo-fence Auto-Lock",
                         value: geofence.isEnabled ? "On · \(geofence.geofences.count)" : nil
                     )
                 }
@@ -1151,7 +1184,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "clock.badge.exclamationmark",
                         iconTint: deadman.isEnabled ? Color.appDanger : Color.subGold,
-                        label: "Dead-Man Wipe (Elite)",
+                        label: "Dead-Man Wipe",
                         value: deadman.isEnabled ? "On · \(deadman.intervalDays)d" : nil
                     )
                 }
@@ -1170,7 +1203,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "externaldrive.badge.icloud",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Encrypted vault backup (Elite)"
+                        label: "Encrypted vault backup"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1188,7 +1221,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "arrow.down.doc",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Restore from backup (Elite)"
+                        label: "Restore from backup"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1208,7 +1241,7 @@ struct SettingsScreen: View {
                         icon: "rectangle.split.3x1",
                         iconTint: ShamirState.shared.mySplit != nil ? Color.appSuccess
                             : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Shamir Split (Elite)",
+                        label: "Shamir Split",
                         value: ShamirState.shared.mySplit.map { "\($0.threshold)-of-\($0.total)" }
                     )
                 }
@@ -1230,7 +1263,7 @@ struct SettingsScreen: View {
                         icon: "person.2.wave.2",
                         iconTint: trustedWitness.featureEnabled ? Color.appSuccess
                             : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Trusted Witness (Elite)",
+                        label: "Trusted Witness",
                         value: trustedWitness.featureEnabled ? "On · \(trustedWitness.witnesses.count)" : nil
                     )
                 }
@@ -1249,7 +1282,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "photo.badge.plus",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Steganographic Vault (Elite)"
+                        label: "Steganographic Vault"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1269,7 +1302,7 @@ struct SettingsScreen: View {
                         iconTint: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey
                             ? Color.appSuccess
                             : (sub.hasElite ? Color.appAccent : Color.subGold),
-                        label: "Signed Audit Log (Elite)",
+                        label: "Signed Audit Log",
                         value: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
                     )
                 }
@@ -1288,7 +1321,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "wifi.exclamationmark",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Rogue Network Scanner (Elite)"
+                        label: "Rogue Network Scanner"
                     )
                 }
                 .buttonStyle(.plain)
@@ -1306,7 +1339,7 @@ struct SettingsScreen: View {
                     SettingsNavRow(
                         icon: "shield.lefthalf.filled",
                         iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
-                        label: "Offline Threat Intel (Elite)"
+                        label: "Offline Threat Intel"
                     )
                 }
                 .buttonStyle(.plain)
