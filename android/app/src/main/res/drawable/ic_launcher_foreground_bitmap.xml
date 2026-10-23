@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Raw shield bitmap. Wrapped by `ic_launcher_foreground.xml` in an <inset> so the shield
+  sits inside Android's adaptive-icon safe zone.
+-->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher_foreground_src"
+    android:gravity="center" />
