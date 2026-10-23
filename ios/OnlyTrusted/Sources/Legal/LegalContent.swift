@@ -21,8 +21,42 @@ enum LegalContent {
         Section(title: "Data principles", body: dataPrinciples),
         Section(title: "Accessibility", body: accessibility),
         Section(title: "Duress Mode & law", body: duressAndLaw),
-        Section(title: "Border Mode & law", body: borderModeAndLaw)
+        Section(title: "Border Mode & law", body: borderModeAndLaw),
+        Section(title: "Panic Lockdown & law", body: panicLockdownAndLaw)
     ]
+
+    static let panicLockdownAndLaw = """
+    Panic Lockdown is an Elite feature designed for the moment when you are already in trouble — a mugging, a kidnapping attempt, an abusive partner demanding your phone, an unlawful seizure in progress. Where Border Mode is a planned, triple-confirmation preset for a crossing you know is coming, Panic Lockdown is a single-tap red button for the emergency happening right now. One tap locks the app, arms Duress Mode so the next unlock drops into the decoy vault and sends the silent SOS, forces aggressive sensor monitoring, disables the share extension so nothing leaks out of the app, disables biometric unlock (PIN-only), and timestamps the moment in the audit log.
+
+    What it is for
+
+    - A self-defence tool when you cannot safely explain what you are doing on your phone.
+    - Buying you a hand-off: the attacker sees the decoy vault; your emergency contact gets a signal.
+    - Preserving the Fifth-Amendment advantage in US courts by removing biometric unlock from the picture at the exact moment it matters.
+
+    What it is NOT for
+
+    - Obstructing a lawful search, border inspection, warrant, subpoena, or court order. In many jurisdictions, destroying evidence after service of legal process, lying to officers, or interfering with an investigation is itself a crime. OnlyTrusted does not advise you on when any of those apply to your situation.
+    - Hiding activity from a victim, a court-ordered monitor, or anyone with a lawful right to inspect the device.
+    - Running on a device you do not own or administer.
+
+    Legal reality
+
+    - US — passcode compulsion case law is mixed and jurisdiction-dependent. Biometric compulsion has generally been treated as a physical act and compelled routinely; passcodes have more often been treated as testimonial and protected. The Fifth Amendment advantage of switching to PIN-only is a defensive posture, not a guarantee.
+    - UK — RIPA s.49 and Schedule 7 of the Terrorism Act can require you to disclose a passphrase; refusal is itself an offence.
+    - EU — member states vary. Some require disclosure, some don't.
+    - Many other jurisdictions — unknown or hostile. Research your destination and the authority you may encounter before you rely on this feature.
+
+    Practical reality
+
+    Panic Lockdown raises the per-incident cost of a casual coercive search: biometric compulsion is off the table, the share extension cannot leak data, and the next unlock looks like a plausible-but-empty vault. It will not stop a determined forensic lab from imaging unlocked hardware, and it will not help you if you are legally obligated to disclose a passphrase in your jurisdiction.
+
+    What this app will NOT do
+
+    - We will not help someone evade a lawful warrant, destroy evidence after legal process has been served, or obstruct an investigation.
+    - We will not add network callbacks that would phone home when Panic Lockdown is armed. Everything stays on device. The silent SOS runs through the local SMS composer with the owner's chosen recipient; nothing goes to us.
+    - We will not change the behaviour of Panic Lockdown in a silent update. If the mechanism changes, the "last updated" date above moves and the full text ships inside the new version of the app.
+    """
 
     static let borderModeAndLaw = """
     Border Mode is an Elite preset designed for high-risk crossings — international borders, airports where you may be pulled aside, protests where a device could be seized, hostile territory. One tap stacks every defensive layer OnlyTrusted ships: Dead-Man Wipe forced to 7 days, Duress Mode active, biometric unlock disabled (PIN-only), screenshot blocking and shield watermark on, auto-lock at 30 seconds, and — if you set one up — a plausible "cover identity" shown on the Dashboard and Vault.

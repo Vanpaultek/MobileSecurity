@@ -149,6 +149,7 @@ fun SettingsScreen(
     onOpenEncryptedBackup: () -> Unit = {},
     onOpenBackupRestore: () -> Unit = {},
     onOpenBorderMode: () -> Unit = {},
+    onOpenPanicLockdown: () -> Unit = {},
     onOpenFaceLock: () -> Unit = {},
     onOpenGeofence: () -> Unit = {},
     onOpenShamirSplit: () -> Unit = {},
@@ -222,6 +223,10 @@ fun SettingsScreen(
         com.onlytrusted.app.ui.p2p.TrustedWitnessState.witnesses(context).size
     }
     var borderModeUpsellOpen by remember { mutableStateOf(false) }
+    var panicLockdownUpsellOpen by remember { mutableStateOf(false) }
+    val panicLockdownArmed = remember {
+        com.onlytrusted.app.ui.paniclockdown.PanicLockdownState.isArmed(context)
+    }
     var faceLockUpsellOpen by remember { mutableStateOf(false) }
     var geofenceUpsellOpen by remember { mutableStateOf(false) }
     val geofenceEnabled = remember { com.onlytrusted.app.geofence.GeofenceState.isEnabled(context) }
@@ -719,6 +724,30 @@ fun SettingsScreen(
                     }
                 )
 
+                // Panic Lockdown (Elite) — the "I'm in trouble RIGHT NOW" companion to Border
+                // Mode. Single tap locks the app, arms Duress for the next unlock, forces
+                // aggressive sensor monitoring, disables the Smart Link Guard SMS watcher +
+                // QR scanner, and switches to PIN-only. Placed directly below Border Mode so
+                // the two Elite emergency presets live together.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Warning,
+                    tint = when {
+                        panicLockdownArmed -> DangerDark
+                        SubscriptionState.hasElite(context) -> DangerDark
+                        else -> subGold
+                    },
+                    title = "Panic Lockdown (Elite)",
+                    value = if (panicLockdownArmed) "ARMED" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenPanicLockdown()
+                        } else {
+                            panicLockdownUpsellOpen = true
+                        }
+                    }
+                )
+
                 // Hardware Security Key (Elite) — FIDO2 YubiKey / Titan / SoloKey. Elite tier
                 // gates the most dangerous actions (Wipe everything, Duress disarm, encrypted
                 // backup export, Dead-Man Wipe disable) behind a physical key tap.
@@ -1175,6 +1204,38 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { faceLockUpsellOpen = false }) { Text("Not now") }
+                },
+                containerColor = MidnightCard
+            )
+        }
+
+        if (panicLockdownUpsellOpen) {
+            AlertDialog(
+                onDismissRequest = { panicLockdownUpsellOpen = false },
+                title = {
+                    Text(
+                        "Panic Lockdown is an Elite feature",
+                        color = PrimaryTextDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "The RIGHT-NOW emergency button. One tap locks the app, arms Duress, " +
+                            "forces aggressive sensor monitoring, disables the Smart Link " +
+                            "Guard watcher, switches to PIN-only, and timestamps the moment " +
+                            "in the audit log. Elite tier.",
+                        color = SecondaryTextDark
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        panicLockdownUpsellOpen = false
+                        onOpenUpgrade()
+                    }) { Text("Upgrade to Elite", color = subGold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { panicLockdownUpsellOpen = false }) { Text("Not now") }
                 },
                 containerColor = MidnightCard
             )

@@ -41,5 +41,9 @@ data class SecurityEvent(
         const val TYPE_BACKUP_RESTORED = "BACKUP_RESTORED"
         /** Geo-fence Auto-Lock (Elite): device exited every trusted region. */
         const val TYPE_GEOFENCE_EXIT = "GEOFENCE_EXIT"
+        /** Panic Lockdown (Elite): owner tapped the red "activate" button. */
+        const val TYPE_PANIC_LOCKDOWN_ACTIVATED = "PANIC_LOCKDOWN_ACTIVATED"
+        /** Panic Lockdown (Elite): owner disarmed with biometric + PIN (+ hardware key). */
+        const val TYPE_PANIC_LOCKDOWN_DISARMED = "PANIC_LOCKDOWN_DISARMED"
     }
 }

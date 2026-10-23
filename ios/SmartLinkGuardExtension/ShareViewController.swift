@@ -20,7 +20,38 @@ final class ShareViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        // Panic Lockdown (Elite) — when the main app has armed Panic Lockdown it flips the
+        // `panic_lockdown.share_disabled` flag in the shared app-group UserDefaults. Bail out
+        // immediately so no accidental data leaves the app through the share sheet. The owner
+        // re-enables the share target by disarming Panic Lockdown from inside the main app.
+        if panicLockdownIsArmed() {
+            renderLockdownNotice()
+            return
+        }
         extractURLFromContext()
+    }
+
+    /// Reads the shared app-group UserDefaults for the Panic Lockdown flag the main app
+    /// writes under `PanicLockdownState.shareExtensionDisabledKey`. Hard-coded here because
+    /// the extension can't link against the main app target.
+    private func panicLockdownIsArmed() -> Bool {
+        UserDefaults(suiteName: "group.com.onlytrusted.app.shared")?
+            .bool(forKey: "panic_lockdown.share_disabled") ?? false
+    }
+
+    private func renderLockdownNotice() {
+        let v = VerdictView(
+            verdictLabel: "Panic Lockdown is armed",
+            verdictColor: .systemRed,
+            urlText: "The Smart Link Guard share target is disabled while Panic Lockdown is active.",
+            reasons: [
+                "Open OnlyTrusted → Settings → Panic Lockdown and disarm to re-enable sharing.",
+                "Nothing has been inspected or logged."
+            ]
+        )
+        v.openAction = nil
+        v.cancelAction = { [weak self] in self?.cancel() }
+        attach(v)
     }
 
     // MARK: - URL extraction

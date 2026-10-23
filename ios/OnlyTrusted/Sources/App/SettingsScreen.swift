@@ -49,6 +49,10 @@ struct SettingsScreen: View {
     @State private var showBorderModeUpsell = false
     @State private var showBorderModeSetup = false
     @StateObject private var borderMode = BorderModeState.shared
+    // Panic Lockdown (Elite)
+    @State private var showPanicLockdownUpsell = false
+    @State private var showPanicLockdownSetup = false
+    @StateObject private var panicLockdown = PanicLockdownState.shared
     // Dead-Man Wipe (Elite)
     @State private var showDeadmanWipeUpsell = false
     @State private var showDeadmanWipeSetup = false
@@ -338,6 +342,20 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showBorderModeUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Panic Lockdown (Elite) — the "right-now" emergency companion to Border Mode.
+        .sheet(isPresented: $showPanicLockdownSetup) {
+            NavigationStack { PanicLockdownScreen() }
+        }
+        .sheet(isPresented: $showPanicLockdownUpsell) {
+            PanicLockdownUpsellSheet(
+                onUpgrade: {
+                    showPanicLockdownUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showPanicLockdownUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -945,6 +963,30 @@ struct SettingsScreen: View {
                         iconTint: borderMode.isArmed ? Color.appDanger : (sub.hasElite ? Color.appAccent : Color.subGold),
                         label: "Border Mode (Elite)",
                         value: borderMode.isArmed ? "Armed" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Panic Lockdown (Elite) — the "I'm in trouble RIGHT NOW" companion to Border
+                // Mode. Single tap locks the app, arms Duress for the next unlock, forces
+                // aggressive sensor monitoring, disables the share extension, and switches to
+                // PIN-only. Placed directly below Border Mode per the brief so the two
+                // Elite emergency presets live together.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showPanicLockdownSetup = true
+                    } else {
+                        showPanicLockdownUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "exclamationmark.octagon.fill",
+                        iconTint: panicLockdown.isArmed
+                            ? Color.appDanger
+                            : (sub.hasElite ? Color.appDanger : Color.subGold),
+                        label: "Panic Lockdown (Elite)",
+                        value: panicLockdown.isArmed ? "ARMED" : nil
                     )
                 }
                 .buttonStyle(.plain)

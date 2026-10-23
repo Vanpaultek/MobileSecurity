@@ -80,6 +80,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object DeadmanWipe : Destination("deadman_wipe", "Dead-Man", Icons.Filled.Security)
     data object Geofence : Destination("geofence_setup", "Geo-fence", Icons.Filled.Security)
     data object BorderMode : Destination("border_mode", "Border", Icons.Filled.Security)
+    // Elite — Panic Lockdown: "I'm in trouble RIGHT NOW" one-tap emergency preset.
+    data object PanicLockdown : Destination("panic_lockdown", "Panic", Icons.Filled.Security)
     data object FaceLock : Destination("face_lock", "Face lock", Icons.Filled.Security)
     data object EncryptedBackup : Destination("encrypted_backup", "Backup", Icons.Filled.Security)
     data object BackupRestore : Destination("backup_restore", "Restore", Icons.Filled.Security)
@@ -229,6 +231,7 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenEncryptedBackup = { navController.navigate(Destination.EncryptedBackup.route) },
                     onOpenBackupRestore = { navController.navigate(Destination.BackupRestore.route) },
                     onOpenBorderMode = { navController.navigate(Destination.BorderMode.route) },
+                    onOpenPanicLockdown = { navController.navigate(Destination.PanicLockdown.route) },
                     onOpenFaceLock = { navController.navigate(Destination.FaceLock.route) },
                     onOpenGeofence = { navController.navigate(Destination.Geofence.route) },
                     onOpenShamirSplit = { navController.navigate(Destination.ShamirSplit.route) },
@@ -313,6 +316,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.BorderMode.route) {
                 com.onlytrusted.app.ui.bordermode.BorderModeSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.PanicLockdown.route) {
+                com.onlytrusted.app.ui.paniclockdown.PanicLockdownScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
