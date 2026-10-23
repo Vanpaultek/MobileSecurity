@@ -623,22 +623,9 @@ struct SettingsScreen: View {
     private var freeFeaturesCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
-                NavigationLink { PrivacyShieldDashboard() } label: {
-                    SettingsNavRow(icon: "shield.lefthalf.filled.badge.checkmark",
-                                   iconTint: Color.settingsBlue, label: "Privacy Shield")
-                }
-                SettingsDivider()
-                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
-                // feed. Monthly local reminder + ad-hoc "Check now". Elite upsell copy is
-                // inside the screen.
-                NavigationLink { BreachWatchScreen() } label: {
-                    SettingsNavRow(icon: "envelope.badge.shield.half.filled",
-                                   iconTint: Color.settingsBlue, label: "Breach Watch")
-                }
-                SettingsDivider()
-                // Data Removal Scan (FREE, visibility-only). Deep-link search URLs for
-                // common people-search sites — opens each in Safari. The "view only"
-                // caveat lives on the detail screen hero + footer, not on the row.
+                // Core comms + system-settings rows stay Free. Privacy Shield / Breach
+                // Watch / Private Aliases / Identity Protection moved to Premium in
+                // v0.3.0 — see premiumFeaturesCard.
                 NavigationLink { DataRemovalScreen() } label: {
                     SettingsNavRow(
                         icon: "person.text.rectangle",
@@ -647,28 +634,9 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
-                // Private Aliases (FREE, unlimited). On-device alias generator; forwarding
-                // is done by the user's chosen relay (iCloud Hide My Email, DDG, SimpleLogin,
-                // Firefox Relay, custom domain). Honest claim lives inside the screen.
-                NavigationLink { AliasesScreen() } label: {
-                    SettingsNavRow(
-                        icon: "at.badge.plus",
-                        iconTint: Color.settingsBlue,
-                        label: "Private Aliases"
-                    )
-                }
-                SettingsDivider()
-                // Identity Protection (FREE). Deep-link checklist of credit freezes, fraud
-                // alerts, HIBP enrollment, FTC report, SSA block. We don't contact any
-                // bureau; we show the official self-service URLs and track your checkmarks.
-                NavigationLink { IdentityProtectionScreen() } label: {
-                    SettingsNavRow(
-                        icon: "person.badge.shield.checkmark",
-                        iconTint: Color.settingsBlue,
-                        label: "Identity Protection"
-                    )
-                }
-                SettingsDivider()
+                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
+                // feed. Monthly local reminder + ad-hoc "Check now". Elite upsell copy is
+                // inside the screen.
                 NavigationLink { BlockListScreen() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
                 }
@@ -688,12 +656,42 @@ struct SettingsScreen: View {
         }
     }
 
-    /// Premium ($4.99/yr) exclusives: Weekly Digest + Advanced Blocking. The rows
-    /// themselves gate their Premium content internally — tapping a row from a Free
-    /// account lands on an upsell card inside the destination screen.
+    /// Premium ($4.99/yr) exclusives: Privacy Shield, Breach Watch, Private Aliases,
+    /// Identity Protection, Weekly Digest, Advanced Blocking.
+    ///
+    /// Privacy Shield / Breach Watch / Private Aliases / Identity Protection were in
+    /// Free Features through v0.2.0; moved to Premium per product repositioning so
+    /// Free covers calls/SMS/system settings only. Each destination screen enforces
+    /// the gate internally for deep-link safety.
     private var premiumFeaturesCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
+                NavigationLink { PrivacyShieldDashboard() } label: {
+                    SettingsNavRow(icon: "shield.lefthalf.filled.badge.checkmark",
+                                   iconTint: Color.appAccent, label: "Privacy Shield")
+                }
+                SettingsDivider()
+                NavigationLink { BreachWatchScreen() } label: {
+                    SettingsNavRow(icon: "envelope.badge.shield.half.filled",
+                                   iconTint: Color.appAccent, label: "Breach Watch")
+                }
+                SettingsDivider()
+                NavigationLink { AliasesScreen() } label: {
+                    SettingsNavRow(
+                        icon: "at.badge.plus",
+                        iconTint: Color.appAccent,
+                        label: "Private Aliases"
+                    )
+                }
+                SettingsDivider()
+                NavigationLink { IdentityProtectionScreen() } label: {
+                    SettingsNavRow(
+                        icon: "person.badge.shield.checkmark",
+                        iconTint: Color.appAccent,
+                        label: "Identity Protection"
+                    )
+                }
+                SettingsDivider()
                 NavigationLink { WeeklyDigestScreen() } label: {
                     SettingsNavRow(
                         icon: "doc.text.image",

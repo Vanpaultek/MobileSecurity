@@ -72,6 +72,16 @@ import java.util.Date
 fun BreachWatchScreen(onBack: () -> Unit) {
     val context = LocalContext.current
 
+    if (!com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)) {
+        com.onlytrusted.app.ui.subscription.PremiumGatedScaffold(
+            title = "Breach Watch",
+            featureName = "Breach Watch",
+            description = "Monitor up to 5 of your email addresses against a bundled breach-hash list. Lookups run entirely on-device.",
+            onBack = onBack
+        )
+        return
+    }
+
     var email by remember { mutableStateOf(BreachWatchState.email(context)) }
     var draftEmail by remember { mutableStateOf(email) }
     var userName by remember { mutableStateOf(BreachWatchState.userName(context)) }

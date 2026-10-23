@@ -22,6 +22,13 @@ struct IdentityProtectionScreen: View {
     private var total: Int { IdentityActionsCatalog.all.count }
 
     var body: some View {
+        PremiumGate(
+            featureName: "Identity Protection",
+            description: "Checklist of credit freezes, fraud alerts, HIBP enrollment, FTC report, and SSA account block. Each row deep-links to the official self-service portal."
+        ) { gatedBody }
+    }
+
+    private var gatedBody: some View {
         ScrollView {
             VStack(spacing: 16) {
                 heroCard

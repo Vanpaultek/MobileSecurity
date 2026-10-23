@@ -22,6 +22,13 @@ struct BreachWatchScreen: View {
     private var isSaved: Bool { !state.email.isEmpty }
 
     var body: some View {
+        PremiumGate(
+            featureName: "Breach Watch",
+            description: "Monitor up to 5 of your email addresses against a bundled breach-hash list. Lookups run entirely on-device."
+        ) { gatedBody }
+    }
+
+    private var gatedBody: some View {
         ScrollView {
             VStack(spacing: 16) {
                 heroCard

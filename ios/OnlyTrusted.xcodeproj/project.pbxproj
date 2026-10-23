@@ -49,6 +49,7 @@
 		3DE68DDAD3C58E8F9468DD3E /* BackupRestoreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C26378948D69C41DC6EFEA /* BackupRestoreScreen.swift */; };
 		3F11882C8CCD32E7C5804EB6 /* DuressVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB7D55CE347AA4C580FB36 /* DuressVault.swift */; };
 		41D922C570BA400222F1ED3A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
+		4271E83AB6A2CB7AC93E006D /* PremiumGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1771386B17B4F8FE139740 /* PremiumGate.swift */; };
 		4435D5D84DB4174CEDF41B69 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = AA4DF852CE4AA7F87A97AF33 /* Data */; };
 		49A98D61332204920438EECE /* EncryptedBackupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19451BB26BC249BF36BD090 /* EncryptedBackupScreen.swift */; };
 		4C091E1465E0117CF62999EA /* AppBackdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67E35947FEDCCD998311AE4 /* AppBackdrop.swift */; };
@@ -275,6 +276,7 @@
 		89DE746BE75DFBB63A137C9F /* PrivacyShieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyShieldState.swift; sourceTree = "<group>"; };
 		8A0D1DC54E62DA7A5014A8E2 /* MFCC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFCC.swift; sourceTree = "<group>"; };
 		8A66FFC76D02EA4B8E5AABFD /* ReportsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsScreen.swift; sourceTree = "<group>"; };
+		8D1771386B17B4F8FE139740 /* PremiumGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumGate.swift; sourceTree = "<group>"; };
 		9175C2D0C46ABCD5771CD716 /* DataRemovalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRemovalScreen.swift; sourceTree = "<group>"; };
 		93F2FB3D59C4ED0CC76ABDE9 /* ShamirSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSetupScreen.swift; sourceTree = "<group>"; };
 		941D635F33B083055F6451ED /* PanicLockdownState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanicLockdownState.swift; sourceTree = "<group>"; };
@@ -812,6 +814,7 @@
 			isa = PBXGroup;
 			children = (
 				1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */,
+				8D1771386B17B4F8FE139740 /* PremiumGate.swift */,
 				D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */,
 			);
 			path = Subscription;
@@ -1107,6 +1110,7 @@
 				B9665F5233049CA2A7EC37CE /* PermissionWatchdogScreen.swift in Sources */,
 				07984B02973A557DB51B5880 /* PermissionWatchdogStore.swift in Sources */,
 				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
+				4271E83AB6A2CB7AC93E006D /* PremiumGate.swift in Sources */,
 				2C99252753A8A6EEE47E23D7 /* PrivacyShieldDashboard.swift in Sources */,
 				05619DDEA5F1EA37C3BFA180 /* PrivacyShieldState.swift in Sources */,
 				F3D31222798A38B44DFE785F /* ReportsScreen.swift in Sources */,

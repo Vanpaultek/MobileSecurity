@@ -432,17 +432,19 @@ extension UpgradeToPremiumScreen.Plan {
         switch self {
         case .free: return [
             .init(text: "Trusted contacts + Blocking & Unknown", included: true),
-            .init(text: "Privacy Shield + mic/camera use alerts", included: true),
-            .init(text: "Breach Watch (1 email) + Data Removal Scan", included: true),
-            .init(text: "Private Aliases (unlimited) + Identity Protection", included: true),
-            .init(text: "App Lock, Panic lock, Data export (JSON/CSV)", included: true)
+            .init(text: "Call Handling + Text Handling + Notifications", included: true),
+            .init(text: "Data Removal Scan (visibility-only)", included: true),
+            .init(text: "App Lock, Pocket-dial, Screenshot protection", included: true),
+            .init(text: "Panic lock + Data export (JSON/CSV)", included: true)
         ]
         case .premium: return [
-            .init(text: "Breach Watch — monitor 5 emails", included: true),
+            .init(text: "Privacy Shield + mic/camera use alerts", included: true),
+            .init(text: "Breach Watch (up to 5 emails)", included: true),
+            .init(text: "Private Aliases (unlimited) + CSV backup", included: true),
+            .init(text: "Identity Protection + yearly renewal reminders", included: true),
+            .init(text: "Data Removal 90-day re-check reminders", included: true),
             .init(text: "Weekly PDF digest", included: true),
-            .init(text: "Alias book backup (CSV import/export)", included: true),
-            .init(text: "Quiet hours + area-code allowlist", included: true),
-            .init(text: "Data Removal + Identity renewal reminders", included: true)
+            .init(text: "Quiet hours + area-code allowlist", included: true)
         ]
         case .family: return [
             .init(text: "All Premium features", included: true),

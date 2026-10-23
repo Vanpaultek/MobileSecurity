@@ -26,6 +26,13 @@ struct PrivacyShieldDashboard: View {
     @State private var showAppShieldUpsell = false
 
     var body: some View {
+        PremiumGate(
+            featureName: "Privacy Shield",
+            description: "App Recording Shutdown, system mic/camera use alerts, hardening assistant, and the Phase 1 three-card privacy dashboard."
+        ) { gatedBody }
+    }
+
+    private var gatedBody: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
                 heroCard

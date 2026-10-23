@@ -86,6 +86,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun AliasesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+
+    if (!com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)) {
+        com.onlytrusted.app.ui.subscription.PremiumGatedScaffold(
+            title = "Private Aliases",
+            featureName = "Private Aliases",
+            description = "Generate unlimited disposable email aliases on-device; forwarding is done by your chosen relay (iCloud+ Hide My Email, DuckDuckGo, SimpleLogin, Firefox Relay, custom domain).",
+            onBack = onBack
+        )
+        return
+    }
+
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 

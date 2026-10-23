@@ -68,6 +68,17 @@ import com.onlytrusted.app.ui.theme.TertiaryTextDark
 @Composable
 fun IdentityProtectionScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+
+    if (!com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)) {
+        com.onlytrusted.app.ui.subscription.PremiumGatedScaffold(
+            title = "Identity Protection",
+            featureName = "Identity Protection",
+            description = "Checklist of credit freezes, fraud alerts, HIBP enrollment, FTC report, and SSA account block. Each row deep-links to the official self-service portal.",
+            onBack = onBack
+        )
+        return
+    }
+
     var done by remember { mutableStateOf(IdentityActionsProgress.done(context)) }
     var reminders by remember { mutableStateOf(IdentityActionsProgress.reminders(context)) }
     var showMenu by remember { mutableStateOf(false) }

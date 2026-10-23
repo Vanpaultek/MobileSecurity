@@ -99,17 +99,19 @@ private fun Plan.cadenceSuffix(cadence: BillingCadence): String = when (this) {
 private fun Plan.features(): List<PlanFeature> = when (this) {
     Plan.Free -> listOf(
         PlanFeature("Trusted contacts + Blocking & Unknown", true),
-        PlanFeature("Privacy Shield + mic/camera use alerts", true),
-        PlanFeature("Breach Watch (1 email) + Data Removal Scan", true),
-        PlanFeature("Private Aliases (unlimited) + Identity Protection", true),
-        PlanFeature("App Lock, Panic lock, Data export (JSON/CSV)", true)
+        PlanFeature("Call Handling + Text Handling + Notifications", true),
+        PlanFeature("Data Removal Scan (visibility-only)", true),
+        PlanFeature("App Lock, Pocket-dial, Screenshot protection", true),
+        PlanFeature("Panic lock + Data export (JSON/CSV)", true)
     )
     Plan.Premium -> listOf(
-        PlanFeature("Breach Watch — monitor 5 emails", true),
+        PlanFeature("Privacy Shield + mic/camera use alerts", true),
+        PlanFeature("Breach Watch (up to 5 emails)", true),
+        PlanFeature("Private Aliases (unlimited) + CSV backup", true),
+        PlanFeature("Identity Protection + yearly renewal reminders", true),
+        PlanFeature("Data Removal 90-day re-check reminders", true),
         PlanFeature("Weekly PDF digest", true),
-        PlanFeature("Alias book backup (CSV import/export)", true),
-        PlanFeature("Quiet hours + area-code allowlist", true),
-        PlanFeature("Data Removal + Identity renewal reminders", true)
+        PlanFeature("Quiet hours + area-code allowlist", true)
     )
     Plan.Family -> listOf(
         PlanFeature("All Premium features", true),

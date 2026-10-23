@@ -39,6 +39,13 @@ struct AliasesScreen: View {
     }
 
     var body: some View {
+        PremiumGate(
+            featureName: "Private Aliases",
+            description: "Generate unlimited disposable email aliases on-device; forwarding is done by your chosen relay (iCloud+ Hide My Email, DuckDuckGo, SimpleLogin, Firefox Relay, custom domain)."
+        ) { gatedBody }
+    }
+
+    private var gatedBody: some View {
         ScrollView {
             VStack(spacing: 16) {
                 heroCard

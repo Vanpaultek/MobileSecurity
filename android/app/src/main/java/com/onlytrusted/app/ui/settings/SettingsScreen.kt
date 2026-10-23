@@ -336,42 +336,14 @@ fun SettingsScreen(
                     .padding(top = 4.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // --- FREE Features (always available) ---
+                // --- FREE Features (always available — core comms + system settings) ---
             TierSectionHeader("Free Features", chipText = "FREE", chipColor = settingsBlue)
             SettingsCard {
-                SettingsNavRow(
-                    icon = Icons.Filled.Security,
-                    tint = settingsBlue,
-                    title = "Privacy Shield",
-                    onClick = onOpenPrivacyShield
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.MarkEmailUnread,
-                    tint = settingsBlue,
-                    title = "Breach Watch",
-                    onClick = onOpenBreachWatch
-                )
-                RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.PersonSearch,
                     tint = settingsBlue,
                     title = "Data Removal Scan",
                     onClick = onOpenDataRemoval
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.AlternateEmail,
-                    tint = settingsBlue,
-                    title = "Private Aliases",
-                    onClick = onOpenAliases
-                )
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.VerifiedUser,
-                    tint = settingsBlue,
-                    title = "Identity Protection",
-                    onClick = onOpenIdentityProtection
                 )
                 RowDivider()
                 SettingsNavRow(
@@ -403,9 +375,42 @@ fun SettingsScreen(
                 )
             }
 
-            // --- PREMIUM Features ($4.99/yr) ---
+            // --- PREMIUM Features ($4.99/yr — privacy & identity monitoring) ---
+            // Privacy Shield, Breach Watch, Private Aliases, Identity Protection were in
+            // Free Features through v0.2.0; moved to Premium per product repositioning
+            // so Free covers calls/SMS/system settings only and Premium covers active
+            // privacy monitoring. Each screen also enforces the gate internally so
+            // Free users deep-linking in see the upsell card.
             TierSectionHeader("Premium Features", chipText = "PREMIUM", chipColor = BrandAccentDark)
             SettingsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Security,
+                    tint = BrandAccentDark,
+                    title = "Privacy Shield",
+                    onClick = onOpenPrivacyShield
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.MarkEmailUnread,
+                    tint = BrandAccentDark,
+                    title = "Breach Watch",
+                    onClick = onOpenBreachWatch
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.AlternateEmail,
+                    tint = BrandAccentDark,
+                    title = "Private Aliases",
+                    onClick = onOpenAliases
+                )
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.VerifiedUser,
+                    tint = BrandAccentDark,
+                    title = "Identity Protection",
+                    onClick = onOpenIdentityProtection
+                )
+                RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.Description,
                     tint = BrandAccentDark,

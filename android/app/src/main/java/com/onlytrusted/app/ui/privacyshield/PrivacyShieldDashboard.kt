@@ -94,6 +94,17 @@ fun PrivacyShieldDashboard(
     onOpenAppShield: () -> Unit = {}
 ) {
     val context = LocalContext.current
+
+    if (!com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)) {
+        com.onlytrusted.app.ui.subscription.PremiumGatedScaffold(
+            title = "Privacy Shield",
+            featureName = "Privacy Shield",
+            description = "App Recording Shutdown, system mic/camera use alerts, hardening assistant, and the Phase 1 three-card privacy dashboard.",
+            onBack = onBack
+        )
+        return
+    }
+
     var autoStopEnabled by remember {
         mutableStateOf(PrivacyShieldState.isAutoStopEnabled(context))
     }
