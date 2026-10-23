@@ -157,7 +157,8 @@ fun SettingsScreen(
     onOpenSignedLog: () -> Unit = {},
     onOpenVoiceBio: () -> Unit = {},
     onOpenRogueNetwork: () -> Unit = {},
-    onOpenThreatIntel: () -> Unit = {}
+    onOpenThreatIntel: () -> Unit = {},
+    onOpenPrivacyShield: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -311,6 +312,17 @@ fun SettingsScreen(
                 // --- Protection (iOS-aligned: BLUE gradient chips) ---
             SectionHeader("Protection")
             SettingsCard {
+                // Auto Privacy Shield (free tier) lives at the top of Protection per the
+                // Phase 1 brief. Only "App Recording Shutdown" (card #1 on the dashboard)
+                // is actually enforced by this app; the other two cards tell the honest
+                // story about what Android/iOS let us do and don't.
+                SettingsNavRow(
+                    icon = Icons.Filled.Security,
+                    tint = settingsBlue,
+                    title = "Privacy Shield",
+                    onClick = onOpenPrivacyShield
+                )
+                RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.Shield,
                     tint = settingsBlue,

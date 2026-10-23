@@ -9,6 +9,7 @@ import android.os.Build
 import com.onlytrusted.app.data.db.AppDatabase
 import com.onlytrusted.app.data.repository.SecurityRepository
 import com.onlytrusted.app.data.repository.TrustedContactsRepository
+import com.onlytrusted.app.ui.privacyshield.CaptureRegistry
 import com.onlytrusted.app.ui.roguenetwork.RogueNetworkMonitor
 import com.onlytrusted.app.ui.smartlinkguard.SmartLinkGuardRules
 import com.onlytrusted.app.ui.threatintel.ThreatIntelDatabase
@@ -29,6 +30,10 @@ class OnlyTrustedApp : Application() {
         super.onCreate()
         instance = this
         createNotificationChannels()
+        // Auto Privacy Shield (free tier): attach the process-wide lifecycle observer so
+        // every live camera/mic capture OnlyTrusted owns tears down on ON_PAUSE. The
+        // SCREEN_OFF receiver is armed lazily by features on their first registration.
+        CaptureRegistry.attach(this)
         // Fortress R4 recovery: Rogue Network Scanner (Elite). Snapshot the radio
         // + Wi-Fi state once at launch so a 2G downgrade or lookalike SSID lands as
         // an alert even before the user visits the dedicated screen.

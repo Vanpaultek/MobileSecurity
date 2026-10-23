@@ -10,6 +10,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.core.content.ContextCompat
+import com.onlytrusted.app.ui.privacyshield.CaptureRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -39,6 +40,8 @@ class VoiceBioRecorder(private val context: Context) {
 
     @Volatile private var record: AudioRecord? = null
     @Volatile private var captureBuffer: FloatArray = FloatArray(0)
+    /** Auto Privacy Shield handle. Non-null only while `AudioRecord` is live. */
+    @Volatile private var shieldHandle: CaptureRegistry.Handle? = null
 
     /** True if RECORD_AUDIO is already granted. Callers should request it via ActivityResult. */
     fun hasPermission(): Boolean = ContextCompat.checkSelfPermission(
@@ -86,6 +89,14 @@ class VoiceBioRecorder(private val context: Context) {
         val outBuffer = FloatArray(totalSamples)
         val chunk = ShortArray(2048)
         var written = 0
+        // Auto Privacy Shield: register once the AudioRecord is initialised but before
+        // we actually start capture. Stop closure routes through `cancel()` so a
+        // background/screen-off event stops the hardware mid-read.
+        shieldHandle = CaptureRegistry.register(
+            feature = "VoiceBio",
+            kind = CaptureRegistry.Kind.MICROPHONE
+        ) { cancel() }
+        CaptureRegistry.maybeArmScreenOffReceiver(context.applicationContext)
         try {
             rec.startRecording()
             while (written < totalSamples) {
@@ -101,15 +112,31 @@ class VoiceBioRecorder(private val context: Context) {
             runCatching { rec.stop() }
             rec.release()
             record = null
+            shieldHandle?.let { h ->
+                shieldHandle = null
+                CaptureRegistry.unregister(h)
+            }
         }
         if (written == 0) throw StartError.Hardware("No audio captured")
         captureBuffer = outBuffer.copyOf(written)
         captureBuffer
     }
 
-    /** Cancel any in-flight recording. Safe to call multiple times. */
+    /**
+     * Cancel any in-flight recording. Safe to call multiple times, including from the
+     * Auto Privacy Shield registry on a background / screen-off transition — releasing
+     * [AudioRecord] from a different thread while the IO coroutine is mid-[AudioRecord.read]
+     * is safe (`read` returns -1 and the finally block above completes normally).
+     */
     fun cancel() {
-        val rec = record ?: return
+        val rec = record ?: run {
+            // Still unregister so the dashboard doesn't show a stale phantom handle.
+            shieldHandle?.let { h ->
+                shieldHandle = null
+                CaptureRegistry.unregister(h)
+            }
+            return
+        }
         runCatching { rec.stop() }
         rec.release()
         record = null

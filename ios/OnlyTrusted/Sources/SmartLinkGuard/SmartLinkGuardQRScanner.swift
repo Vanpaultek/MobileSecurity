@@ -66,6 +66,9 @@ final class QRScannerController: UIViewController, @preconcurrency AVCaptureMeta
 
     private let session = AVCaptureSession()
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    /// Auto Privacy Shield handle. The `MainActor` registry owns teardown on scene
+    /// transitions; `stopCapture()` here is the single teardown path and is idempotent.
+    private var shieldHandle: CaptureRegistry.Handle?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,13 +82,32 @@ final class QRScannerController: UIViewController, @preconcurrency AVCaptureMeta
         if !session.isRunning {
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 self?.session.startRunning()
+                DispatchQueue.main.async { [weak self] in
+                    guard let self, self.session.isRunning, self.shieldHandle == nil else { return }
+                    // Register with the Auto Privacy Shield. Stop callback routes through
+                    // `stopCapture` so a scene-background event tears down the preview too.
+                    self.shieldHandle = CaptureRegistry.shared.register(
+                        feature: "SmartLinkGuard QR",
+                        kind: .camera
+                    ) { [weak self] in self?.stopCapture() }
+                }
             }
         }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        stopCapture()
+    }
+
+    /// Idempotent teardown. Called by `viewWillDisappear`, by the registry on background,
+    /// and by the metadata-detect callback once we have a QR hit.
+    private func stopCapture() {
         if session.isRunning { session.stopRunning() }
+        if let handle = shieldHandle {
+            shieldHandle = nil
+            CaptureRegistry.shared.unregister(handle)
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -160,7 +182,7 @@ final class QRScannerController: UIViewController, @preconcurrency AVCaptureMeta
     ) {
         guard let first = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
               let value = first.stringValue, !value.isEmpty else { return }
-        session.stopRunning()
+        stopCapture()
         onDetected?(value)
     }
 }

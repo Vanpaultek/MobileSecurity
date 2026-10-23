@@ -20,6 +20,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.onlytrusted.app.ui.privacyshield.CaptureRegistry
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 
@@ -63,6 +64,8 @@ class FaceLockMonitor(private val lifecycleOwner: LifecycleOwner) {
 
     @Volatile private var provider: ProcessCameraProvider? = null
     @Volatile private var analysis: ImageAnalysis? = null
+    /** Auto Privacy Shield handle. Non-null only while the camera is bound. */
+    @Volatile private var shieldHandle: CaptureRegistry.Handle? = null
 
     @Volatile private var noFaceSinceMs: Long = 0L
     @Volatile private var consecutiveStranger: Int = 0
@@ -106,6 +109,15 @@ class FaceLockMonitor(private val lifecycleOwner: LifecycleOwner) {
                     an
                 )
                 _runningState.value = true
+                // Auto Privacy Shield: register once bind succeeds. The stop closure
+                // routes back through `stop()` so teardown + state reset stays single-path.
+                if (shieldHandle == null) {
+                    shieldHandle = CaptureRegistry.register(
+                        feature = "FaceLock",
+                        kind = CaptureRegistry.Kind.CAMERA
+                    ) { stop() }
+                    CaptureRegistry.maybeArmScreenOffReceiver(context.applicationContext)
+                }
             } catch (t: Throwable) {
                 _decisionState.value = Decision.Idle
                 _runningState.value = false
@@ -114,6 +126,13 @@ class FaceLockMonitor(private val lifecycleOwner: LifecycleOwner) {
     }
 
     fun stop() {
+        // Auto Privacy Shield: unregister before teardown. If `stop` was called by the
+        // registry (`stopAll`) the handle is already removed, so `unregister` is a
+        // no-op. If `stop` was called by the view normally this logs the clean teardown.
+        shieldHandle?.let { h ->
+            shieldHandle = null
+            CaptureRegistry.unregister(h)
+        }
         try { provider?.unbindAll() } catch (_: Throwable) {}
         provider = null
         analysis = null

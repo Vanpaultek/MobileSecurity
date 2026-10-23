@@ -560,6 +560,14 @@ struct SettingsScreen: View {
     private var protectionCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
+                // Auto Privacy Shield (free-tier) — lives at the top of Protection per the
+                // Phase 1 brief. Opens the 3-card dashboard; app-recording shutdown is the
+                // only part this app enforces, the other two cards are honest about scope.
+                NavigationLink { PrivacyShieldDashboard() } label: {
+                    SettingsNavRow(icon: "shield.lefthalf.filled.badge.checkmark",
+                                   iconTint: Color.settingsBlue, label: "Privacy Shield")
+                }
+                SettingsDivider()
                 NavigationLink { BlockListScreen() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
                 }

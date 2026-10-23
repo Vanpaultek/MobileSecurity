@@ -98,6 +98,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object RogueNetwork : Destination("rogue_network", "Rogue net", Icons.Filled.NetworkCheck)
     // Elite — Fortress R4 recovery: Offline Threat Intel database.
     data object ThreatIntel : Destination("threat_intel", "Threat intel", Icons.Filled.Security)
+    // Auto Privacy Shield (free tier). Dashboard + hardening sub-screen.
+    data object PrivacyShield : Destination("privacy_shield", "Privacy shield", Icons.Filled.Shield)
+    data object PermissionHardening : Destination("permission_hardening", "Hardening", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -232,7 +235,24 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenSignedLog = { navController.navigate(Destination.SignedLog.route) },
                     onOpenVoiceBio = { navController.navigate(Destination.VoiceBio.route) },
                     onOpenRogueNetwork = { navController.navigate(Destination.RogueNetwork.route) },
-                    onOpenThreatIntel = { navController.navigate(Destination.ThreatIntel.route) }
+                    onOpenThreatIntel = { navController.navigate(Destination.ThreatIntel.route) },
+                    onOpenPrivacyShield = { navController.navigate(Destination.PrivacyShield.route) }
+                )
+            }
+            composable(Destination.PrivacyShield.route) {
+                com.onlytrusted.app.ui.privacyshield.PrivacyShieldDashboard(
+                    onBack = { navController.popBackStack() },
+                    onOpenHardening = {
+                        navController.navigate(Destination.PermissionHardening.route)
+                    },
+                    onOpenUpgrade = {
+                        navController.navigate(Destination.UpgradePremium.route)
+                    }
+                )
+            }
+            composable(Destination.PermissionHardening.route) {
+                com.onlytrusted.app.ui.privacyshield.PermissionHardeningScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(Destination.DuressSetup.route) {

@@ -53,6 +53,10 @@ final class FaceLockMonitor: NSObject, ObservableObject {
     nonisolated private let processingLock = NSLock()
     private var noFaceSince: Date?
     private var configured = false
+    /// Auto Privacy Shield handle. Non-nil only while the session is live. The registry
+    /// calls `stop()` on scene-phase transitions so the camera tears down even if the
+    /// view holding this monitor is still mounted.
+    private var shieldHandle: CaptureRegistry.Handle?
     /// How many consecutive samples we've already seen in the current state. Prevents a one-off
     /// Vision mis-detection (common in low light) from auto-locking.
     private var consecutiveStrangerSamples = 0
@@ -84,12 +88,31 @@ final class FaceLockMonitor: NSObject, ObservableObject {
             if !self.configured { self.configureSession() }
             if !self.session.isRunning {
                 self.session.startRunning()
-                DispatchQueue.main.async { self.isRunning = self.session.isRunning }
+                DispatchQueue.main.async {
+                    self.isRunning = self.session.isRunning
+                    // Auto Privacy Shield: register once the session is actually running.
+                    // The stop closure routes back through `stop()` so the AVCaptureSession
+                    // teardown + state reset stays in one place.
+                    if self.session.isRunning && self.shieldHandle == nil {
+                        self.shieldHandle = CaptureRegistry.shared.register(
+                            feature: "FaceLock",
+                            kind: .camera
+                        ) { [weak self] in self?.stop() }
+                    }
+                }
             }
         }
     }
 
     func stop() {
+        // Auto Privacy Shield: unregister BEFORE tearing down. If `stop` was called by
+        // the registry itself (`stopAll` path) the handle is already removed from
+        // `active`, so `unregister` is a defensive no-op. If `stop` was called by the
+        // view normally, this logs a `.featureUnregistered` event.
+        if let handle = shieldHandle {
+            shieldHandle = nil
+            CaptureRegistry.shared.unregister(handle)
+        }
         sessionQueue.async { [weak self] in
             guard let self else { return }
             if self.session.isRunning {

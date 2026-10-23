@@ -64,6 +64,15 @@ struct OnlyTrustedApp: App {
             switch newPhase {
             case .background:
                 gate.noteDidEnterBackground()
+                // Auto Privacy Shield — stop every live camera/mic session OnlyTrusted
+                // controls. The registry respects the user's `autoStopEnabled` pref.
+                _ = CaptureRegistry.shared.stopAll(reason: .background)
+            case .inactive:
+                // `.inactive` also fires for the lock-screen auth sheet + control-center
+                // pull-down; the brief wants capture stopped on both lock + background so
+                // we trigger here too. The registry is idempotent: a second call with
+                // no live handles is a no-op and does not pollute the history.
+                _ = CaptureRegistry.shared.stopAll(reason: .background)
             case .active:
                 gate.maybeAutoLock()
                 // SIM-Swap Alarm — re-check the carrier identity against the baseline

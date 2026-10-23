@@ -33,6 +33,9 @@ final class VoiceBioRecorder {
     private var buffer: [Float] = []
     private var active = false
     private let targetSampleRate: Double = MFCC.sampleRate
+    /// Auto Privacy Shield handle. Non-nil only while capture is running. Teardown goes
+    /// through `stop()` so the engine, audio-session, and registry entry stay in sync.
+    private var shieldHandle: CaptureRegistry.Handle?
 
     deinit {
         // Nothing to tear down from `deinit`; `stop()` on the main actor already removed
@@ -90,11 +93,24 @@ final class VoiceBioRecorder {
         } catch {
             throw StartError.engineFailed(error.localizedDescription)
         }
+        // Auto Privacy Shield: register the live mic so a background/lock transition
+        // tears the engine down even if the enrollment countdown is mid-flight.
+        shieldHandle = CaptureRegistry.shared.register(
+            feature: "VoiceBio",
+            kind: .microphone
+        ) { [weak self] in _ = self?.stop() }
         #endif
     }
 
     /// Stop the engine and return the captured mono 16 kHz Float sample buffer.
+    @discardableResult
     func stop() -> [Float] {
+        // Idempotent. Called by the enrollment flow on normal completion, by the view on
+        // cancel, and by the shield registry when the scene backgrounds.
+        if let handle = shieldHandle {
+            shieldHandle = nil
+            CaptureRegistry.shared.unregister(handle)
+        }
         guard active else { return buffer }
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()

@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.onlytrusted.app.ui.privacyshield.CaptureRegistry
 import java.util.concurrent.Executors
 
 /**
@@ -162,9 +163,22 @@ private fun CameraPreview(onDetected: (String) -> Unit) {
     var fired by remember { mutableStateOf(false) }
 
     val scanner = remember { BarcodeScanning.getClient() }
+    // Auto Privacy Shield handle for this scanner's camera. Non-null while the preview
+    // is bound; the stop closure finishes the hosting activity so the user sees the
+    // UI tear down too (not just the sensor).
+    val providerRef = remember { arrayOf<ProcessCameraProvider?>(null) }
+    val shieldHandleRef = remember { arrayOf<CaptureRegistry.Handle?>(null) }
 
     DisposableEffect(Unit) {
         onDispose {
+            // Unbind + unregister on composable disposal so the dashboard history logs
+            // this teardown explicitly rather than seeing a lingering phantom handle.
+            runCatching { providerRef[0]?.unbindAll() }
+            providerRef[0] = null
+            shieldHandleRef[0]?.let { h ->
+                shieldHandleRef[0] = null
+                CaptureRegistry.unregister(h)
+            }
             scanner.close()
             executor.shutdown()
         }
@@ -220,6 +234,19 @@ private fun CameraPreview(onDetected: (String) -> Unit) {
                         preview,
                         analysis
                     )
+                    providerRef[0] = provider
+                    // Auto Privacy Shield: register once bind succeeds. The stop
+                    // closure unbinds, which cascades through CameraX to close the
+                    // sensor; the `DisposableEffect` cleans up the handle on recompose.
+                    if (shieldHandleRef[0] == null) {
+                        shieldHandleRef[0] = CaptureRegistry.register(
+                            feature = "SmartLinkGuard QR",
+                            kind = CaptureRegistry.Kind.CAMERA
+                        ) {
+                            runCatching { providerRef[0]?.unbindAll() }
+                        }
+                        CaptureRegistry.maybeArmScreenOffReceiver(ctx.applicationContext)
+                    }
                 }
             }, ContextCompat.getMainExecutor(ctx))
             previewView
