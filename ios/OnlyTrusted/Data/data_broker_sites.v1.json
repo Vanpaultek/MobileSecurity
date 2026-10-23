@@ -1,14 +1,89 @@
 [
-  {"name": "Spokeo", "search_url": "https://www.spokeo.com/{first}-{last}"},
-  {"name": "BeenVerified", "search_url": "https://www.beenverified.com/people/{first}-{last}/"},
-  {"name": "Whitepages", "search_url": "https://www.whitepages.com/name/{first}-{last}"},
-  {"name": "PeopleFinder", "search_url": "https://www.peoplefinder.com/people/{first}-{last}"},
-  {"name": "TruePeopleSearch", "search_url": "https://www.truepeoplesearch.com/results?name={first}%20{last}"},
-  {"name": "FastPeopleSearch", "search_url": "https://www.fastpeoplesearch.com/name/{first}-{last}"},
-  {"name": "Radaris", "search_url": "https://radaris.com/p/{First}/{Last}/"},
-  {"name": "USSearch", "search_url": "https://www.ussearch.com/people-search?firstName={first}&lastName={last}"},
-  {"name": "InstantCheckmate", "search_url": "https://www.instantcheckmate.com/people/{first}-{last}/"},
-  {"name": "Intelius", "search_url": "https://www.intelius.com/people-search/{first}-{last}"},
-  {"name": "MyLife", "search_url": "https://www.mylife.com/{first}-{last}"},
-  {"name": "PublicDataUSA", "search_url": "https://publicdatausa.com/search?name={first}%20{last}"}
+  {
+    "name": "Spokeo",
+    "search_urls": {
+      "name": "https://www.spokeo.com/{first}-{last}",
+      "phone": "https://www.spokeo.com/{phone}",
+      "address": "https://www.spokeo.com/{street}-{city}-{state}"
+    }
+  },
+  {
+    "name": "BeenVerified",
+    "search_urls": {
+      "name": "https://www.beenverified.com/people/{first}-{last}/",
+      "phone": "https://www.beenverified.com/rp/phone/{phone}",
+      "address": "https://www.beenverified.com/rp/address/{street}-{city}-{state}"
+    }
+  },
+  {
+    "name": "Whitepages",
+    "search_urls": {
+      "name": "https://www.whitepages.com/name/{first}-{last}",
+      "phone": "https://www.whitepages.com/phone/{phone}",
+      "address": "https://www.whitepages.com/address/{street}/{city}-{state}"
+    }
+  },
+  {
+    "name": "PeopleFinder",
+    "search_urls": {
+      "name": "https://www.peoplefinder.com/people/{first}-{last}"
+    }
+  },
+  {
+    "name": "TruePeopleSearch",
+    "search_urls": {
+      "name": "https://www.truepeoplesearch.com/results?name={first}%20{last}",
+      "phone": "https://www.truepeoplesearch.com/resultphone?phoneno={phone}",
+      "address": "https://www.truepeoplesearch.com/resultaddress?streetaddress={street}&citystatezip={city}%2C%20{state}"
+    }
+  },
+  {
+    "name": "FastPeopleSearch",
+    "search_urls": {
+      "name": "https://www.fastpeoplesearch.com/name/{first}-{last}",
+      "phone": "https://www.fastpeoplesearch.com/{phone}",
+      "address": "https://www.fastpeoplesearch.com/address/{street}_{city}-{state}"
+    }
+  },
+  {
+    "name": "Radaris",
+    "search_urls": {
+      "name": "https://radaris.com/p/{First}/{Last}/",
+      "phone": "https://radaris.com/phone/{phone}"
+    }
+  },
+  {
+    "name": "USSearch",
+    "search_urls": {
+      "name": "https://www.ussearch.com/people-search?firstName={first}&lastName={last}",
+      "phone": "https://www.ussearch.com/reverse-phone-lookup?phone={phone}"
+    }
+  },
+  {
+    "name": "InstantCheckmate",
+    "search_urls": {
+      "name": "https://www.instantcheckmate.com/people/{first}-{last}/",
+      "phone": "https://www.instantcheckmate.com/phone-lookup/{phone}"
+    }
+  },
+  {
+    "name": "Intelius",
+    "search_urls": {
+      "name": "https://www.intelius.com/people-search/{first}-{last}",
+      "phone": "https://www.intelius.com/phone-lookup/{phone}",
+      "address": "https://www.intelius.com/address-lookup/{street}-{city}-{state}"
+    }
+  },
+  {
+    "name": "MyLife",
+    "search_urls": {
+      "name": "https://www.mylife.com/{first}-{last}"
+    }
+  },
+  {
+    "name": "PublicDataUSA",
+    "search_urls": {
+      "name": "https://publicdatausa.com/search?name={first}%20{last}"
+    }
+  }
 ]

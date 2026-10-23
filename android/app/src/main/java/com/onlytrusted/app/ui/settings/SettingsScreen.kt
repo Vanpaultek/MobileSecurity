@@ -353,13 +353,12 @@ fun SettingsScreen(
                 )
                 RowDivider()
                 // Data Removal Scan (FREE, visibility-only). Opens search URLs on common
-                // people-search sites; cannot and does not remove data. Caption makes
-                // that unambiguous.
+                // people-search sites; cannot and does not remove data. The "view only"
+                // caveat lives on the detail screen hero + footer, not on the row.
                 SettingsNavRow(
                     icon = Icons.Filled.PersonSearch,
                     tint = settingsBlue,
                     title = "Data Removal Scan",
-                    value = "View only — can't remove",
                     onClick = onOpenDataRemoval
                 )
                 RowDivider()

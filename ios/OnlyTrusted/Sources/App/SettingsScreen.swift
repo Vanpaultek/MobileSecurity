@@ -613,14 +613,13 @@ struct SettingsScreen: View {
                 }
                 SettingsDivider()
                 // Data Removal Scan (FREE, visibility-only). Deep-link search URLs for
-                // common people-search sites — opens each in Safari. Does NOT remove
-                // anything; the row subtitle makes that unambiguous.
+                // common people-search sites — opens each in Safari. The "view only"
+                // caveat lives on the detail screen hero + footer, not on the row.
                 NavigationLink { DataRemovalScreen() } label: {
                     SettingsNavRow(
                         icon: "person.text.rectangle",
                         iconTint: Color.settingsBlue,
-                        label: "Data Removal Scan",
-                        value: "View only — can't remove"
+                        label: "Data Removal Scan"
                     )
                 }
                 SettingsDivider()

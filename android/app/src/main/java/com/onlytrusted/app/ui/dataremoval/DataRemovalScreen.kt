@@ -20,18 +20,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,36 +49,53 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
-import com.onlytrusted.app.ui.theme.MidnightCard
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
 import com.onlytrusted.app.ui.theme.SecondaryTextDark
-import com.onlytrusted.app.ui.theme.TertiaryTextDark
 import com.onlytrusted.app.ui.theme.WarningDark
 
-/** Data Removal Scan (FREE, visibility-only). Mirrors iOS `DataRemovalScreen`. */
+/**
+ * Data Removal Scan (FREE, visibility-only). Three search modes — Name / Phone /
+ * Address — selectable via segmented picker. Fields change to match. Only sites
+ * whose catalog entry supports the active mode appear in the "Check" list.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataRemovalScreen(onBack: () -> Unit) {
     val context = LocalContext.current
 
+    var mode by remember { mutableStateOf(DataRemovalState.mode(context)) }
     var firstName by remember { mutableStateOf(DataRemovalState.firstName(context)) }
     var lastName by remember { mutableStateOf(DataRemovalState.lastName(context)) }
     var stateCode by remember { mutableStateOf(DataRemovalState.stateCode(context)) }
+    var phone by remember { mutableStateOf(DataRemovalState.phone(context)) }
+    var street by remember { mutableStateOf(DataRemovalState.street(context)) }
+    var city by remember { mutableStateOf(DataRemovalState.city(context)) }
     var statePickerOpen by remember { mutableStateOf(false) }
     var sitesVisible by remember { mutableStateOf(false) }
 
-    val sites = remember { DataRemovalCatalog.sites(context) }
+    fun currentForm() = DataRemovalForm(
+        firstName = firstName, lastName = lastName, state = stateCode,
+        phone = phone, street = street, city = city
+    )
 
-    val canScan = firstName.trim().isNotEmpty() && lastName.trim().isNotEmpty()
+    val canScan = DataRemovalCatalog.sites(context, mode)
+        .any { DataRemovalCatalog.renderUrl(it, mode, currentForm()) != null }
+
+    val scanLabel = if (canScan) "Scan now" else when (mode) {
+        SearchMode.NAME -> "Enter first + last name"
+        SearchMode.PHONE -> "Enter a phone number"
+        SearchMode.ADDRESS -> "Enter street + city + state"
+    }
 
     Scaffold(
         containerColor = MidnightBackground,
@@ -96,106 +117,130 @@ fun DataRemovalScreen(onBack: () -> Unit) {
                 .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Warning hero
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MidnightElevated,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = WarningDark.copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(16.dp)
-                    )
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(shape = RoundedCornerShape(10.dp), color = WarningDark) {
-                            Icon(Icons.Filled.Warning, null, tint = Color.White,
-                                modifier = Modifier.padding(8.dp))
-                        }
-                        Spacer(Modifier.size(10.dp))
-                        Text(
-                            "Visibility only",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = WarningDark
+            WarningHero()
+
+            // Mode picker
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SearchMode.entries.forEachIndexed { index, m ->
+                    SegmentedButton(
+                        selected = mode == m,
+                        onClick = {
+                            mode = m
+                            DataRemovalState.setMode(context, m)
+                            sitesVisible = false
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = SearchMode.entries.size
                         )
+                    ) {
+                        Text(m.label)
                     }
-                    Text(
-                        "This scan does not remove your data. It only generates search links so you can see where your name may be published. Removal has to be done manually with each site.",
-                        fontSize = 12.sp, color = SecondaryTextDark
-                    )
                 }
             }
 
-            // Form
+            // Form (mode-dependent)
             CardBox {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        "Your details",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = PrimaryTextDark
-                    )
-                    OutlinedTextField(
-                        value = firstName,
-                        onValueChange = {
-                            firstName = it
-                            DataRemovalState.setFirstName(context, it)
-                        },
-                        placeholder = { Text("First name") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = lastName,
-                        onValueChange = {
-                            lastName = it
-                            DataRemovalState.setLastName(context, it)
-                        },
-                        placeholder = { Text("Last name") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    val icon = when (mode) {
+                        SearchMode.NAME -> Icons.Filled.Person
+                        SearchMode.PHONE -> Icons.Filled.Phone
+                        SearchMode.ADDRESS -> Icons.Filled.LocationOn
+                    }
+                    val title = when (mode) {
+                        SearchMode.NAME -> "Your name"
+                        SearchMode.PHONE -> "Phone number"
+                        SearchMode.ADDRESS -> "Address"
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "State (optional)",
-                            fontSize = 13.sp,
-                            color = SecondaryTextDark,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Box {
-                            TextButton(onClick = { statePickerOpen = true }) {
-                                Text(
-                                    stateCode.ifEmpty { "Any" },
-                                    color = BrandAccentDark,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = statePickerOpen,
-                                onDismissRequest = { statePickerOpen = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Any") },
-                                    onClick = {
-                                        stateCode = ""
-                                        DataRemovalState.setStateCode(context, "")
-                                        statePickerOpen = false
-                                    }
-                                )
-                                USStates.all.forEach { s ->
-                                    DropdownMenuItem(
-                                        text = { Text(s) },
-                                        onClick = {
-                                            stateCode = s
-                                            DataRemovalState.setStateCode(context, s)
-                                            statePickerOpen = false
-                                        }
-                                    )
+                        Surface(shape = RoundedCornerShape(10.dp), color = BrandAccentDark) {
+                            Icon(icon, null, tint = Color.White, modifier = Modifier.padding(8.dp))
+                        }
+                        Spacer(Modifier.size(10.dp))
+                        Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = PrimaryTextDark)
+                    }
+                    when (mode) {
+                        SearchMode.NAME -> {
+                            OutlinedTextField(
+                                value = firstName,
+                                onValueChange = {
+                                    firstName = it
+                                    DataRemovalState.setFirstName(context, it)
+                                },
+                                placeholder = { Text("First name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = lastName,
+                                onValueChange = {
+                                    lastName = it
+                                    DataRemovalState.setLastName(context, it)
+                                },
+                                placeholder = { Text("Last name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            StatePickerRow(
+                                label = "State (optional)",
+                                selected = stateCode,
+                                open = statePickerOpen,
+                                onOpenChange = { statePickerOpen = it },
+                                onSelected = {
+                                    stateCode = it
+                                    DataRemovalState.setStateCode(context, it)
                                 }
-                            }
+                            )
+                        }
+                        SearchMode.PHONE -> {
+                            OutlinedTextField(
+                                value = phone,
+                                onValueChange = {
+                                    phone = it
+                                    DataRemovalState.setPhone(context, it)
+                                },
+                                placeholder = { Text("Phone number (digits only)") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                "Enter 10 digits (US) or full international format with country code.",
+                                fontSize = 11.sp,
+                                color = SecondaryTextDark
+                            )
+                        }
+                        SearchMode.ADDRESS -> {
+                            OutlinedTextField(
+                                value = street,
+                                onValueChange = {
+                                    street = it
+                                    DataRemovalState.setStreet(context, it)
+                                },
+                                placeholder = { Text("Street (e.g. 123 Main St)") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = city,
+                                onValueChange = {
+                                    city = it
+                                    DataRemovalState.setCity(context, it)
+                                },
+                                placeholder = { Text("City") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            StatePickerRow(
+                                label = "State",
+                                selected = stateCode,
+                                open = statePickerOpen,
+                                onOpenChange = { statePickerOpen = it },
+                                onSelected = {
+                                    stateCode = it
+                                    DataRemovalState.setStateCode(context, it)
+                                }
+                            )
                         }
                     }
                 }
@@ -211,10 +256,11 @@ fun DataRemovalScreen(onBack: () -> Unit) {
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (canScan) "Scan now" else "Enter first + last name")
+                Text(scanLabel)
             }
 
             if (sitesVisible) {
+                val visibleSites = DataRemovalCatalog.sites(context, mode)
                 CardBox {
                     Column(
                         Modifier.padding(16.dp),
@@ -234,11 +280,19 @@ fun DataRemovalScreen(onBack: () -> Unit) {
                             )
                         }
                         Text(
-                            "Tap Check on any row to open the site's search. We don't share your name — the browser does.",
+                            "Tap Check on any row to open the site's search in your browser. We don't share your details — the browser does.",
                             fontSize = 11.sp, color = SecondaryTextDark
                         )
-                        sites.forEach { site ->
-                            SiteRow(site = site, firstName = firstName, lastName = lastName) { uri ->
+                        if (visibleSites.isEmpty()) {
+                            Text(
+                                "No sites in the catalog support ${mode.label.lowercase()} search.",
+                                fontSize = 12.sp,
+                                color = SecondaryTextDark
+                            )
+                        }
+                        val form = currentForm()
+                        visibleSites.forEach { site ->
+                            SiteRow(site = site, mode = mode, form = form) { uri ->
                                 val intent = Intent(Intent.ACTION_VIEW, uri)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 runCatching { context.startActivity(intent) }
@@ -277,12 +331,78 @@ fun DataRemovalScreen(onBack: () -> Unit) {
 }
 
 @Composable
+private fun WarningHero() {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MidnightElevated,
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, WarningDark.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = RoundedCornerShape(10.dp), color = WarningDark) {
+                    Icon(Icons.Filled.Warning, null, tint = Color.White,
+                        modifier = Modifier.padding(8.dp))
+                }
+                Spacer(Modifier.size(10.dp))
+                Text(
+                    "Visibility only",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WarningDark
+                )
+            }
+            Text(
+                "This scan does not remove your data. It only generates search links so you can see where your name, phone, or address may be published. Removal has to be done manually with each site.",
+                fontSize = 12.sp, color = SecondaryTextDark
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatePickerRow(
+    label: String,
+    selected: String,
+    open: Boolean,
+    onOpenChange: (Boolean) -> Unit,
+    onSelected: (String) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(label, fontSize = 13.sp, color = SecondaryTextDark, modifier = Modifier.weight(1f))
+        Box {
+            TextButton(onClick = { onOpenChange(true) }) {
+                Text(
+                    selected.ifEmpty { "Any" },
+                    color = BrandAccentDark,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { onOpenChange(false) }) {
+                DropdownMenuItem(
+                    text = { Text("Any") },
+                    onClick = { onSelected(""); onOpenChange(false) }
+                )
+                USStates.all.forEach { s ->
+                    DropdownMenuItem(
+                        text = { Text(s) },
+                        onClick = { onSelected(s); onOpenChange(false) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun SiteRow(
     site: DataRemovalSite,
-    firstName: String,
-    lastName: String,
+    mode: SearchMode,
+    form: DataRemovalForm,
     onOpen: (android.net.Uri) -> Unit
 ) {
+    val uri = DataRemovalCatalog.renderUrl(site, mode, form)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -292,19 +412,18 @@ private fun SiteRow(
         Column(Modifier.weight(1f)) {
             Text(site.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = PrimaryTextDark)
             Text(
-                hostLabel(site.searchUrl),
+                uri?.host.orEmpty().ifEmpty { site.template(mode).orEmpty() },
                 fontSize = 10.sp,
                 color = SecondaryTextDark,
                 maxLines = 1
             )
         }
         Button(
-            onClick = {
-                val uri = DataRemovalCatalog.renderSearchUrl(site.searchUrl, firstName, lastName)
-                if (uri != null) onOpen(uri)
-            },
+            enabled = uri != null,
+            onClick = { if (uri != null) onOpen(uri) },
             colors = ButtonDefaults.buttonColors(
                 containerColor = BrandAccentDark,
+                disabledContainerColor = MidnightElevated,
                 contentColor = Color.White
             )
         ) {
@@ -312,10 +431,6 @@ private fun SiteRow(
         }
     }
 }
-
-private fun hostLabel(raw: String): String =
-    runCatching { android.net.Uri.parse(raw).host.orEmpty() }
-        .getOrDefault(raw)
 
 @Composable
 private fun CardBox(content: @Composable () -> Unit) {

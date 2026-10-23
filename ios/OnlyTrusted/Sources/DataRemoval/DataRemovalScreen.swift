@@ -6,10 +6,14 @@ import UIKit
 /// Data Removal Scan (FREE tier, visibility-only). Generates deep-link search URLs for
 /// each bundled data-broker / people-search site; opens the user's choice in Safari.
 ///
-/// Hard rule — honest UX: every surface tells the user this feature does NOT remove the
-/// data, only shows where exposure might exist. OnlyTrusted cannot act on behalf of the
-/// user because the deletion flow for every site is manual, often paper-based, and
-/// legally scoped to the record owner.
+/// Three search modes — Name / Phone / Address. The segmented picker up top switches
+/// between them; the form fields and the visible site list update to match. Each site
+/// in the bundled catalog declares which modes it supports via `search_urls`; sites
+/// without a template for the selected mode drop out of the list.
+///
+/// Hard rule — honest UX: the hero and footer repeat that this feature does NOT remove
+/// data. OnlyTrusted cannot act on behalf of the user because every site's removal flow
+/// is manual, often paper-based, and legally scoped to the record owner.
 struct DataRemovalScreen: View {
 
     @StateObject private var state = DataRemovalState.shared
@@ -20,6 +24,7 @@ struct DataRemovalScreen: View {
         ScrollView {
             VStack(spacing: 16) {
                 warningHero
+                modePicker
                 formCard
                 scanButton
                 if sitesVisible { sitesCard }
@@ -49,7 +54,7 @@ struct DataRemovalScreen: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.appWarning)
                 }
-                Text("This scan does not remove your data. It only generates search links so you can see where your name may be published. Removal has to be done manually with each site.")
+                Text("This scan does not remove your data. It only generates search links so you can see where your name, phone, or address may be published. Removal has to be done manually with each site.")
                     .font(.footnote)
                     .foregroundStyle(Color.appSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -61,60 +66,138 @@ struct DataRemovalScreen: View {
         )
     }
 
-    // MARK: - Form
+    // MARK: - Mode picker
+
+    private var modePicker: some View {
+        Picker("Search by", selection: Binding(
+            get: { state.searchMode },
+            set: { newMode in
+                state.searchMode = newMode
+                sitesVisible = false   // force a fresh scan when mode changes
+            }
+        )) {
+            ForEach(SearchMode.allCases) { mode in
+                Text(mode.label).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    // MARK: - Form (mode-dependent fields)
 
     private var formCard: some View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 12) {
-                CardHeader(icon: "person.text.rectangle",
-                           title: "Your details",
+                CardHeader(icon: formIcon,
+                           title: formTitle,
                            tint: Color.appAccent)
 
-                field(placeholder: "First name", value: Binding(
-                    get: { state.firstName },
-                    set: { state.firstName = $0 }
-                ), contentType: .givenName)
-
-                field(placeholder: "Last name", value: Binding(
-                    get: { state.lastName },
-                    set: { state.lastName = $0 }
-                ), contentType: .familyName)
-
-                HStack {
-                    Text("State (optional)")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.appSecondaryText)
-                    Spacer()
-                    Button {
-                        statePickerOpen = true
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text(state.state.isEmpty ? "Any" : state.state)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Color.appAccent)
-                            Image(systemName: "chevron.down")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.appAccent)
-                        }
-                    }
-                    .confirmationDialog("Select state", isPresented: $statePickerOpen,
-                                        titleVisibility: .visible) {
-                        Button("Any") { state.state = "" }
-                        ForEach(USStates.all, id: \.self) { s in
-                            Button(s) { state.state = s }
-                        }
-                        Button("Cancel", role: .cancel) {}
-                    }
+                switch state.searchMode {
+                case .name:    nameFields
+                case .phone:   phoneFields
+                case .address: addressFields
                 }
             }
         }
     }
 
-    private func field(placeholder: String, value: Binding<String>,
-                       contentType: UITextContentType) -> some View {
+    private var formIcon: String {
+        switch state.searchMode {
+        case .name:    return "person.text.rectangle"
+        case .phone:   return "phone.circle"
+        case .address: return "mappin.and.ellipse"
+        }
+    }
+
+    private var formTitle: String {
+        switch state.searchMode {
+        case .name:    return "Your name"
+        case .phone:   return "Phone number"
+        case .address: return "Address"
+        }
+    }
+
+    @ViewBuilder private var nameFields: some View {
+        field(placeholder: "First name",
+              value: Binding(get: { state.firstName }, set: { state.firstName = $0 }),
+              contentType: .givenName,
+              keyboard: .default,
+              capitalization: .words)
+
+        field(placeholder: "Last name",
+              value: Binding(get: { state.lastName }, set: { state.lastName = $0 }),
+              contentType: .familyName,
+              keyboard: .default,
+              capitalization: .words)
+
+        statePickerRow(label: "State (optional)")
+    }
+
+    @ViewBuilder private var phoneFields: some View {
+        field(placeholder: "Phone number (digits only)",
+              value: Binding(get: { state.phone }, set: { state.phone = $0 }),
+              contentType: .telephoneNumber,
+              keyboard: .phonePad,
+              capitalization: .none)
+        Text("Enter 10 digits (US) or full international format with country code.")
+            .font(.caption)
+            .foregroundStyle(Color.appSecondaryText)
+    }
+
+    @ViewBuilder private var addressFields: some View {
+        field(placeholder: "Street (e.g. 123 Main St)",
+              value: Binding(get: { state.street }, set: { state.street = $0 }),
+              contentType: .streetAddressLine1,
+              keyboard: .default,
+              capitalization: .words)
+
+        field(placeholder: "City",
+              value: Binding(get: { state.city }, set: { state.city = $0 }),
+              contentType: .addressCity,
+              keyboard: .default,
+              capitalization: .words)
+
+        statePickerRow(label: "State")
+    }
+
+    private func statePickerRow(label: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(Color.appSecondaryText)
+            Spacer()
+            Button {
+                statePickerOpen = true
+            } label: {
+                HStack(spacing: 6) {
+                    Text(state.state.isEmpty ? "Any" : state.state)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appAccent)
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.appAccent)
+                }
+            }
+            .confirmationDialog("Select state", isPresented: $statePickerOpen,
+                                titleVisibility: .visible) {
+                Button("Any") { state.state = "" }
+                ForEach(USStates.all, id: \.self) { s in
+                    Button(s) { state.state = s }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+        }
+    }
+
+    private func field(placeholder: String,
+                       value: Binding<String>,
+                       contentType: UITextContentType,
+                       keyboard: UIKeyboardType,
+                       capitalization: UITextAutocapitalizationType) -> some View {
         TextField(placeholder, text: value)
             .textContentType(contentType)
-            .autocapitalization(.words)
+            .keyboardType(keyboard)
+            .autocapitalization(capitalization)
             .disableAutocorrection(true)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -124,16 +207,28 @@ struct DataRemovalScreen: View {
             )
     }
 
+    // MARK: - Scan button + validation
+
     private var canScan: Bool {
-        !state.firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !state.lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let f = state.form
+        return DataRemovalCatalog.sites(for: state.searchMode)
+            .contains { DataRemovalCatalog.renderURL(site: $0, mode: state.searchMode, form: f) != nil }
+    }
+
+    private var scanButtonLabel: String {
+        if canScan { return "Scan now" }
+        switch state.searchMode {
+        case .name:    return "Enter first + last name"
+        case .phone:   return "Enter a phone number"
+        case .address: return "Enter street + city + state"
+        }
     }
 
     private var scanButton: some View {
         Button {
             sitesVisible = canScan
         } label: {
-            Text(canScan ? "Scan now" : "Enter first + last name")
+            Text(scanButtonLabel)
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity, minHeight: 44)
         }
@@ -144,42 +239,49 @@ struct DataRemovalScreen: View {
 
     // MARK: - Sites
 
+    private var modeSites: [DataRemovalSite] {
+        DataRemovalCatalog.sites(for: state.searchMode)
+    }
+
     private var sitesCard: some View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 12) {
                 CardHeader(icon: "list.bullet.rectangle",
                            title: "People-search sites",
                            tint: Color.appAccent)
-                Text("Tap Check on any row to open the site's search. We don't share your name — the browser does.")
+                Text("Tap Check on any row to open the site's search in Safari. We don't share your details — Safari does.")
                     .font(.caption)
                     .foregroundStyle(Color.appSecondaryText)
-                ForEach(DataRemovalCatalog.sites) { site in
-                    siteRow(site)
+
+                let f = state.form
+                let sites = modeSites
+                if sites.isEmpty {
+                    Text("No sites in the catalog support \(state.searchMode.label.lowercased()) search.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                }
+                ForEach(sites) { site in
+                    siteRow(site, form: f)
                 }
             }
         }
     }
 
-    private func siteRow(_ site: DataRemovalSite) -> some View {
-        HStack {
+    private func siteRow(_ site: DataRemovalSite, form: DataRemovalForm) -> some View {
+        let url = DataRemovalCatalog.renderURL(site: site, mode: state.searchMode, form: form)
+        return HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(site.name)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.appPrimaryText)
-                Text(hostLabel(site.search_url))
+                Text(url?.host ?? site.template(for: state.searchMode) ?? "")
                     .font(.caption)
                     .foregroundStyle(Color.appSecondaryText)
                     .lineLimit(1)
             }
             Spacer()
             Button {
-                if let url = DataRemovalCatalog.renderSearchURL(
-                    site.search_url,
-                    firstName: state.firstName,
-                    lastName: state.lastName
-                ) {
-                    UIApplication.shared.open(url)
-                }
+                if let url { UIApplication.shared.open(url) }
             } label: {
                 Text("Check")
                     .font(.footnote.weight(.semibold))
@@ -187,17 +289,14 @@ struct DataRemovalScreen: View {
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.appAccent)
+                            .fill(url == nil ? Color.appElevatedSurface : Color.appAccent)
                     )
-                    .foregroundStyle(.white)
+                    .foregroundStyle(url == nil ? Color.appSecondaryText : .white)
             }
             .buttonStyle(.plain)
+            .disabled(url == nil)
         }
         .padding(.vertical, 6)
-    }
-
-    private func hostLabel(_ raw: String) -> String {
-        URL(string: raw)?.host ?? raw
     }
 
     private var paidToolsCard: some View {
