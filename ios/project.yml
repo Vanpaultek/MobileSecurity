@@ -72,6 +72,11 @@ targets:
         PRODUCT_NAME: "CallDirectoryExtension"
         PRODUCT_MODULE_NAME: CallDirectoryExtension
         INFOPLIST_KEY_CFBundleDisplayName: "OnlyTrusted Call Blocker"
+    # Ship the bundled scam-number threat intel into the extension so blocking entries
+    # cover known scam prefixes in addition to the user's manual block list.
+    resources:
+      - path: OnlyTrusted/Data/scam_numbers.v1.txt
+        destination: Resources
 
   # --- Message Filter Extension ------------------------------------------------
   MessageFilterExtension:
@@ -81,6 +86,7 @@ targets:
       - path: MessageFilterExtension
       - path: OnlyTrusted/Sources/Shared
       - path: OnlyTrusted/Sources/Vault/PhoneUtils.swift
+      - path: OnlyTrusted/Sources/SmartLinkGuard/SmartLinkGuardRules.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.onlytrusted.app.MessageFilterExtension

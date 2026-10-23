@@ -5,7 +5,15 @@ import IdentityLookup
 
 /// iOS calls this whenever an SMS from an unknown sender arrives (iOS does NOT invoke
 /// filter extensions for Contacts or prior conversations). Our job: decide whether the
-/// message is .junk / .promotion / .transaction / .none based on the sender.
+/// message is .junk / .promotion / .transaction / .none.
+///
+/// Two inputs feed the classifier:
+///   1. **Sender** — if on the user's block list with `blockSms` set, return .junk.
+///   2. **Message body** — scan for URLs and run each through
+///      `SmartLinkGuardRules.inspect(_:)`. If any URL comes back `Caution` or `Danger`,
+///      return .junk. This is the Apple-approved on-device path for Smart Link Guard
+///      (iOS does not expose a general SMS intercept API — the filter extension is the
+///      only legitimate hook, and only for messages from unknown senders).
 ///
 /// Budget: tight. Must return within a few seconds. No network. No UI.
 final class MessageFilterHandler: ILMessageFilterExtension {}
@@ -17,21 +25,63 @@ extension MessageFilterHandler: ILMessageFilterQueryHandling {
                 completion: @escaping (ILMessageFilterQueryResponse) -> Void) {
 
         let response = ILMessageFilterQueryResponse()
-        response.action = classify(sender: queryRequest.sender)
+        response.action = classify(
+            sender: queryRequest.sender,
+            body: queryRequest.messageBody
+        )
         completion(response)
     }
 
-    private func classify(sender: String?) -> ILMessageFilterAction {
-        guard let sender, !sender.isEmpty else { return .none }
-        let normalised = PhoneUtils.normalise(sender)
+    private func classify(sender: String?, body: String?) -> ILMessageFilterAction {
+        // Rule 1 — sender on user block list (SMS blocking enabled).
+        if let sender, !sender.isEmpty {
+            let normalised = PhoneUtils.normalise(sender)
+            let hit = BlockListStore.shared.allSorted().first { $0.normalisedNumber == normalised }
+            if let hit, hit.blockSms {
+                return .junk
+            }
+        }
 
-        // If the sender is on the block list AND the user asked us to flag SMS from them,
-        // mark the message as junk — iOS routes it to the "Junk" tab in Messages and
-        // suppresses the notification.
-        let hit = BlockListStore.shared.allSorted().first { $0.normalisedNumber == normalised }
-        if let hit, hit.blockSms {
+        // Rule 2 — Smart Link Guard body scan. Pull every URL in the message, run the
+        // shared offline rules, and junk the message if any URL is Caution or Danger.
+        if let body, !body.isEmpty, bodyHasRiskyURL(body) {
             return .junk
         }
+
         return .none
+    }
+
+    /// Returns `true` if the body contains an http(s) URL whose Smart Link Guard verdict
+    /// is Caution or Danger. The scanner only runs when at least one URL is present, so
+    /// the common "safe" case stays cheap.
+    private func bodyHasRiskyURL(_ body: String) -> Bool {
+        let urls = extractURLs(from: body)
+        guard !urls.isEmpty else { return false }
+        for url in urls {
+            let result = SmartLinkGuardRules.inspect(url)
+            if result.verdict == .caution || result.verdict == .danger {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// Lightweight URL extractor using `NSDataDetector` — safe in app-extension budget,
+    /// no network.
+    private func extractURLs(from body: String) -> [String] {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return []
+        }
+        let range = NSRange(body.startIndex..., in: body)
+        var found: [String] = []
+        detector.enumerateMatches(in: body, options: [], range: range) { match, _, _ in
+            if let url = match?.url {
+                let s = url.absoluteString
+                if s.hasPrefix("http://") || s.hasPrefix("https://") {
+                    found.append(s)
+                }
+            }
+        }
+        return found
     }
 }

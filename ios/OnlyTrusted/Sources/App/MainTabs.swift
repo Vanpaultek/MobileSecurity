@@ -140,6 +140,31 @@ private struct PanicSOSButton: View {
         if let url = URL(string: "tel:\(number)") {
             UIApplication.shared.open(url)
         }
+
+        // If the user has configured their own Panic SOS backend (Settings → Security &
+        // data → Panic SOS backend), POST the alert to it so SMS goes out silently via
+        // their server. Otherwise fall back to the pre-filled Messages composer that
+        // requires the user to tap Send.
+        if PanicBackend.isConfigured {
+            let allRecipients = allTrustedContactNumbers()
+            let body = "\u{26A0}\u{FE0F} OnlyTrusted panic alert from \(name): I need help."
+            Task.detached {
+                let result = await PanicBackend.send(
+                    recipients: allRecipients,
+                    isDuress: false,
+                    location: ""
+                )
+                if case .ok = result { return }
+                // Backend failed — fall back to composer so the user still has a path.
+                await MainActor.run {
+                    self.smsRecipient = number
+                    self.smsBody = body
+                    self.showSMSComposer = true
+                }
+            }
+            return
+        }
+
         // iOS limitation: there is no silent SMS send. We open the system Messages
         // composer with recipient + body pre-filled; the user must tap Send.
         if MessageComposerView.canSendText {
@@ -151,6 +176,10 @@ private struct PanicSOSButton: View {
                 showSMSComposer = true
             }
         }
+    }
+
+    private func allTrustedContactNumbers() -> [String] {
+        VaultStore.shared.contacts.flatMap { $0.normalisedNumbers }
     }
 
     private func prepareSMSOnly() {

@@ -736,6 +736,16 @@ struct SettingsScreen: View {
                                    label: "Carrier spam report")
                 }
                 .buttonStyle(.plain)
+                // Panic SOS backend (SafetyShield-inspired optional server fanout).
+                SettingsDivider()
+                NavigationLink { PanicBackendScreen() } label: {
+                    SettingsNavRow(icon: "antenna.radiowaves.left.and.right",
+                                   iconTint: Color.appAccent,
+                                   label: PanicBackend.isConfigured
+                                       ? "Panic SOS backend · configured"
+                                       : "Panic SOS backend")
+                }
+                .buttonStyle(.plain)
                 SettingsDivider()
                 Button { confirmPanic = true } label: {
                     SettingsNavRow(icon: "lock.fill", iconTint: Color.appWarning,

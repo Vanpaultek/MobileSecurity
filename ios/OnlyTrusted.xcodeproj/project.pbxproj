@@ -19,6 +19,7 @@
 		127BB6F634006652CE0D4D99 /* CheckInSMSComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AF37DFA82F8F6BE5071EC2 /* CheckInSMSComposer.swift */; };
 		1A56C37DF322E512F04621D7 /* UpgradeToPremiumScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */; };
 		1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
+		1CFBE062D9551BF389F5BD4A /* PanicBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759D36C0E7AFD131D3E3D2B7 /* PanicBackend.swift */; };
 		1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
 		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
 		21F80B3D5488965EC593E4A3 /* ThreatIntelDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BD148F67C16E65E1E0BA41 /* ThreatIntelDatabase.swift */; };
@@ -41,6 +42,7 @@
 		49A98D61332204920438EECE /* EncryptedBackupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19451BB26BC249BF36BD090 /* EncryptedBackupScreen.swift */; };
 		4C091E1465E0117CF62999EA /* AppBackdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67E35947FEDCCD998311AE4 /* AppBackdrop.swift */; };
 		4E9C7B11AEE38F7153FE6C93 /* TrustedWitnessState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC02C9430D06F9D773B85ECA /* TrustedWitnessState.swift */; };
+		4FFCC7C60D5B6AA2A6FE5024 /* SmartLinkGuardRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E7C544A79123DD3E8F7D11 /* SmartLinkGuardRules.swift */; };
 		515C2A5DD466A2542B4E505D /* TrustedWitnessGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3108D7373B9B8950933F08 /* TrustedWitnessGate.swift */; };
 		54F1222A590D224BD05496FB /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */; };
 		555F43EF319DADE0656DC37F /* SmartLinkGuardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8D8237C800B6BE3D6B1B5FA /* SmartLinkGuardScreen.swift */; };
@@ -60,6 +62,7 @@
 		7CC7A7692C3CBBE641ED3862 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
 		7DE1884D3ACF2786A7A87533 /* SIMSwapState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0B69E090510598F6837D15 /* SIMSwapState.swift */; };
 		810CFBAF25DEB421D58DE806 /* HardwareKeyGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D777DC4D2E54F023773654C /* HardwareKeyGate.swift */; };
+		83CD2013912A563D1120E191 /* PanicBackendScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293893A1FBE9BFBEFBCDCD13 /* PanicBackendScreen.swift */; };
 		87B77437083FC80D0989CF91 /* VaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */; };
 		8881302824C22C64A3C00996 /* NotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86321B3D7ECFD06EC4746E3 /* NotificationsScreen.swift */; };
 		8D715BC8DE9DE6FFA9374538 /* VoiceBioMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8621EE175927F0FEAF9EC9 /* VoiceBioMonitor.swift */; };
@@ -187,6 +190,7 @@
 		22BD148F67C16E65E1E0BA41 /* ThreatIntelDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreatIntelDatabase.swift; sourceTree = "<group>"; };
 		22D54D38BF141DB14E7F2838 /* ErrorStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorStateView.swift; sourceTree = "<group>"; };
 		249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceManager.swift; sourceTree = "<group>"; };
+		293893A1FBE9BFBEFBCDCD13 /* PanicBackendScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanicBackendScreen.swift; sourceTree = "<group>"; };
 		2D1056F746D9B995A16100EE /* OTBluetoothPeerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTBluetoothPeerManager.swift; sourceTree = "<group>"; };
 		2D777DC4D2E54F023773654C /* HardwareKeyGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareKeyGate.swift; sourceTree = "<group>"; };
 		2D9E0815ECA5FC1889487F31 /* FaceLockOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockOverlay.swift; sourceTree = "<group>"; };
@@ -217,6 +221,7 @@
 		72ED4A1CD6D58976CFD71099 /* SignedLogScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedLogScreen.swift; sourceTree = "<group>"; };
 		7459C43E3F6BAFF3882D4AC2 /* PermissionWatchdogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWatchdogStore.swift; sourceTree = "<group>"; };
 		7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultScreen.swift; sourceTree = "<group>"; };
+		759D36C0E7AFD131D3E3D2B7 /* PanicBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanicBackend.swift; sourceTree = "<group>"; };
 		777665407CADA154341EBB8B /* RogueNetworkState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RogueNetworkState.swift; sourceTree = "<group>"; };
 		7840CF8E3099B4F708C0100E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		79A3DD6F80CD20416A036060 /* DuressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuressState.swift; sourceTree = "<group>"; };
@@ -310,6 +315,8 @@
 		2797CB6C9550BAA22F04740C /* Safety */ = {
 			isa = PBXGroup;
 			children = (
+				759D36C0E7AFD131D3E3D2B7 /* PanicBackend.swift */,
+				293893A1FBE9BFBEFBCDCD13 /* PanicBackendScreen.swift */,
 				F1728B07C771A9794B257D74 /* SafetyFeatures.swift */,
 			);
 			path = Safety;
@@ -926,6 +933,8 @@
 				B6BD71B4C8B60B4921BFA009 /* OTBluetoothPeerManager.swift in Sources */,
 				BD0F5C0ECAF573D0F78D9EE1 /* OnboardingScreen.swift in Sources */,
 				D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */,
+				1CFBE062D9551BF389F5BD4A /* PanicBackend.swift in Sources */,
+				83CD2013912A563D1120E191 /* PanicBackendScreen.swift in Sources */,
 				B9665F5233049CA2A7EC37CE /* PermissionWatchdogScreen.swift in Sources */,
 				07984B02973A557DB51B5880 /* PermissionWatchdogStore.swift in Sources */,
 				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
@@ -996,6 +1005,7 @@
 				E77DA326804F1AB7DA39F0A0 /* MessageFilterHandler.swift in Sources */,
 				10ED513248320061108B30BA /* PhoneUtils.swift in Sources */,
 				1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */,
+				4FFCC7C60D5B6AA2A6FE5024 /* SmartLinkGuardRules.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
