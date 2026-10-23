@@ -431,9 +431,11 @@ extension UpgradeToPremiumScreen.Plan {
     var features: [Feature] {
         switch self {
         case .free: return [
-            .init(text: "Block unknown contacts", included: true),
-            .init(text: "Trusted contacts", included: false),
-            .init(text: "Basic logs", included: false)
+            .init(text: "Trusted contacts + Blocking & Unknown", included: true),
+            .init(text: "Privacy Shield + mic/camera use alerts", included: true),
+            .init(text: "Breach Watch (1 email) + Data Removal Scan", included: true),
+            .init(text: "Private Aliases (unlimited) + Identity Protection", included: true),
+            .init(text: "App Lock, Panic lock, Data export (JSON/CSV)", included: true)
         ]
         case .premium: return [
             .init(text: "Breach Watch — monitor 5 emails", included: true),
@@ -444,26 +446,28 @@ extension UpgradeToPremiumScreen.Plan {
         ]
         case .family: return [
             .init(text: "All Premium features", included: true),
-            .init(text: "Family sharing", included: true),
-            .init(text: "Usage reports", included: true),
-            .init(text: "Priority support", included: true)
+            .init(text: "Shared via your App Store / Play family group", included: true),
+            .init(text: "Per-device alias books (separately exportable)", included: true),
+            .init(text: "Up to 5 members on one subscription", included: true)
         ]
         case .highPremium: return [
-            .init(text: "All Family features", included: true),
+            .init(text: "All Premium features", included: true),
             .init(text: "Duress Mode + decoy vault", included: true),
-            .init(text: "SIM-Swap Alarm", included: true),
+            .init(text: "SIM-Swap Alarm + Wangiri auto-block", included: true),
             .init(text: "App Permission Watchdog", included: true),
-            .init(text: "Tracker Finder (AirTag, Tile…)", included: true),
-            .init(text: "Smart Link Guard (SMS + QR)", included: true),
-            .init(text: "Wangiri + Safety Check-In", included: true)
+            .init(text: "Tracker Finder (AirTag, Tile, SmartTag)", included: true),
+            .init(text: "Smart Link Guard (SMS + QR + share sheet)", included: true),
+            .init(text: "Safety Check-In", included: true)
         ]
         case .elite: return [
             .init(text: "Everything in Pro", included: true),
-            .init(text: "Hardware security key (YubiKey, Titan, SoloKey)", included: true),
-            .init(text: "Dead-man wipe (auto-wipe if device confiscated)", included: true),
-            .init(text: "Encrypted vault backup to your own cloud", included: true),
-            .init(text: "Panic lockdown mode", included: true),
-            .init(text: "Priority support with 24h response", included: true)
+            .init(text: "App Shield (block any app behind biometric)", included: true),
+            .init(text: "Border Mode preset + Panic Lockdown", included: true),
+            .init(text: "Hardware Security Key + Signed Audit Log", included: true),
+            .init(text: "Encrypted vault backup + Shamir Split + Trusted Witness", included: true),
+            .init(text: "Dead-Man Wipe + Geo-fence Auto-Lock", included: true),
+            .init(text: "Face-Change Lock + Voice Biometric", included: true),
+            .init(text: "Steganographic Vault + Rogue Network + Threat Intel", included: true)
         ]
         }
     }

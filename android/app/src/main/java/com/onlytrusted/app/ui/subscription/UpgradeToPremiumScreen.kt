@@ -98,9 +98,11 @@ private fun Plan.cadenceSuffix(cadence: BillingCadence): String = when (this) {
 
 private fun Plan.features(): List<PlanFeature> = when (this) {
     Plan.Free -> listOf(
-        PlanFeature("Block unknown contacts", true),
-        PlanFeature("Trusted contacts", false),
-        PlanFeature("Basic logs", false)
+        PlanFeature("Trusted contacts + Blocking & Unknown", true),
+        PlanFeature("Privacy Shield + mic/camera use alerts", true),
+        PlanFeature("Breach Watch (1 email) + Data Removal Scan", true),
+        PlanFeature("Private Aliases (unlimited) + Identity Protection", true),
+        PlanFeature("App Lock, Panic lock, Data export (JSON/CSV)", true)
     )
     Plan.Premium -> listOf(
         PlanFeature("Breach Watch — monitor 5 emails", true),
@@ -111,26 +113,28 @@ private fun Plan.features(): List<PlanFeature> = when (this) {
     )
     Plan.Family -> listOf(
         PlanFeature("All Premium features", true),
-        PlanFeature("Family sharing", true),
-        PlanFeature("Usage reports", true),
-        PlanFeature("Priority support", true)
+        PlanFeature("Shared via your App Store / Play family group", true),
+        PlanFeature("Per-device alias books (separately exportable)", true),
+        PlanFeature("Up to 5 members on one subscription", true)
     )
     Plan.HighPremium -> listOf(
-        PlanFeature("All Family features", true),
+        PlanFeature("All Premium features", true),
         PlanFeature("Duress Mode + decoy vault", true),
-        PlanFeature("SIM-Swap Alarm", true),
+        PlanFeature("SIM-Swap Alarm + Wangiri auto-block", true),
         PlanFeature("App Permission Watchdog", true),
-        PlanFeature("Tracker Finder (AirTag, Tile…)", true),
-        PlanFeature("Smart Link Guard (SMS + QR)", true),
-        PlanFeature("Wangiri + Safety Check-In", true)
+        PlanFeature("Tracker Finder (AirTag, Tile, SmartTag)", true),
+        PlanFeature("Smart Link Guard (SMS + QR + share sheet)", true),
+        PlanFeature("Safety Check-In", true)
     )
     Plan.Elite -> listOf(
         PlanFeature("Everything in Pro", true),
-        PlanFeature("Hardware security key (YubiKey, Titan, SoloKey)", true),
-        PlanFeature("Dead-man wipe (auto-wipe if device confiscated)", true),
-        PlanFeature("Encrypted vault backup to your own cloud", true),
-        PlanFeature("Panic lockdown mode", true),
-        PlanFeature("Priority support with 24h response", true)
+        PlanFeature("App Shield (block any app behind biometric)", true),
+        PlanFeature("Border Mode preset + Panic Lockdown", true),
+        PlanFeature("Hardware Security Key + Signed Audit Log", true),
+        PlanFeature("Encrypted vault backup + Shamir Split + Trusted Witness", true),
+        PlanFeature("Dead-Man Wipe + Geo-fence Auto-Lock", true),
+        PlanFeature("Face-Change Lock + Voice Biometric", true),
+        PlanFeature("Steganographic Vault + Rogue Network + Threat Intel", true)
     )
 }
 
