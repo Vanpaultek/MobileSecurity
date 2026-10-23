@@ -1,0 +1,56 @@
+# OnlyTrusted — Offline Threat Intel: phishing URL patterns v1 (placeholder).
+# Format: one lowercased eTLD+1 or hostname per line, hashed by the loader into a
+# Bloom filter at startup. Lines starting with '#' are comments. The shipping build
+# will replace this file with the top 50k patterns from the Anti-Phishing Working
+# Group (APWG) public feed, refreshed with each app update.
+#
+# Entries below are illustrative — real feeds change daily.
+secure-paypa1-login.com
+appleid-verify.co
+bankofamerica-signin.top
+chase-online-secure.xyz
+irs-refund-portal.click
+usps-package-redelivery.zip
+ups-tracking-notify.mov
+fedex-shipment-hold.xyz
+microsoft365-login.party
+outlook-reset-password.gq
+amazon-account-verify.loan
+netflix-billing-update.tk
+spotify-premium-renew.cf
+dhl-express-delivery.ml
+coinbase-wallet-restore.icu
+binance-security-check.live
+metamask-recovery-phrase.site
+google-drive-share.pw
+dropbox-shared-doc.cfd
+onedrive-shared-folder.quest
+instagram-copyright-appeal.sbs
+facebook-security-alert.wtf
+whatsapp-backup-verify.icu
+tiktok-support-portal.lol
+youtube-copyright-strike.monster
+twitter-blue-badge.quest
+linkedin-security-notice.rest
+venmo-pending-payment.cfd
+cashapp-sent-money.site
+zellepay-dispute.cfd
+wells-fargo-secure.live
+citibank-online-verify.sbs
+capitalone-fraud-alert.xyz
+discover-card-login.zip
+amex-services-portal.mov
+hsbc-personal-banking.top
+tdameritrade-login.quest
+schwab-client-access.icu
+fidelity-netbenefits.cfd
+robinhood-support.sbs
+coinbase-security-alert.site
+usaa-member-services.live
+navyfederal-online.quest
+ally-online-banking.icu
+truist-digital-banking.sbs
+pncbank-online.cfd
+etrade-login-secure.site
+vanguard-login-portal.live
+blackrock-shareholder.quest

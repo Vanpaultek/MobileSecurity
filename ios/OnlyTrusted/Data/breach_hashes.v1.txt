@@ -1,0 +1,37 @@
+# OnlyTrusted — Offline Threat Intel: breached-email SHA-256 prefixes v1 (placeholder).
+# Each line is the first 10 hex chars (= 40 bits) of SHA-256(lowercased email). The
+# loader converts the list into a Bloom filter at startup. Lines starting with '#'
+# are comments. The shipping build will replace this file with ~15 MB of breach
+# prefixes derived from the HaveIBeenPwned public dataset (~100M entries).
+#
+# Values below are synthetic prefixes — do NOT rely on them for truth.
+00f0a1b2c3
+0a1b2c3d4e
+0bca84f1d1
+10ab20cd30
+1b2c3d4e5f
+233445566a
+2a2b2c2d2e
+3a3b3c3d3e
+4a4b4c4d4e
+5a5b5c5d5e
+6a6b6c6d6e
+7a7b7c7d7e
+8a8b8c8d8e
+9a9b9c9d9e
+aabbccdd00
+abcd01ef23
+b0b1b2b3b4
+c0c1c2c3c4
+d0d1d2d3d4
+deadbeefca
+e0e1e2e3e4
+f0f1f2f3f4
+fbfbfbfbfb
+cafecafeca
+feedfacefe
+badc0ffee0
+0badc0ffee
+1234567890
+abcdef1234
+fedcba9876

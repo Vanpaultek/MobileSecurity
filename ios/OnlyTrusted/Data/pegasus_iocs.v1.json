@@ -1,0 +1,46 @@
+{
+  "_comment": "OnlyTrusted — Pegasus / Candiru / Predator IoCs v1 (placeholder). The shipping build will refresh from Citizen Lab + Amnesty Tech MVT reports. All lookups run 100% on-device.",
+  "updated_at": "2026-10-21",
+  "source": "https://github.com/mvt-project/mvt (public MVT indicator sets)",
+  "filenames": [
+    "com.apple.CrashReporter.plist.corrupted",
+    "ib.plist",
+    "libtelephony.dylib",
+    "wifiFirmwareLoader.plist",
+    "latestAction.plist",
+    "assistantd_cache",
+    "nehelperd_tmp",
+    "com.apple.gssd.plist.corrupted",
+    "pcsupervisor.plist",
+    "icloudsyncd_cfg"
+  ],
+  "plist_entries": [
+    "com.apple.CrashReporter.plist:BuildInfo",
+    "com.apple.PasscodeDisabled",
+    "com.apple.coretelephony.PhoneCache",
+    "com.apple.icloud.fmip.watch.NotifyActions"
+  ],
+  "dylib_sha256": [
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "1111111111111111111111111111111111111111111111111111111111111111",
+    "2222222222222222222222222222222222222222222222222222222222222222",
+    "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe"
+  ],
+  "process_names": [
+    "assistantd_helper",
+    "cloudkeychaind_v2",
+    "bh",
+    "roleaccountd_watch",
+    "fseventsd_tmp",
+    "logd_helper",
+    "misagent_cfg",
+    "nehelperd_tmp"
+  ],
+  "domains": [
+    "trk.phishy-example.cf",
+    "update.predator-example.xyz",
+    "cdn.candiru-example.top",
+    "stat.pegasus-example.loan"
+  ]
+}

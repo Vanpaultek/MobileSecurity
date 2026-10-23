@@ -91,6 +91,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     // Elite — Steganographic Vault + Hardware-Signed Audit Log (forensic-proof features).
     data object StegoVault : Destination("stego_vault", "Stego", Icons.Filled.Security)
     data object SignedLog : Destination("signed_log", "Signed", Icons.Filled.Security)
+    // Elite — Voice Biometric Trusted-Contact Verification.
+    data object VoiceBio : Destination("voice_bio", "VoiceBio", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -222,7 +224,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenShamirSplit = { navController.navigate(Destination.ShamirSplit.route) },
                     onOpenTrustedWitness = { navController.navigate(Destination.TrustedWitness.route) },
                     onOpenStegoVault = { navController.navigate(Destination.StegoVault.route) },
-                    onOpenSignedLog = { navController.navigate(Destination.SignedLog.route) }
+                    onOpenSignedLog = { navController.navigate(Destination.SignedLog.route) },
+                    onOpenVoiceBio = { navController.navigate(Destination.VoiceBio.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -306,6 +309,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenHardwareKey = {
                         navController.navigate(Destination.HardwareKey.route)
                     }
+                )
+            }
+            composable(Destination.VoiceBio.route) {
+                com.onlytrusted.app.ui.voicebio.VoiceBioSetupScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(Destination.Reports.route) {

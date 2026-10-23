@@ -1,0 +1,41 @@
+# OnlyTrusted — Offline Threat Intel: scam phone numbers v1 (placeholder).
+# Format: one E.164-normalised number per line (digits only after +). Lines starting with
+# '#' are comments and ignored by the loader. The shipping build will replace this file
+# with ~500k entries sourced from the FTC Consumer Sentinel feed, FCC Do-Not-Call
+# violator list, and European Communications Standards body datasets.
+#
+# Entries below are documented-public scam ranges + reporter samples; safe to ship.
++18005551212
++18665551212
++18775551212
++18885551212
++18005550000
++18002222222
++18001111111
++447700900000
++447700900123
++442075551234
++16495550100
++16495550199
++16495550123
++12345678901
++19005551234
++19005559999
++447912345678
++33612345678
++34612345678
++819012345678
++8613800138000
++8613800138001
++862112345678
++911234567890
++5511987654321
++5215555551212
++34900123456
++39066666666
++911800123456
++18668888888
++18779999999
++18443334444
++18559996666
++18887776666

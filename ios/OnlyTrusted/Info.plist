@@ -22,6 +22,13 @@
     <string>2</string>
     <key>NSFaceIDUsageDescription</key>
     <string>OnlyTrusted uses Face ID to unlock the app and the family vault.</string>
+    <!-- Voice Biometric Trusted Contact Verification (Elite). The microphone is used
+         exclusively to (a) enroll a trusted contact's 10-second voice sample during
+         setup, and (b) sample 2 seconds of a live call to detect AI-cloned voices.
+         Audio is never persisted — only a 20-dim MFCC feature vector is kept in the
+         Keychain. No network. -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Elite uses the microphone only to enroll a trusted contact's voice sample and to detect AI-cloned deepfake callers during a live call. Raw audio is never stored or uploaded — only a 20-number mathematical fingerprint lives on-device.</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>OnlyTrusted scans nearby Bluetooth trackers to flag any device that may be following you.</string>
     <key>NSCameraUsageDescription</key>

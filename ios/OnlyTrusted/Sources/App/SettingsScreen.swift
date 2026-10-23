@@ -42,6 +42,9 @@ struct SettingsScreen: View {
     @State private var showHardwareKeyUpsell = false
     @State private var showHardwareKeySetup = false
     @State private var hardwareKeyGateError: String?
+    // Voice Biometric (Elite)
+    @State private var showVoiceBioUpsell = false
+    @State private var showVoiceBioSetup = false
     // Border Mode (Elite)
     @State private var showBorderModeUpsell = false
     @State private var showBorderModeSetup = false
@@ -297,6 +300,20 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showHardwareKeyUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Voice Biometric (Elite)
+        .sheet(isPresented: $showVoiceBioSetup) {
+            NavigationStack { VoiceBioSetupScreen() }
+        }
+        .sheet(isPresented: $showVoiceBioUpsell) {
+            VoiceBioUpsellSheet(
+                onUpgrade: {
+                    showVoiceBioUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showVoiceBioUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -856,6 +873,28 @@ struct SettingsScreen: View {
                         iconTint: sub.hasElite ? Color.appSuccess : Color.subGold,
                         label: "Hardware Security Key (Elite)",
                         value: sub.hasElite && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Voice Biometric (Elite) — enroll trusted contacts' voice fingerprints to catch
+                // AI-cloned deepfake callers. 10s enrollment per contact; comparison happens on
+                // every incoming call via CallKit. Keychain-stored 20-dim MFCC descriptor.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showVoiceBioSetup = true
+                    } else {
+                        showVoiceBioUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "waveform.and.mic",
+                        iconTint: sub.hasElite ? Color.appBrightCyan : Color.subGold,
+                        label: "Voice Biometric (Elite)",
+                        value: sub.hasElite && !VoiceBioState.shared.enrolledContactIDs.isEmpty
+                            ? "\(VoiceBioState.shared.enrolledContactIDs.count) enrolled"
+                            : nil
                     )
                 }
                 .buttonStyle(.plain)

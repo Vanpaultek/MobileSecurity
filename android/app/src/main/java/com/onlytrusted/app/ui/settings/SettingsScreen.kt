@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -151,7 +152,8 @@ fun SettingsScreen(
     onOpenShamirSplit: () -> Unit = {},
     onOpenTrustedWitness: () -> Unit = {},
     onOpenStegoVault: () -> Unit = {},
-    onOpenSignedLog: () -> Unit = {}
+    onOpenSignedLog: () -> Unit = {},
+    onOpenVoiceBio: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -185,6 +187,10 @@ fun SettingsScreen(
     var trustedWitnessGateError by remember { mutableStateOf<String?>(null) }
     var stegoVaultUpsellOpen by remember { mutableStateOf(false) }
     var signedLogUpsellOpen by remember { mutableStateOf(false) }
+    var voiceBioUpsellOpen by remember { mutableStateOf(false) }
+    val voiceBioEnrolledCount = remember {
+        com.onlytrusted.app.ui.voicebio.VoiceBioState.enrolledContactIds(context).size
+    }
     val signEveryEnabled = remember {
         com.onlytrusted.app.ui.signedlog.SignedLogState.isSignEveryEntryEnabled(context)
     }
@@ -677,6 +683,25 @@ fun SettingsScreen(
                             onOpenHardwareKey()
                         } else {
                             hardwareKeyUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Voice Biometric (Elite) — enroll trusted contacts' voice fingerprints to
+                // catch AI-cloned deepfake callers. 10s enrollment per contact; cosine
+                // similarity threshold 0.6 vs stored 20-dim MFCC descriptor.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.MicNone,
+                    tint = if (SubscriptionState.hasElite(context)) BrandCyanDark else subGold,
+                    title = "Voice Biometric (Elite)",
+                    value = if (SubscriptionState.hasElite(context) && voiceBioEnrolledCount > 0)
+                        "$voiceBioEnrolledCount enrolled" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenVoiceBio()
+                        } else {
+                            voiceBioUpsellOpen = true
                         }
                     }
                 )
@@ -1195,6 +1220,16 @@ fun SettingsScreen(
                     onOpenUpgrade()
                 },
                 onDismiss = { signedLogUpsellOpen = false }
+            )
+        }
+
+        if (voiceBioUpsellOpen) {
+            com.onlytrusted.app.ui.voicebio.VoiceBioUpsellDialog(
+                onUpgrade = {
+                    voiceBioUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { voiceBioUpsellOpen = false }
             )
         }
 
