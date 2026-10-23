@@ -436,10 +436,11 @@ extension UpgradeToPremiumScreen.Plan {
             .init(text: "Basic logs", included: false)
         ]
         case .premium: return [
-            .init(text: "Advanced blocking", included: true),
-            .init(text: "Detailed reports", included: true),
-            .init(text: "Cloud sync", included: true),
-            .init(text: "Priority support", included: true)
+            .init(text: "Breach Watch — monitor 5 emails", included: true),
+            .init(text: "Weekly PDF digest", included: true),
+            .init(text: "Alias book backup (CSV import/export)", included: true),
+            .init(text: "Quiet hours + area-code allowlist", included: true),
+            .init(text: "Data Removal + Identity renewal reminders", included: true)
         ]
         case .family: return [
             .init(text: "All Premium features", included: true),

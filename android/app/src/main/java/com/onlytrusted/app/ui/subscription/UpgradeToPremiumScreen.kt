@@ -103,10 +103,11 @@ private fun Plan.features(): List<PlanFeature> = when (this) {
         PlanFeature("Basic logs", false)
     )
     Plan.Premium -> listOf(
-        PlanFeature("Advanced blocking", true),
-        PlanFeature("Detailed reports", true),
-        PlanFeature("Cloud sync", true),
-        PlanFeature("Priority support", true)
+        PlanFeature("Breach Watch — monitor 5 emails", true),
+        PlanFeature("Weekly PDF digest", true),
+        PlanFeature("Alias book backup (CSV import/export)", true),
+        PlanFeature("Quiet hours + area-code allowlist", true),
+        PlanFeature("Data Removal + Identity renewal reminders", true)
     )
     Plan.Family -> listOf(
         PlanFeature("All Premium features", true),
