@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Android 12+ system splash is deliberately minimal: a flat midnight background
+         with NO windowSplashScreenAnimatedIcon. The system splash API only supports a
+         centered icon on a flat color — it cannot render a full-screen bitmap. Showing
+         the launcher-icon badge here briefly before our cinematic Compose splash looked
+         broken, so we skip it entirely. The Compose `SplashScreen` composable paints
+         the SplashHero lakescape + wordmark + loading indicator as the first screen
+         the user sees after our activity resumes. -->
     <style name="Theme.OnlyTrusted" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/midnight_background</item>
         <item name="android:statusBarColor">@color/midnight_background</item>
         <item name="android:navigationBarColor">@color/midnight_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowSplashScreenBackground">@color/midnight_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
     </style>
 
     <style name="Theme.OnlyTrusted.Splash" parent="Theme.OnlyTrusted" />
