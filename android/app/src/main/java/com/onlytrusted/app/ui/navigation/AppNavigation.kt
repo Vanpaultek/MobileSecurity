@@ -113,6 +113,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object Aliases : Destination("aliases", "Aliases", Icons.Filled.Shield)
     // FREE — Identity Protection catalog. Deep-link checklist for credit freezes, fraud alerts, etc.
     data object IdentityProtection : Destination("identity_protection", "Identity Protection", Icons.Filled.Shield)
+    // Premium — Weekly Digest PDF (on-device generation + share-sheet export).
+    data object WeeklyDigest : Destination("weekly_digest", "Weekly Digest", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -254,7 +256,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenBreachWatch = { navController.navigate(Destination.BreachWatch.route) },
                     onOpenDataRemoval = { navController.navigate(Destination.DataRemoval.route) },
                     onOpenAliases = { navController.navigate(Destination.Aliases.route) },
-                    onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) }
+                    onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) },
+                    onOpenWeeklyDigest = { navController.navigate(Destination.WeeklyDigest.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -298,6 +301,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.IdentityProtection.route) {
                 com.onlytrusted.app.ui.identity.IdentityProtectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.WeeklyDigest.route) {
+                com.onlytrusted.app.ui.weeklydigest.WeeklyDigestScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

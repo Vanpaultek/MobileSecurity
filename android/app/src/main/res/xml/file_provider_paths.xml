@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FileProvider paths exposed to other apps via content:// URIs when the user taps Share.
+  Deliberately scoped to the two directories where OnlyTrusted writes outbound files:
+  the Premium Weekly Digest PDFs (cache/digests) and future export bundles (files/exports).
+  Nothing else in the sandbox is reachable through content://.
+-->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="digests" path="digests/" />
+    <files-path name="exports" path="exports/" />
+</paths>

@@ -42,6 +42,7 @@
 		32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */; };
 		3A24CBCD6D895998F3A59B70 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
 		3B31CB13620F36B6A38C5371 /* PanicLockdownState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 941D635F33B083055F6451ED /* PanicLockdownState.swift */; };
+		3C1C6C2177CCE80DFC703555 /* WeeklyDigestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D8A4682ABCB29A2050B732 /* WeeklyDigestScreen.swift */; };
 		3D24F49B44D1E3084486C17F /* AppShieldSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33CFC39002080A374D36EC4 /* AppShieldSetupScreen.swift */; };
 		3D5D547AC680D04BC14A77A0 /* BreachWatchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87EABEB7CA86305E6B37B7EE /* BreachWatchScreen.swift */; };
 		3D888E603EE7FBE043D3AFA4 /* RogueNetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F1A38E78CDDCD071648C59 /* RogueNetworkMonitor.swift */; };
@@ -260,6 +261,7 @@
 		7DB8BB9444909AA0350EAE85 /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalContent.swift; sourceTree = "<group>"; };
 		82E813606043DC7F73BE8C0D /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
 		839A2FFD07A1C195FDB5AF71 /* GeofenceSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceSetupScreen.swift; sourceTree = "<group>"; };
+		83D8A4682ABCB29A2050B732 /* WeeklyDigestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDigestScreen.swift; sourceTree = "<group>"; };
 		83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStore.swift; sourceTree = "<group>"; };
 		87EABEB7CA86305E6B37B7EE /* BreachWatchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreachWatchScreen.swift; sourceTree = "<group>"; };
 		883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MessageFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -418,6 +420,7 @@
 				6090D23C3520BFEAD7394652 /* Vault */,
 				431C413F1355CBF401CCD25F /* VoiceBio */,
 				FFCFD536BFD47A9555967226 /* Wangiri */,
+				71634D893C7D12F5A4BE0216 /* WeeklyDigest */,
 			);
 			name = Sources;
 			path = OnlyTrusted/Sources;
@@ -582,6 +585,14 @@
 				C6C07EA52904EFEE798C4433 /* TrackerFinderStore.swift */,
 			);
 			path = TrackerFinder;
+			sourceTree = "<group>";
+		};
+		71634D893C7D12F5A4BE0216 /* WeeklyDigest */ = {
+			isa = PBXGroup;
+			children = (
+				83D8A4682ABCB29A2050B732 /* WeeklyDigestScreen.swift */,
+			);
+			path = WeeklyDigest;
 			sourceTree = "<group>";
 		};
 		7B0854CADCA48980A3484FC0 /* Shared */ = {
@@ -1128,6 +1139,7 @@
 				782ED76F5759146EE96DB6E9 /* WangiriEventKind.swift in Sources */,
 				0976EB7ACDF08305020837DE /* WangiriSettingsScreen.swift in Sources */,
 				FD52E2394CD39132E36205A0 /* WangiriWatcher.swift in Sources */,
+				3C1C6C2177CCE80DFC703555 /* WeeklyDigestScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FaceRetouchingNatural
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FlightTakeoff
@@ -167,7 +168,8 @@ fun SettingsScreen(
     onOpenBreachWatch: () -> Unit = {},
     onOpenDataRemoval: () -> Unit = {},
     onOpenAliases: () -> Unit = {},
-    onOpenIdentityProtection: () -> Unit = {}
+    onOpenIdentityProtection: () -> Unit = {},
+    onOpenWeeklyDigest: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -381,6 +383,15 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Identity Protection",
                     onClick = onOpenIdentityProtection
+                )
+                RowDivider()
+                // Weekly Digest (Premium). One-page on-device PDF summary generated from
+                // the signed audit log and shared via the system share sheet.
+                SettingsNavRow(
+                    icon = Icons.Filled.Description,
+                    tint = settingsBlue,
+                    title = "Weekly Digest",
+                    onClick = onOpenWeeklyDigest
                 )
                 RowDivider()
                 // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users

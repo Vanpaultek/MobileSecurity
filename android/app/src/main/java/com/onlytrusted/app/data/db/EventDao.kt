@@ -20,8 +20,16 @@ interface EventDao {
     @Query("SELECT COUNT(*) FROM security_events WHERE type = :type AND timestamp >= :since")
     fun countOfTypeSince(type: String, since: Long): Flow<Int>
 
+    /** One-shot variant of [countOfTypeSince] for the Weekly Digest PDF generator. */
+    @Query("SELECT COUNT(*) FROM security_events WHERE type = :type AND timestamp >= :since")
+    suspend fun countOfTypeSinceOnce(type: String, since: Long): Int
+
     @Query("SELECT COUNT(*) FROM security_events WHERE timestamp >= :since")
     fun countSince(since: Long): Flow<Int>
+
+    /** One-shot variant of [countSince]. */
+    @Query("SELECT COUNT(*) FROM security_events WHERE timestamp >= :since")
+    suspend fun countSinceOnce(since: Long): Int
 
     @Query("DELETE FROM security_events")
     suspend fun clearAll()

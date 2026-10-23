@@ -645,6 +645,16 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
+                // Weekly Digest (Premium). Generates a one-page on-device PDF from the
+                // signed audit log and offers it to the system share sheet.
+                NavigationLink { WeeklyDigestScreen() } label: {
+                    SettingsNavRow(
+                        icon: "doc.text.image",
+                        iconTint: Color.settingsBlue,
+                        label: "Weekly Digest"
+                    )
+                }
+                SettingsDivider()
                 // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
                 // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
                 // to the setup wizard.
