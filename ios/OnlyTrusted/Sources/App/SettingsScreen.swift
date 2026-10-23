@@ -81,6 +81,12 @@ struct SettingsScreen: View {
     @State private var showSignedLogUpsell = false
     @State private var showSignedLogSetup = false
     @StateObject private var signedLog = SignedLogStore.shared
+    // Rogue Network Scanner (Elite) — IMSI-catcher + Wi-Fi downgrade detector.
+    @State private var showRogueNetworkUpsell = false
+    @State private var showRogueNetworkSetup = false
+    // Offline Threat Intel (Elite) — bundled scam/phishing/breach/IoC feeds.
+    @State private var showThreatIntelUpsell = false
+    @State private var showThreatIntelSetup = false
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -454,6 +460,34 @@ struct SettingsScreen: View {
                     showUpgradeSheet = true
                 },
                 onDismiss: { showSignedLogUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Rogue Network Scanner (Elite)
+        .sheet(isPresented: $showRogueNetworkSetup) {
+            NavigationStack { RogueNetworkScreen() }
+        }
+        .sheet(isPresented: $showRogueNetworkUpsell) {
+            RogueNetworkUpsellSheet(
+                onUpgrade: {
+                    showRogueNetworkUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showRogueNetworkUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        // Offline Threat Intel (Elite)
+        .sheet(isPresented: $showThreatIntelSetup) {
+            NavigationStack { ThreatIntelScreen() }
+        }
+        .sheet(isPresented: $showThreatIntelUpsell) {
+            ThreatIntelUpsellSheet(
+                onUpgrade: {
+                    showThreatIntelUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showThreatIntelUpsell = false }
             )
             .presentationDetents([.medium])
         }
@@ -1075,6 +1109,42 @@ struct SettingsScreen: View {
                             : (sub.hasElite ? Color.appAccent : Color.subGold),
                         label: "Signed Audit Log (Elite)",
                         value: signedLog.signEveryEntry && HardwareKeyState.shared.hasEnrolledKey ? "On" : nil
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Rogue Network Scanner (Elite) — IMSI-catcher + 2G downgrade + lookalike
+                // Wi-Fi detector. 100% on-device; no network calls.
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showRogueNetworkSetup = true
+                    } else {
+                        showRogueNetworkUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "wifi.exclamationmark",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Rogue Network Scanner (Elite)"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Offline Threat Intel (Elite) — bundled scam / phishing / breach / IoC
+                // feeds consulted on-device. Dashboard, "check my vault", "scan sandbox".
+                SettingsDivider()
+                Button {
+                    if sub.hasElite {
+                        showThreatIntelSetup = true
+                    } else {
+                        showThreatIntelUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "shield.lefthalf.filled",
+                        iconTint: sub.hasElite ? Color.appAccent : Color.subGold,
+                        label: "Offline Threat Intel (Elite)"
                     )
                 }
                 .buttonStyle(.plain)

@@ -40,7 +40,9 @@ import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MicNone
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Phone
@@ -153,7 +155,9 @@ fun SettingsScreen(
     onOpenTrustedWitness: () -> Unit = {},
     onOpenStegoVault: () -> Unit = {},
     onOpenSignedLog: () -> Unit = {},
-    onOpenVoiceBio: () -> Unit = {}
+    onOpenVoiceBio: () -> Unit = {},
+    onOpenRogueNetwork: () -> Unit = {},
+    onOpenThreatIntel: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -188,6 +192,8 @@ fun SettingsScreen(
     var stegoVaultUpsellOpen by remember { mutableStateOf(false) }
     var signedLogUpsellOpen by remember { mutableStateOf(false) }
     var voiceBioUpsellOpen by remember { mutableStateOf(false) }
+    var rogueNetworkUpsellOpen by remember { mutableStateOf(false) }
+    var threatIntelUpsellOpen by remember { mutableStateOf(false) }
     val voiceBioEnrolledCount = remember {
         com.onlytrusted.app.ui.voicebio.VoiceBioState.enrolledContactIds(context).size
     }
@@ -869,6 +875,38 @@ fun SettingsScreen(
                         }
                     }
                 )
+
+                // Rogue Network Scanner (Elite) — IMSI-catcher + 2G downgrade + lookalike
+                // Wi-Fi detector. 100% on-device.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.NetworkCheck,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Rogue Network Scanner (Elite)",
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenRogueNetwork()
+                        } else {
+                            rogueNetworkUpsellOpen = true
+                        }
+                    }
+                )
+
+                // Offline Threat Intel (Elite) — bundled scam / phishing / breach / IoC
+                // feeds consulted on-device.
+                RowDivider()
+                SettingsNavRow(
+                    icon = Icons.Filled.Security,
+                    tint = if (SubscriptionState.hasElite(context)) BrandAccentDark else subGold,
+                    title = "Offline Threat Intel (Elite)",
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenThreatIntel()
+                        } else {
+                            threatIntelUpsellOpen = true
+                        }
+                    }
+                )
             }
 
             // --- Shield watermark (Android-only feature) ---
@@ -1230,6 +1268,26 @@ fun SettingsScreen(
                     onOpenUpgrade()
                 },
                 onDismiss = { voiceBioUpsellOpen = false }
+            )
+        }
+
+        if (rogueNetworkUpsellOpen) {
+            com.onlytrusted.app.ui.roguenetwork.RogueNetworkUpsellDialog(
+                onUpgrade = {
+                    rogueNetworkUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { rogueNetworkUpsellOpen = false }
+            )
+        }
+
+        if (threatIntelUpsellOpen) {
+            com.onlytrusted.app.ui.threatintel.ThreatIntelUpsellDialog(
+                onUpgrade = {
+                    threatIntelUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { threatIntelUpsellOpen = false }
             )
         }
 

@@ -9,6 +9,10 @@ import android.os.Build
 import com.onlytrusted.app.data.db.AppDatabase
 import com.onlytrusted.app.data.repository.SecurityRepository
 import com.onlytrusted.app.data.repository.TrustedContactsRepository
+import com.onlytrusted.app.ui.roguenetwork.RogueNetworkMonitor
+import com.onlytrusted.app.ui.smartlinkguard.SmartLinkGuardRules
+import com.onlytrusted.app.ui.threatintel.ThreatIntelDatabase
+import com.onlytrusted.app.ui.wangiri.WangiriPrefs
 import com.onlytrusted.app.util.NotificationHelper
 
 class OnlyTrustedApp : Application() {
@@ -25,6 +29,23 @@ class OnlyTrustedApp : Application() {
         super.onCreate()
         instance = this
         createNotificationChannels()
+        // Fortress R4 recovery: Rogue Network Scanner (Elite). Snapshot the radio
+        // + Wi-Fi state once at launch so a 2G downgrade or lookalike SSID lands as
+        // an alert even before the user visits the dedicated screen.
+        runCatching { RogueNetworkMonitor.scanOnce(this) }
+        // Smart Link Guard ↔ Offline Threat Intel bridge. Lets the Smart Link Guard
+        // engine consult the bundled APWG phishing-URL set when inspecting URLs.
+        SmartLinkGuardRules.phishingHostLookup = { host ->
+            runCatching { ThreatIntelDatabase.get(this).isPhishingHost(host) }
+                .getOrDefault(false)
+        }
+        // Wangiri Protection ↔ Offline Threat Intel bridge. When this returns true,
+        // Wangiri can auto-block immediately instead of waiting for the ring-timing
+        // heuristic to fire.
+        WangiriPrefs.scamNumberLookup = { number ->
+            runCatching { ThreatIntelDatabase.get(this).isScamNumber(number) }
+                .getOrDefault(false)
+        }
     }
 
     private fun createNotificationChannels() {

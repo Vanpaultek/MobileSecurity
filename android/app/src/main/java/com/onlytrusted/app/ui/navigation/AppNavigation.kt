@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
@@ -93,6 +94,10 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object SignedLog : Destination("signed_log", "Signed", Icons.Filled.Security)
     // Elite — Voice Biometric Trusted-Contact Verification.
     data object VoiceBio : Destination("voice_bio", "VoiceBio", Icons.Filled.Security)
+    // Elite — Fortress R4 recovery: Rogue Wi-Fi + IMSI Catcher Scanner.
+    data object RogueNetwork : Destination("rogue_network", "Rogue net", Icons.Filled.NetworkCheck)
+    // Elite — Fortress R4 recovery: Offline Threat Intel database.
+    data object ThreatIntel : Destination("threat_intel", "Threat intel", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -225,7 +230,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenTrustedWitness = { navController.navigate(Destination.TrustedWitness.route) },
                     onOpenStegoVault = { navController.navigate(Destination.StegoVault.route) },
                     onOpenSignedLog = { navController.navigate(Destination.SignedLog.route) },
-                    onOpenVoiceBio = { navController.navigate(Destination.VoiceBio.route) }
+                    onOpenVoiceBio = { navController.navigate(Destination.VoiceBio.route) },
+                    onOpenRogueNetwork = { navController.navigate(Destination.RogueNetwork.route) },
+                    onOpenThreatIntel = { navController.navigate(Destination.ThreatIntel.route) }
                 )
             }
             composable(Destination.DuressSetup.route) {
@@ -313,6 +320,16 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.VoiceBio.route) {
                 com.onlytrusted.app.ui.voicebio.VoiceBioSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.RogueNetwork.route) {
+                com.onlytrusted.app.ui.roguenetwork.RogueNetworkScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.ThreatIntel.route) {
+                com.onlytrusted.app.ui.threatintel.ThreatIntelScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

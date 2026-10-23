@@ -25,6 +25,16 @@ struct OnlyTrustedApp: App {
             if GeofenceState.shared.isEnabled {
                 GeofenceManager.shared.startMonitoring()
             }
+            // Rogue Network Scanner (Elite). Snapshot the radio + Wi-Fi state once at
+            // launch so a 2G downgrade or lookalike SSID gets flagged even before the
+            // user visits the dedicated screen.
+            RogueNetworkMonitor.scanOnce()
+        }
+        // Smart Link Guard ↔ Offline Threat Intel bridge. Lets the SmartLinkGuardRules
+        // engine consult the bundled APWG phishing-URL set when inspecting URLs from
+        // the main app target (the share extension stays on the built-in rules).
+        SmartLinkGuardRules.phishingHostLookup = { host in
+            ThreatIntelDatabase.shared.isPhishingHost(host)
         }
     }
 

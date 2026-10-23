@@ -44,6 +44,12 @@ data class URLSafetyResult(
 
 object SmartLinkGuardRules {
 
+    /** Optional injection point for the Offline Threat Intel database. The app
+     *  wires this to `ThreatIntelDatabase.isPhishingHost` so a bundled APWG match
+     *  bumps the verdict to Danger. Left null in tests + non-elite flows. */
+    @Volatile
+    var phishingHostLookup: ((String) -> Boolean)? = null
+
     // --- Public API -----------------------------------------------------------
 
     /** Run every heuristic over [rawUrl]. Falls back to Danger if the URL is unparseable. */
@@ -131,6 +137,15 @@ object SmartLinkGuardRules {
             val match = closestAllowlistMatch(etldPlusOne)
             if (match != null) {
                 reasons += "Possible typosquat of $match (${match.distance} edit${if (match.distance == 1) "" else "s"} away)."
+                worst = bump(worst, URLVerdict.Danger)
+            }
+        }
+
+        // 7b — Offline Threat Intel (Elite). Only consulted when the main-app has
+        // wired `phishingHostLookup`. Any hit forces Danger.
+        phishingHostLookup?.let { lookup ->
+            if (lookup(etldPlusOne)) {
+                reasons += "Host appears in the bundled phishing-URL feed."
                 worst = bump(worst, URLVerdict.Danger)
             }
         }

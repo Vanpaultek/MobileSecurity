@@ -43,6 +43,12 @@ public struct URLSafetyResult: Equatable, Sendable {
 
 public enum SmartLinkGuardRules {
 
+    /// Injection point for an external threat-intel source. The main-app target wires
+    /// this to `ThreatIntelDatabase.shared.isPhishingHost` so a bundled APWG match
+    /// bumps the verdict to `.danger`. Extensions that can't link ThreatIntelDatabase
+    /// leave it nil and keep working with the built-in rules alone.
+    public nonisolated(unsafe) static var phishingHostLookup: (@Sendable (String) -> Bool)?
+
     // MARK: - Public API
 
     public static func inspect(_ rawUrl: String) -> URLSafetyResult {
@@ -123,6 +129,13 @@ public enum SmartLinkGuardRules {
         if !allowlistHit, let match = closestAllowlistMatch(etldPlusOne) {
             let plural = match.distance == 1 ? "" : "s"
             reasons.append("Possible typosquat of \(match.match) (\(match.distance) edit\(plural) away).")
+            worst = bump(worst, .danger)
+        }
+
+        // 7b — Offline Threat Intel (Elite). Only consulted when the main-app target
+        // has wired `phishingHostLookup`. Any hit forces .danger.
+        if let lookup = phishingHostLookup, lookup(etldPlusOne) {
+            reasons.append("Host appears in the bundled phishing-URL feed.")
             worst = bump(worst, .danger)
         }
 

@@ -71,6 +71,14 @@ object WangiriPrefs {
 
     private fun currentMonthKey(): String =
         SimpleDateFormat("yyyy-MM", Locale.US).format(Date())
+
+    /** Optional cross-reference hook injected by the main app at startup. When the
+     *  Elite tier's Offline Threat Intel database is active, this returns true for
+     *  any scam number present in the bundled FTC/FCC feed. Wangiri detection can
+     *  then skip its ring-timing heuristic and auto-block immediately. Left null
+     *  outside the main app flow so the data layer stays test-free of context. */
+    @Volatile
+    var scamNumberLookup: ((String) -> Boolean)? = null
 }
 
 /**

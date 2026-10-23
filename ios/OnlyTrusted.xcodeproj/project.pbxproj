@@ -21,6 +21,7 @@
 		1CFA16A708C45FE1ABADC93C /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		1E1C7118B0209970B1451AAB /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
 		20A426A51D2A267996954721 /* MainTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0181DD98D26C9984555D6A90 /* MainTabs.swift */; };
+		21F80B3D5488965EC593E4A3 /* ThreatIntelDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BD148F67C16E65E1E0BA41 /* ThreatIntelDatabase.swift */; };
 		22313F1408F73C4FFD65B90B /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F8C52E1A8099780F21613E /* Cards.swift */; };
 		2684C20B6C66EC750384154D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFF4754051354FB2E3F10DA /* Theme.swift */; };
 		2A354125918CB0473F1B02D1 /* BorderModeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8881F1B53DE849BEEA079AC3 /* BorderModeState.swift */; };
@@ -32,6 +33,7 @@
 		3099C006611569D587D98E02 /* EventsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E78BCAC334EB9E52192B19 /* EventsScreen.swift */; };
 		32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */; };
 		3A24CBCD6D895998F3A59B70 /* BlockListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57602976D8C9A69AEB4959 /* BlockListStore.swift */; };
+		3D888E603EE7FBE043D3AFA4 /* RogueNetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F1A38E78CDDCD071648C59 /* RogueNetworkMonitor.swift */; };
 		3DE68DDAD3C58E8F9468DD3E /* BackupRestoreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C26378948D69C41DC6EFEA /* BackupRestoreScreen.swift */; };
 		3F11882C8CCD32E7C5804EB6 /* DuressVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB7D55CE347AA4C580FB36 /* DuressVault.swift */; };
 		41D922C570BA400222F1ED3A /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B624AA0E449B364901659D23 /* EventStore.swift */; };
@@ -46,6 +48,7 @@
 		5B55298D0C056AB4FC7237EA /* DeadmanWipeSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F45B80EDAAA7B50465F2E0 /* DeadmanWipeSetupScreen.swift */; };
 		5F3A4A8B92CBCA4672369C31 /* ShamirSSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C18F7192B55359DB4F01021 /* ShamirSSS.swift */; };
 		63302E65BD76169E845C3814 /* TrackerFinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C66099C7EE48ABCF66D354FD /* TrackerFinderScreen.swift */; };
+		636BDD0135549321356A2CF3 /* ThreatIntelScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1E4647F6100EDB64A27C53 /* ThreatIntelScreen.swift */; };
 		68C1782A2C3E52DE72EF04A4 /* HardwareKeyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86ACF06C58669C735244AE6 /* HardwareKeyState.swift */; };
 		6977DB921C17609B9ACDFB9D /* CheckInState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A322615CAB3BF4B117D1EEB4 /* CheckInState.swift */; };
 		6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
@@ -63,6 +66,7 @@
 		8E03206240ADB93E1C3A766F /* DuressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A3DD6F80CD20416A036060 /* DuressState.swift */; };
 		8FEB8945420C183742F79416 /* BorderModeSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A62D69894E411B41A3CACF /* BorderModeSetupScreen.swift */; };
 		9002D9397880C727477AA9C3 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F918CD93F698EE6CF0B95BC /* ShareViewController.swift */; };
+		9225B8B3AA2E8B63CE6C4B33 /* RogueNetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777665407CADA154341EBB8B /* RogueNetworkState.swift */; };
 		942EF088BB21A3B91BC880C6 /* MFCC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D1DC54E62DA7A5014A8E2 /* MFCC.swift */; };
 		95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8990FFD2A86A59C606EA58A8 /* ConsentScreen.swift */; };
 		97BE974DB4719B74799CAD39 /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */; };
@@ -93,6 +97,7 @@
 		C5F5DA2B7303B145F29A0463 /* BackupPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D6B7365CC1BA9B45116B88 /* BackupPayload.swift */; };
 		C6C5E32A9387780BB9EDE39C /* StegoCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = E507EE9F9B1878725946FCCB /* StegoCrypto.swift */; };
 		CACA4B7B43A751F97854D2F5 /* TrackerFinderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C07EA52904EFEE798C4433 /* TrackerFinderStore.swift */; };
+		CB03A5B9E01AE0DEE075BAD7 /* RogueNetworkScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141E70164FEC7380A9B10BFE /* RogueNetworkScreen.swift */; };
 		CD8C946BB50B198244A009A4 /* SIMSwapSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1348106552A74211B95AAB8E /* SIMSwapSetupScreen.swift */; };
 		D0BD35DB911249AC376B7D9F /* OnlyTrustedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */; };
 		D2032631209A17EBA1224990 /* FaceLockOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9E0815ECA5FC1889487F31 /* FaceLockOverlay.swift */; };
@@ -166,17 +171,20 @@
 /* Begin PBXFileReference section */
 		0181DD98D26C9984555D6A90 /* MainTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabs.swift; sourceTree = "<group>"; };
 		0332FF701392245643B56D6F /* PermissionWatchdogScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWatchdogScreen.swift; sourceTree = "<group>"; };
+		0C1E4647F6100EDB64A27C53 /* ThreatIntelScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreatIntelScreen.swift; sourceTree = "<group>"; };
 		0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListScreen.swift; sourceTree = "<group>"; };
 		0FBFA3A076D0A1E297EB91C3 /* ShamirState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirState.swift; sourceTree = "<group>"; };
 		11701C182AFD4FAE53874C81 /* SmartLinkGuardQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartLinkGuardQRScanner.swift; sourceTree = "<group>"; };
 		119AC115F503D46187427F9C /* LegalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalScreen.swift; sourceTree = "<group>"; };
 		1348106552A74211B95AAB8E /* SIMSwapSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIMSwapSetupScreen.swift; sourceTree = "<group>"; };
+		141E70164FEC7380A9B10BFE /* RogueNetworkScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RogueNetworkScreen.swift; sourceTree = "<group>"; };
 		1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingSubscriptionScreen.swift; sourceTree = "<group>"; };
 		1C18F7192B55359DB4F01021 /* ShamirSSS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSSS.swift; sourceTree = "<group>"; };
 		1F0622302C519D1D5732A303 /* StegoVaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StegoVaultScreen.swift; sourceTree = "<group>"; };
 		209FD6AF84DBA79B1E98294F /* StegoVaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StegoVaultManager.swift; sourceTree = "<group>"; };
 		20D6B7365CC1BA9B45116B88 /* BackupPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupPayload.swift; sourceTree = "<group>"; };
 		21AF37DFA82F8F6BE5071EC2 /* CheckInSMSComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInSMSComposer.swift; sourceTree = "<group>"; };
+		22BD148F67C16E65E1E0BA41 /* ThreatIntelDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreatIntelDatabase.swift; sourceTree = "<group>"; };
 		22D54D38BF141DB14E7F2838 /* ErrorStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorStateView.swift; sourceTree = "<group>"; };
 		249770DE5DC20DBFACE05A6A /* GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceManager.swift; sourceTree = "<group>"; };
 		2D1056F746D9B995A16100EE /* OTBluetoothPeerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTBluetoothPeerManager.swift; sourceTree = "<group>"; };
@@ -209,6 +217,7 @@
 		72ED4A1CD6D58976CFD71099 /* SignedLogScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedLogScreen.swift; sourceTree = "<group>"; };
 		7459C43E3F6BAFF3882D4AC2 /* PermissionWatchdogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWatchdogStore.swift; sourceTree = "<group>"; };
 		7472F15E294E8B29D0A4C2B6 /* VaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultScreen.swift; sourceTree = "<group>"; };
+		777665407CADA154341EBB8B /* RogueNetworkState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RogueNetworkState.swift; sourceTree = "<group>"; };
 		7840CF8E3099B4F708C0100E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		79A3DD6F80CD20416A036060 /* DuressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuressState.swift; sourceTree = "<group>"; };
 		7B7801804192FBD47DF25876 /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
@@ -239,6 +248,7 @@
 		B73691742FBB9DAB95541EDB /* VoiceBioSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBioSetupScreen.swift; sourceTree = "<group>"; };
 		B875C9E9199F8E854722B33A /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
 		B9BB7D55CE347AA4C580FB36 /* DuressVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuressVault.swift; sourceTree = "<group>"; };
+		B9F1A38E78CDDCD071648C59 /* RogueNetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RogueNetworkMonitor.swift; sourceTree = "<group>"; };
 		BA15C620019BB9D395CEDC12 /* AppGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGate.swift; sourceTree = "<group>"; };
 		BDCCF63C37EE6C23E7E1C047 /* SignedEvidenceExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedEvidenceExporter.swift; sourceTree = "<group>"; };
 		C1FAE53AA80F77A1A94B6A8F /* CyberComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberComponents.swift; sourceTree = "<group>"; };
@@ -336,6 +346,7 @@
 				91E80C8F66BB86EE2B54BF05 /* P2P */,
 				FF9A0805C0F7AD6BBAAF478A /* PermissionWatchdog */,
 				E0BEBB8BCADF302F3D864698 /* Reports */,
+				C9DD4ACE2BAD89F849D6C48D /* RogueNetwork */,
 				2797CB6C9550BAA22F04740C /* Safety */,
 				7B0854CADCA48980A3484FC0 /* Shared */,
 				CD0BCAE5C7F173D6BF865B89 /* SignedLog */,
@@ -344,6 +355,7 @@
 				41D80A2CB90B6D041A616140 /* Stego */,
 				D9CBF7641523999CDCD71F32 /* Subscription */,
 				624695B8BED90C9B3D2A350A /* Theme */,
+				A0B05AEE4E3997DC697C3AA5 /* ThreatIntel */,
 				6F95839054E7EA8A3899F747 /* TrackerFinder */,
 				6090D23C3520BFEAD7394652 /* Vault */,
 				431C413F1355CBF401CCD25F /* VoiceBio */,
@@ -580,6 +592,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A0B05AEE4E3997DC697C3AA5 /* ThreatIntel */ = {
+			isa = PBXGroup;
+			children = (
+				22BD148F67C16E65E1E0BA41 /* ThreatIntelDatabase.swift */,
+				0C1E4647F6100EDB64A27C53 /* ThreatIntelScreen.swift */,
+			);
+			path = ThreatIntel;
+			sourceTree = "<group>";
+		};
 		B71B8A8F3A6FB790A5ACCB2D = {
 			isa = PBXGroup;
 			children = (
@@ -611,6 +632,16 @@
 				119AC115F503D46187427F9C /* LegalScreen.swift */,
 			);
 			path = Legal;
+			sourceTree = "<group>";
+		};
+		C9DD4ACE2BAD89F849D6C48D /* RogueNetwork */ = {
+			isa = PBXGroup;
+			children = (
+				B9F1A38E78CDDCD071648C59 /* RogueNetworkMonitor.swift */,
+				141E70164FEC7380A9B10BFE /* RogueNetworkScreen.swift */,
+				777665407CADA154341EBB8B /* RogueNetworkState.swift */,
+			);
+			path = RogueNetwork;
 			sourceTree = "<group>";
 		};
 		CD0BCAE5C7F173D6BF865B89 /* SignedLog */ = {
@@ -899,6 +930,9 @@
 				07984B02973A557DB51B5880 /* PermissionWatchdogStore.swift in Sources */,
 				C197D554F53AF82C133FC154 /* PhoneUtils.swift in Sources */,
 				F3D31222798A38B44DFE785F /* ReportsScreen.swift in Sources */,
+				3D888E603EE7FBE043D3AFA4 /* RogueNetworkMonitor.swift in Sources */,
+				CB03A5B9E01AE0DEE075BAD7 /* RogueNetworkScreen.swift in Sources */,
+				9225B8B3AA2E8B63CE6C4B33 /* RogueNetworkState.swift in Sources */,
 				0034481A9605ED9C285F4370 /* SIMSwapAlarmSheet.swift in Sources */,
 				CD8C946BB50B198244A009A4 /* SIMSwapSetupScreen.swift in Sources */,
 				7DE1884D3ACF2786A7A87533 /* SIMSwapState.swift in Sources */,
@@ -922,6 +956,8 @@
 				C5A5C3540B6EDA43A8BA8A50 /* StegoVaultManager.swift in Sources */,
 				FC4A55D9129C704233C77615 /* StegoVaultScreen.swift in Sources */,
 				2684C20B6C66EC750384154D /* Theme.swift in Sources */,
+				21F80B3D5488965EC593E4A3 /* ThreatIntelDatabase.swift in Sources */,
+				636BDD0135549321356A2CF3 /* ThreatIntelScreen.swift in Sources */,
 				019BA1AEDF30127167B6D111 /* TrackerFinderScanner.swift in Sources */,
 				63302E65BD76169E845C3814 /* TrackerFinderScreen.swift in Sources */,
 				CACA4B7B43A751F97854D2F5 /* TrackerFinderStore.swift in Sources */,
