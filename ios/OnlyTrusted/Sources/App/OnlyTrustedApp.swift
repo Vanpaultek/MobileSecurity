@@ -29,6 +29,10 @@ struct OnlyTrustedApp: App {
             // launch so a 2G downgrade or lookalike SSID gets flagged even before the
             // user visits the dedicated screen.
             RogueNetworkMonitor.scanOnce()
+            // App Shield (Elite, Phase 2). Reload the persisted FamilyControls selection +
+            // authorization snapshot so the Settings / dashboard rows reflect reality on
+            // launch. On simulator / un-approved builds this is a safe no-op.
+            AppShieldManager.rehydrate()
         }
         // Smart Link Guard ↔ Offline Threat Intel bridge. Lets the SmartLinkGuardRules
         // engine consult the bundled APWG phishing-URL set when inspecting URLs from

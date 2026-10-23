@@ -6,5 +6,27 @@
     <array>
         <string>group.com.onlytrusted.app.shared</string>
     </array>
+    <!--
+      Family Controls (Phase 2 — App Shield / Selected Apps Restriction).
+
+      This entitlement is NOT auto-provisioned by Apple. Apple reviews each app
+      individually and only grants it to apps that pass a manual review as a
+      "family safety / parental control" tool. For OnlyTrusted the request has to
+      be filed via https://developer.apple.com/contact/request/family-controls-distribution/
+      BEFORE the first App Store submission that uses the entitlement.
+
+      The iOS Simulator does NOT fully support FamilyControls:
+        * `AuthorizationCenter.shared.requestAuthorization(for: .individual)` throws.
+        * `FamilyActivityPicker` renders but the returned tokens cannot be applied.
+      AppShieldManager detects the simulator and shows an honest "requires device +
+      Apple-approved entitlement" message instead of crashing.
+
+      Until Apple approves the request on the real team ID, device builds that keep
+      this key will fail code-signing with "Provisioning profile doesn't include
+      the com.apple.developer.family-controls entitlement". That is expected and is
+      the signal to remove the key temporarily or to finish the Apple request.
+    -->
+    <key>com.apple.developer.family-controls</key>
+    <true/>
 </dict>
 </plist>

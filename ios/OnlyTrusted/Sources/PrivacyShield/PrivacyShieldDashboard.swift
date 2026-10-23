@@ -19,7 +19,11 @@ import UIKit
 struct PrivacyShieldDashboard: View {
     @StateObject private var state = PrivacyShieldState.shared
     @StateObject private var registry = CaptureRegistry.shared
+    @StateObject private var appShield = AppShieldState.shared
+    @StateObject private var sub = SubscriptionState.shared
     @State private var showUpgrade = false
+    @State private var showAppShieldSetup = false
+    @State private var showAppShieldUpsell = false
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -40,6 +44,24 @@ struct PrivacyShieldDashboard: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showUpgrade) {
             NavigationStack { UpgradeToPremiumScreen() }
+        }
+        .sheet(isPresented: $showAppShieldSetup) {
+            NavigationStack { AppShieldSetupScreen() }
+        }
+        .sheet(isPresented: $showAppShieldUpsell) {
+            AppShieldUpsellSheet(
+                onUpgrade: {
+                    showAppShieldUpsell = false
+                    showUpgrade = true
+                },
+                onDismiss: { showAppShieldUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
+        .onAppear {
+            // Rehydrate the Family Controls state when the dashboard opens so the Phase 2
+            // card can show the real shielded-count instead of an empty placeholder.
+            AppShieldManager.rehydrate()
         }
     }
 
@@ -164,27 +186,69 @@ struct PrivacyShieldDashboard: View {
 
     // MARK: - Card 2: Selected Apps Restriction (ELITE PHASE 2)
 
+    /// Three sub-states for this card:
+    ///   * Non-Elite → upgrade upsell (unchanged shape from Phase 1).
+    ///   * Elite, not configured → "Set up now" CTA that opens `AppShieldSetupScreen`.
+    ///   * Elite, enabled with N apps → honest "N apps shielded via Family Controls."
     private var selectedAppsCard: some View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 12) {
-                CardHeader(icon: "app.badge", title: "Selected Apps Restriction")
-                statusChip(color: Color.appBrightCyan, label: "Available on Elite")
-                Text("Phase 2 ships a FamilyControls-based picker so you can require Face ID / passcode before chosen apps can launch after unlock. iOS keeps global sensor toggles reserved to MDM, so we restrict launches instead of mic/camera directly.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.appSecondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button {
-                    showUpgrade = true
-                } label: {
-                    HStack {
-                        Image(systemName: "crown.fill")
-                        Text("Upgrade to Elite")
-                            .font(.body.weight(.semibold))
+                CardHeader(icon: "app.badge.checkmark.fill", title: "Selected Apps Restriction")
+                if !sub.hasElite {
+                    statusChip(color: Color.appBrightCyan, label: "Available on Elite")
+                    Text("Phase 2 ships a FamilyControls-based picker so iOS can block the apps you pick until you lift the shield. Launch-blocking only — Apple still reserves camera / mic toggles to supervised MDM.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showAppShieldUpsell = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "crown.fill")
+                            Text("Upgrade to Elite")
+                                .font(.body.weight(.semibold))
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.subGold)
+                } else if appShield.enabled && appShield.shieldedCount > 0 {
+                    statusChip(color: Color.appSuccess, label: "Enforced")
+                    Text("\(appShield.shieldedCount) app\(appShield.shieldedCount == 1 ? "" : "s") shielded via Family Controls. iOS keeps them inaccessible until you lift the shield.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showAppShieldSetup = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "slider.horizontal.3")
+                            Text("Manage shielded apps")
+                                .font(.body.weight(.semibold))
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(Color.appAccent)
+                } else {
+                    statusChip(color: Color.appWarning, label: "Not configured")
+                    Text("Pick the apps you want OnlyTrusted to block and iOS will enforce the restriction at the OS level. Launch-blocking only — not a sensor toggle.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.appSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showAppShieldSetup = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "app.badge.checkmark.fill")
+                            Text("Set up now")
+                                .font(.body.weight(.semibold))
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appAccent)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.subGold)
             }
         }
     }

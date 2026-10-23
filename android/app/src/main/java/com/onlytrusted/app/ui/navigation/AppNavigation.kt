@@ -101,6 +101,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     // Auto Privacy Shield (free tier). Dashboard + hardening sub-screen.
     data object PrivacyShield : Destination("privacy_shield", "Privacy shield", Icons.Filled.Shield)
     data object PermissionHardening : Destination("permission_hardening", "Hardening", Icons.Filled.Security)
+    // Auto Privacy Shield — Phase 2 (Elite). Guided Digital Wellbeing walkthrough.
+    data object AppShield : Destination("app_shield", "App shield", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -236,7 +238,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenVoiceBio = { navController.navigate(Destination.VoiceBio.route) },
                     onOpenRogueNetwork = { navController.navigate(Destination.RogueNetwork.route) },
                     onOpenThreatIntel = { navController.navigate(Destination.ThreatIntel.route) },
-                    onOpenPrivacyShield = { navController.navigate(Destination.PrivacyShield.route) }
+                    onOpenPrivacyShield = { navController.navigate(Destination.PrivacyShield.route) },
+                    onOpenAppShield = { navController.navigate(Destination.AppShield.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -247,11 +250,19 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     },
                     onOpenUpgrade = {
                         navController.navigate(Destination.UpgradePremium.route)
+                    },
+                    onOpenAppShield = {
+                        navController.navigate(Destination.AppShield.route)
                     }
                 )
             }
             composable(Destination.PermissionHardening.route) {
                 com.onlytrusted.app.ui.privacyshield.PermissionHardeningScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.AppShield.route) {
+                com.onlytrusted.app.ui.appshield.AppShieldSetupScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

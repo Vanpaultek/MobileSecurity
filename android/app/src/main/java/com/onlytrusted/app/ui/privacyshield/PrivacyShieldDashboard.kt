@@ -89,7 +89,8 @@ private val subGold = Color(0xFFEAB308)
 fun PrivacyShieldDashboard(
     onBack: () -> Unit,
     onOpenHardening: () -> Unit,
-    onOpenUpgrade: () -> Unit
+    onOpenUpgrade: () -> Unit,
+    onOpenAppShield: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var autoStopEnabled by remember {
@@ -99,6 +100,15 @@ fun PrivacyShieldDashboard(
         mutableStateOf(PrivacyShieldState.isRequireManualRestart(context))
     }
     val sensorToggleSupport = remember { PrivacyShieldState.supportsSystemSensorToggles(context) }
+    // App Shield (Elite, Phase 2) — informational list + walkthrough state.
+    val hasElite = remember { com.onlytrusted.app.ui.subscription.SubscriptionState.hasElite(context) }
+    val appShieldWatched = remember {
+        com.onlytrusted.app.ui.appshield.AppShieldState.watchedPackages(context)
+    }
+    val appShieldCount = appShieldWatched.size
+    val appShieldWalkthroughDone = remember {
+        com.onlytrusted.app.ui.appshield.AppShieldState.wellbeingWalkthroughDone(context)
+    }
 
     Scaffold(
         containerColor = MidnightBackground,
@@ -244,27 +254,71 @@ fun PrivacyShieldDashboard(
             }
 
             // Card 2: Selected Apps Restriction (ELITE PHASE 2)
+            // Three sub-states driven by subscription + walkthrough + list size:
+            //   * Non-Elite → upsell (unchanged shape).
+            //   * Elite, not configured → "Set up now" CTA opens the guided screen.
+            //   * Elite, walkthrough opened + list non-empty → "Guided setup via Digital Wellbeing".
             Card {
                 CardHeader(Icons.Filled.Security, "Selected Apps Restriction")
-                StatusChip(BrandCyanDark, "Available on Elite")
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    "Android reserves cross-app sensor control to Device Owner provisioning (not available to consumer apps). Phase 2 ships an Elite restriction surface that leans on Android's shortcut-pinning + accessibility prompts rather than claiming system-wide enforcement.",
-                    color = SecondaryTextDark,
-                    fontSize = 13.sp
-                )
-                Spacer(Modifier.height(12.dp))
-                Button(
-                    onClick = onOpenUpgrade,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = subGold,
-                        contentColor = Color.Black
+                if (!hasElite) {
+                    StatusChip(BrandCyanDark, "Available on Elite")
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "True cross-app blocking on Android requires Device Owner provisioning, which no Play Store app can do. Phase 2 ships an Elite walkthrough that opens Google's Digital Wellbeing / Focus Mode so the OS enforces the restriction.",
+                        color = SecondaryTextDark,
+                        fontSize = 13.sp
                     )
-                ) {
-                    Icon(Icons.Filled.EmojiEvents, contentDescription = null)
-                    Spacer(Modifier.size(6.dp))
-                    Text("Upgrade to Elite", fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = onOpenUpgrade,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = subGold,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Icon(Icons.Filled.EmojiEvents, contentDescription = null)
+                        Spacer(Modifier.size(6.dp))
+                        Text("Upgrade to Elite", fontWeight = FontWeight.SemiBold)
+                    }
+                } else if (appShieldWalkthroughDone && appShieldCount > 0) {
+                    StatusChip(SuccessDark, "Guided setup via Digital Wellbeing")
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "$appShieldCount app${if (appShieldCount == 1) "" else "s"} on your reminder list — enforced by Google Digital Wellbeing, not by OnlyTrusted.",
+                        color = SecondaryTextDark,
+                        fontSize = 13.sp
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = onOpenAppShield,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.Tune, contentDescription = null, tint = BrandAccentDark)
+                        Spacer(Modifier.size(6.dp))
+                        Text("Manage reminder list", color = BrandAccentDark, fontWeight = FontWeight.SemiBold)
+                    }
+                } else {
+                    StatusChip(WarningDark, "Not configured")
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Pick the apps you want restricted. OnlyTrusted will walk you through Google's Digital Wellbeing so the OS enforces the limits.",
+                        color = SecondaryTextDark,
+                        fontSize = 13.sp
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = onOpenAppShield,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BrandAccentDark,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Icon(Icons.Filled.Security, contentDescription = null)
+                        Spacer(Modifier.size(6.dp))
+                        Text("Set up now", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
 

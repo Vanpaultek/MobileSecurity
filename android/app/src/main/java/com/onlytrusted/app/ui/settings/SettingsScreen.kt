@@ -158,7 +158,8 @@ fun SettingsScreen(
     onOpenVoiceBio: () -> Unit = {},
     onOpenRogueNetwork: () -> Unit = {},
     onOpenThreatIntel: () -> Unit = {},
-    onOpenPrivacyShield: () -> Unit = {}
+    onOpenPrivacyShield: () -> Unit = {},
+    onOpenAppShield: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -195,6 +196,16 @@ fun SettingsScreen(
     var voiceBioUpsellOpen by remember { mutableStateOf(false) }
     var rogueNetworkUpsellOpen by remember { mutableStateOf(false) }
     var threatIntelUpsellOpen by remember { mutableStateOf(false) }
+    // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users see the upsell;
+    // Elite users navigate to the guided Digital Wellbeing walkthrough.
+    var appShieldUpsellOpen by remember { mutableStateOf(false) }
+    val appShieldWatched = remember {
+        com.onlytrusted.app.ui.appshield.AppShieldState.watchedPackages(context)
+    }
+    val appShieldCount = appShieldWatched.size
+    val appShieldConfigured = remember {
+        com.onlytrusted.app.ui.appshield.AppShieldState.isConfigured(context)
+    }
     val voiceBioEnrolledCount = remember {
         com.onlytrusted.app.ui.voicebio.VoiceBioState.enrolledContactIds(context).size
     }
@@ -321,6 +332,27 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Privacy Shield",
                     onClick = onOpenPrivacyShield
+                )
+                RowDivider()
+                // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users
+                // see the upsell dialog; Elite users jump to the guided Wellbeing walkthrough.
+                SettingsNavRow(
+                    icon = Icons.Filled.Shield,
+                    tint = when {
+                        SubscriptionState.hasElite(context) && appShieldConfigured -> BrandAccentDark
+                        SubscriptionState.hasElite(context) -> settingsBlue
+                        else -> subGold
+                    },
+                    title = "App Shield (Elite)",
+                    value = if (SubscriptionState.hasElite(context) && appShieldConfigured)
+                        "On · $appShieldCount" else null,
+                    onClick = {
+                        if (SubscriptionState.hasElite(context)) {
+                            onOpenAppShield()
+                        } else {
+                            appShieldUpsellOpen = true
+                        }
+                    }
                 )
                 RowDivider()
                 SettingsNavRow(
@@ -1300,6 +1332,16 @@ fun SettingsScreen(
                     onOpenUpgrade()
                 },
                 onDismiss = { threatIntelUpsellOpen = false }
+            )
+        }
+
+        if (appShieldUpsellOpen) {
+            com.onlytrusted.app.ui.appshield.AppShieldUpsellDialog(
+                onUpgrade = {
+                    appShieldUpsellOpen = false
+                    onOpenUpgrade()
+                },
+                onDismiss = { appShieldUpsellOpen = false }
             )
         }
 

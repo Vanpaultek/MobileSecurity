@@ -87,6 +87,10 @@ struct SettingsScreen: View {
     // Offline Threat Intel (Elite) — bundled scam/phishing/breach/IoC feeds.
     @State private var showThreatIntelUpsell = false
     @State private var showThreatIntelSetup = false
+    // App Shield (Elite) — Phase 2 FamilyControls Selected-App Restriction.
+    @State private var showAppShieldUpsell = false
+    @State private var showAppShieldSetup = false
+    @StateObject private var appShield = AppShieldState.shared
     // F2 Auto-lock inactivity
     @State private var autoLockToggle = false
     @State private var autoLockSeconds: Int = AutoLockPrefs.currentSeconds
@@ -491,6 +495,20 @@ struct SettingsScreen: View {
             )
             .presentationDetents([.medium])
         }
+        // App Shield (Elite) — Phase 2 FamilyControls Selected-App Restriction.
+        .sheet(isPresented: $showAppShieldSetup) {
+            NavigationStack { AppShieldSetupScreen() }
+        }
+        .sheet(isPresented: $showAppShieldUpsell) {
+            AppShieldUpsellSheet(
+                onUpgrade: {
+                    showAppShieldUpsell = false
+                    showUpgradeSheet = true
+                },
+                onDismiss: { showAppShieldUpsell = false }
+            )
+            .presentationDetents([.medium])
+        }
         .sheet(isPresented: Binding(
             get: { TrustedWitnessApprovalPresenter.shared.isActive },
             set: { _ in }
@@ -567,6 +585,28 @@ struct SettingsScreen: View {
                     SettingsNavRow(icon: "shield.lefthalf.filled.badge.checkmark",
                                    iconTint: Color.settingsBlue, label: "Privacy Shield")
                 }
+                SettingsDivider()
+                // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
+                // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
+                // to the setup wizard.
+                Button {
+                    if sub.hasElite {
+                        showAppShieldSetup = true
+                    } else {
+                        showAppShieldUpsell = true
+                    }
+                } label: {
+                    SettingsNavRow(
+                        icon: "app.badge.checkmark.fill",
+                        iconTint: sub.hasElite && appShield.enabled ? Color.appSuccess
+                            : (sub.hasElite ? Color.settingsBlue : Color.subGold),
+                        label: "App Shield (Elite)",
+                        value: sub.hasElite && appShield.enabled && appShield.shieldedCount > 0
+                            ? "On · \(appShield.shieldedCount)"
+                            : nil
+                    )
+                }
+                .buttonStyle(.plain)
                 SettingsDivider()
                 NavigationLink { BlockListScreen() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
