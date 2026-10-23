@@ -7,6 +7,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -93,8 +95,41 @@ fun AliasesScreen(onBack: () -> Unit) {
     var relayPickerOpen by remember { mutableStateOf(false) }
     var editingLabelFor by remember { mutableStateOf<String?>(null) }
     var labelDraft by remember { mutableStateOf("") }
+    var showingBulkDialog by remember { mutableStateOf<BulkAction?>(null) }
+    val isPremium = com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)
 
     fun reload() { aliases = AliasStore.load(context) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.use { out ->
+                    out.write(AliasStore.exportCsv(context).toByteArray(Charsets.UTF_8))
+                }
+                scope.launch { snackbar.showSnackbar("Exported alias book") }
+            }.onFailure {
+                scope.launch { snackbar.showSnackbar("Export failed") }
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                val text = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?.toString(Charsets.UTF_8).orEmpty()
+                val added = AliasStore.importCsv(context, text)
+                reload()
+                scope.launch { snackbar.showSnackbar("Imported $added alias${if (added == 1) "" else "es"}") }
+            }.onFailure {
+                scope.launch { snackbar.showSnackbar("Import failed") }
+            }
+        }
+    }
 
     AppBackdropScaffold(
         topBar = {
@@ -232,6 +267,48 @@ fun AliasesScreen(onBack: () -> Unit) {
                 }
             }
 
+            // Premium tools (CSV + bulk)
+            if (isPremium) {
+                CardBox {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        HeaderRow(Icons.Filled.ContentCopy, "Premium tools", BrandAccentDark)
+                        Text(
+                            "Portable alias book. Export your list to move to a new device, or " +
+                                "batch-tidy a long list.",
+                            fontSize = 11.sp, color = SecondaryTextDark
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Button(
+                                onClick = {
+                                    val stamp = System.currentTimeMillis() / 1000
+                                    exportLauncher.launch("onlytrusted_aliases_$stamp.csv")
+                                },
+                                enabled = aliases.isNotEmpty(),
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = BrandAccentDark)
+                            ) { Text("Export CSV", color = Color.White, fontSize = 12.sp) }
+                            Button(
+                                onClick = { importLauncher.launch(arrayOf("text/csv", "text/plain", "text/comma-separated-values")) },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = MidnightBackground)
+                            ) { Text("Import CSV", color = BrandAccentDark, fontSize = 12.sp) }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            TextButton(
+                                onClick = { showingBulkDialog = BulkAction.DISABLE_ALL },
+                                enabled = aliases.isNotEmpty(),
+                                modifier = Modifier.weight(1f)
+                            ) { Text("Disable all", color = SecondaryTextDark, fontSize = 11.sp) }
+                            TextButton(
+                                onClick = { showingBulkDialog = BulkAction.DELETE_DISABLED },
+                                enabled = aliases.any { !it.enabled },
+                                modifier = Modifier.weight(1f)
+                            ) { Text("Delete disabled", color = BrandAccentDark, fontSize = 11.sp) }
+                        }
+                    }
+                }
+            }
+
             // List or empty state
             if (aliases.isEmpty()) {
                 CardBox {
@@ -284,6 +361,32 @@ fun AliasesScreen(onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+
+            // Bulk confirmation dialog
+            showingBulkDialog?.let { bulk ->
+                AlertDialog(
+                    onDismissRequest = { showingBulkDialog = null },
+                    title = { Text(bulk.title, color = PrimaryTextDark) },
+                    text = { Text(bulk.detail, color = SecondaryTextDark) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            when (bulk) {
+                                BulkAction.DISABLE_ALL -> AliasStore.disableAll(context)
+                                BulkAction.DELETE_DISABLED -> AliasStore.deleteAllDisabled(context)
+                            }
+                            reload()
+                            showingBulkDialog = null
+                            scope.launch { snackbar.showSnackbar("Done") }
+                        }) { Text("Do it", color = BrandAccentDark) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showingBulkDialog = null }) {
+                            Text("Cancel", color = TertiaryTextDark)
+                        }
+                    },
+                    containerColor = MidnightElevated
+                )
             }
 
             // How it works
@@ -416,6 +519,19 @@ private fun CardBox(content: @Composable () -> Unit) {
 private fun copyToClipboard(ctx: Context, text: String) {
     val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     cm.setPrimaryClip(ClipData.newPlainText("alias", text))
+}
+
+private enum class BulkAction(val title: String, val detail: String) {
+    DISABLE_ALL(
+        "Disable every alias?",
+        "Flips the on/off bookmark for every alias to OFF. Your relay provider still " +
+            "forwards — remember to disable there too if you want forwarding to stop."
+    ),
+    DELETE_DISABLED(
+        "Delete every disabled alias?",
+        "Removes every alias currently marked disabled. Cannot be undone unless you've " +
+            "exported a CSV."
+    )
 }
 
 private fun openUrl(ctx: Context, url: String) {

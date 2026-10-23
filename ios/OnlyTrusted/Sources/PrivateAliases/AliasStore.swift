@@ -88,6 +88,113 @@ final class AliasStore: ObservableObject {
         aliases = []
     }
 
+    // MARK: - Premium: bulk + CSV
+
+    /// Premium: toggle `enabled = false` across every alias.
+    func disableAll() {
+        aliases = aliases.map { a in
+            var out = a
+            out.enabled = false
+            return out
+        }
+    }
+
+    /// Premium: delete every alias currently marked disabled.
+    func deleteAllDisabled() {
+        aliases.removeAll { !$0.enabled }
+    }
+
+    /// Premium: export the alias list as CSV. Columns:
+    /// `prefix,label,enabled,created_at_iso`. The alias domain is NOT exported — the
+    /// receiving device supplies its own relay choice, which is intentional (users may
+    /// migrate between relay providers during a device swap).
+    func exportCSV() -> String {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime]
+        var out = "prefix,label,enabled,created_at\n"
+        for a in aliases {
+            // Minimal CSV escape — quote label if it contains comma or quote.
+            let labelEscaped = Self.csvEscape(a.label)
+            out += "\(a.prefix),\(labelEscaped),\(a.enabled),\(iso.string(from: a.createdAt))\n"
+        }
+        return out
+    }
+
+    /// Premium: import aliases from a CSV string in the same format as `exportCSV()`.
+    /// Returns the number of aliases added (duplicates by prefix are skipped). Malformed
+    /// rows are silently dropped so a partially-corrupt file still restores what it can.
+    @discardableResult
+    func importCSV(_ raw: String) -> Int {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime]
+        let existingPrefixes = Set(aliases.map { $0.prefix })
+        var added = 0
+        let lines = raw.split(whereSeparator: { $0.isNewline })
+        for (idx, line) in lines.enumerated() {
+            // Skip header
+            if idx == 0 && line.hasPrefix("prefix,") { continue }
+            let cols = Self.csvSplit(String(line))
+            guard cols.count >= 4 else { continue }
+            let prefix = cols[0]
+            let label = cols[1]
+            let enabled = (cols[2].lowercased() == "true")
+            let created = iso.date(from: cols[3]) ?? Date()
+            guard !prefix.isEmpty, !existingPrefixes.contains(prefix) else { continue }
+            aliases.insert(EmailAlias(
+                id: UUID().uuidString,
+                prefix: prefix,
+                label: label,
+                enabled: enabled,
+                createdAt: created
+            ), at: 0)
+            added += 1
+        }
+        return added
+    }
+
+    // MARK: - CSV helpers
+
+    private static func csvEscape(_ s: String) -> String {
+        if s.contains(",") || s.contains("\"") || s.contains("\n") {
+            return "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+        }
+        return s
+    }
+
+    private static func csvSplit(_ line: String) -> [String] {
+        var cols: [String] = []
+        var cur = ""
+        var inQuotes = false
+        var i = line.startIndex
+        while i < line.endIndex {
+            let c = line[i]
+            if inQuotes {
+                if c == "\"" {
+                    let next = line.index(after: i)
+                    if next < line.endIndex, line[next] == "\"" {
+                        cur.append("\"")
+                        i = next
+                    } else {
+                        inQuotes = false
+                    }
+                } else {
+                    cur.append(c)
+                }
+            } else {
+                if c == "," {
+                    cols.append(cur); cur = ""
+                } else if c == "\"" {
+                    inQuotes = true
+                } else {
+                    cur.append(c)
+                }
+            }
+            i = line.index(after: i)
+        }
+        cols.append(cur)
+        return cols
+    }
+
     // MARK: - Address assembly
 
     /// Full address for the given alias, built from the current relay choice.

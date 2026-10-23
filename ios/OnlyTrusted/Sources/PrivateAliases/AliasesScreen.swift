@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 /// Full-screen UI for Private Email Aliases (FREE tier, unlimited count).
 ///
@@ -10,10 +11,32 @@ import UIKit
 struct AliasesScreen: View {
 
     @StateObject private var store = AliasStore.shared
+    @StateObject private var sub = SubscriptionState.shared
     @State private var relayPickerOpen = false
     @State private var editingLabel: String? = nil
     @State private var labelDraft: String = ""
     @State private var toast: String? = nil
+    @State private var exportURL: URL? = nil
+    @State private var showingShareSheet = false
+    @State private var showingImportPicker = false
+    @State private var showingBulkConfirm: BulkAction? = nil
+
+    private enum BulkAction: String, Identifiable {
+        case disableAll, deleteDisabled
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .disableAll:     return "Disable every alias?"
+            case .deleteDisabled: return "Delete every disabled alias?"
+            }
+        }
+        var detail: String {
+            switch self {
+            case .disableAll:     return "Flips the on/off bookmark for every alias to OFF. Your relay provider still forwards — remember to disable there too if you want forwarding to stop."
+            case .deleteDisabled: return "Removes every alias currently marked disabled. Cannot be undone unless you've exported a CSV."
+            }
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -21,6 +44,7 @@ struct AliasesScreen: View {
                 heroCard
                 relayCard
                 generateCard
+                if sub.hasPremium { premiumToolsCard }
                 if store.aliases.isEmpty {
                     emptyStateCard
                 } else {
@@ -29,6 +53,40 @@ struct AliasesScreen: View {
                 howItWorksCard
             }
             .padding(20)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = exportURL {
+                ShareSheet(activityItems: [url])
+            }
+        }
+        .fileImporter(
+            isPresented: $showingImportPicker,
+            allowedContentTypes: [.commaSeparatedText, .plainText, .text],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            let didAccess = url.startAccessingSecurityScopedResource()
+            defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
+            guard let data = try? Data(contentsOf: url),
+                  let text = String(data: data, encoding: .utf8) else {
+                showToast("Could not read file")
+                return
+            }
+            let added = store.importCSV(text)
+            showToast("Imported \(added) alias\(added == 1 ? "" : "es")")
+        }
+        .alert(item: $showingBulkConfirm) { bulk in
+            Alert(
+                title: Text(bulk.title),
+                message: Text(bulk.detail),
+                primaryButton: .destructive(Text("Do it")) {
+                    switch bulk {
+                    case .disableAll:     store.disableAll(); showToast("All aliases disabled")
+                    case .deleteDisabled: store.deleteAllDisabled(); showToast("Disabled aliases deleted")
+                    }
+                },
+                secondaryButton: .cancel()
+            )
         }
         .appBackdrop()
         .navigationTitle("Private Aliases")
@@ -150,6 +208,84 @@ struct AliasesScreen: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+
+    private var premiumToolsCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 12) {
+                CardHeader(icon: "square.and.arrow.up.on.square",
+                           title: "Premium tools",
+                           tint: Color.appAccent)
+                Text("Portable alias book. Export your list to move to a new device, or batch-tidy a long list.")
+                    .font(.caption)
+                    .foregroundStyle(Color.appSecondaryText)
+                HStack(spacing: 10) {
+                    Button {
+                        exportToCSV()
+                    } label: {
+                        Label("Export CSV", systemImage: "square.and.arrow.up")
+                            .font(.footnote.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.appAccent, in: RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(Color.appScreenBackground)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(store.aliases.isEmpty)
+
+                    Button {
+                        showingImportPicker = true
+                    } label: {
+                        Label("Import CSV", systemImage: "square.and.arrow.down")
+                            .font(.footnote.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.appElevatedSurface, in: RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(Color.appAccent)
+                    }
+                    .buttonStyle(.plain)
+                }
+                HStack(spacing: 10) {
+                    Button {
+                        showingBulkConfirm = .disableAll
+                    } label: {
+                        Text("Disable all")
+                            .font(.caption.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.appElevatedSurface, in: RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(Color.appSecondaryText)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(store.aliases.isEmpty)
+                    Button {
+                        showingBulkConfirm = .deleteDisabled
+                    } label: {
+                        Text("Delete disabled")
+                            .font(.caption.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.appElevatedSurface, in: RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(Color.appDanger)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!store.aliases.contains { !$0.enabled })
+                }
+            }
+        }
+    }
+
+    private func exportToCSV() {
+        let csv = store.exportCSV()
+        let fname = "onlytrusted_aliases_\(Int(Date().timeIntervalSince1970)).csv"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fname)
+        do {
+            try csv.data(using: .utf8)?.write(to: url, options: .atomic)
+            exportURL = url
+            showingShareSheet = true
+        } catch {
+            showToast("Export failed")
         }
     }
 
@@ -299,3 +435,4 @@ struct AliasesScreen: View {
 #Preview {
     NavigationStack { AliasesScreen() }
 }
+

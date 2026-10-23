@@ -128,6 +128,99 @@ object AliasStore {
         prefs(ctx).edit().remove(KEY_LIST).apply()
     }
 
+    // MARK: - Premium: bulk + CSV
+
+    /** Premium: flip every alias to disabled. */
+    fun disableAll(ctx: Context) {
+        save(ctx, load(ctx).map { it.copy(enabled = false) })
+    }
+
+    /** Premium: delete every alias currently marked disabled. */
+    fun deleteAllDisabled(ctx: Context) {
+        save(ctx, load(ctx).filter { it.enabled })
+    }
+
+    /** Premium: CSV export (prefix,label,enabled,created_at_iso). */
+    fun exportCsv(ctx: Context): String {
+        val iso = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US)
+        val sb = StringBuilder("prefix,label,enabled,created_at\n")
+        load(ctx).forEach { a ->
+            sb.append(a.prefix).append(',')
+                .append(csvEscape(a.label)).append(',')
+                .append(a.enabled).append(',')
+                .append(iso.format(java.util.Date(a.createdAtMillis)))
+                .append('\n')
+        }
+        return sb.toString()
+    }
+
+    /** Premium: import CSV; returns number of new aliases added (dupes skipped). */
+    fun importCsv(ctx: Context, raw: String): Int {
+        val iso = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US)
+        val existing = load(ctx).toMutableList()
+        val existingPrefixes = existing.map { it.prefix }.toMutableSet()
+        var added = 0
+        raw.lines().forEachIndexed { idx, line ->
+            if (idx == 0 && line.startsWith("prefix,")) return@forEachIndexed
+            if (line.isBlank()) return@forEachIndexed
+            val cols = csvSplit(line)
+            if (cols.size < 4) return@forEachIndexed
+            val prefix = cols[0]
+            if (prefix.isEmpty() || prefix in existingPrefixes) return@forEachIndexed
+            val label = cols[1]
+            val enabled = cols[2].equals("true", ignoreCase = true)
+            val createdAt = runCatching { iso.parse(cols[3])?.time }.getOrNull()
+                ?: System.currentTimeMillis()
+            existing.add(0, EmailAlias(
+                id = UUID.randomUUID().toString(),
+                prefix = prefix,
+                label = label,
+                enabled = enabled,
+                createdAtMillis = createdAt
+            ))
+            existingPrefixes.add(prefix)
+            added++
+        }
+        save(ctx, existing)
+        return added
+    }
+
+    private fun csvEscape(s: String): String {
+        return if (s.contains(',') || s.contains('"') || s.contains('\n')) {
+            "\"" + s.replace("\"", "\"\"") + "\""
+        } else s
+    }
+
+    private fun csvSplit(line: String): List<String> {
+        val cols = mutableListOf<String>()
+        val cur = StringBuilder()
+        var inQuotes = false
+        var i = 0
+        while (i < line.length) {
+            val c = line[i]
+            if (inQuotes) {
+                if (c == '"') {
+                    if (i + 1 < line.length && line[i + 1] == '"') {
+                        cur.append('"'); i++
+                    } else {
+                        inQuotes = false
+                    }
+                } else {
+                    cur.append(c)
+                }
+            } else {
+                when (c) {
+                    ',' -> { cols.add(cur.toString()); cur.setLength(0) }
+                    '"' -> inQuotes = true
+                    else -> cur.append(c)
+                }
+            }
+            i++
+        }
+        cols.add(cur.toString())
+        return cols
+    }
+
     // MARK: - Relay
 
     fun relay(ctx: Context): RelayChoice {
