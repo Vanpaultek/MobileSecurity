@@ -655,6 +655,17 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
+                // Advanced Blocking (Premium). Quiet-hours window + NANP area-code
+                // allowlist. Enforced by call/SMS routing paths that query the rules at
+                // decision time.
+                NavigationLink { AdvancedBlockingScreen() } label: {
+                    SettingsNavRow(
+                        icon: "line.horizontal.3.decrease.circle",
+                        iconTint: Color.settingsBlue,
+                        label: "Advanced Blocking"
+                    )
+                }
+                SettingsDivider()
                 // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
                 // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
                 // to the setup wizard.

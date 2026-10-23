@@ -115,6 +115,8 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object IdentityProtection : Destination("identity_protection", "Identity Protection", Icons.Filled.Shield)
     // Premium — Weekly Digest PDF (on-device generation + share-sheet export).
     data object WeeklyDigest : Destination("weekly_digest", "Weekly Digest", Icons.Filled.Shield)
+    // Premium — Advanced Blocking (quiet hours + area-code allowlist).
+    data object AdvancedBlocking : Destination("advanced_blocking", "Advanced Blocking", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -257,7 +259,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenDataRemoval = { navController.navigate(Destination.DataRemoval.route) },
                     onOpenAliases = { navController.navigate(Destination.Aliases.route) },
                     onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) },
-                    onOpenWeeklyDigest = { navController.navigate(Destination.WeeklyDigest.route) }
+                    onOpenWeeklyDigest = { navController.navigate(Destination.WeeklyDigest.route) },
+                    onOpenAdvancedBlocking = { navController.navigate(Destination.AdvancedBlocking.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -306,6 +309,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.WeeklyDigest.route) {
                 com.onlytrusted.app.ui.weeklydigest.WeeklyDigestScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.AdvancedBlocking.route) {
+                com.onlytrusted.app.ui.advancedblocking.AdvancedBlockingScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

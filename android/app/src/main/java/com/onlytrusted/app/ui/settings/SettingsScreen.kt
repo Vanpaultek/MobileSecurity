@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FaceRetouchingNatural
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -169,7 +170,8 @@ fun SettingsScreen(
     onOpenDataRemoval: () -> Unit = {},
     onOpenAliases: () -> Unit = {},
     onOpenIdentityProtection: () -> Unit = {},
-    onOpenWeeklyDigest: () -> Unit = {}
+    onOpenWeeklyDigest: () -> Unit = {},
+    onOpenAdvancedBlocking: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -392,6 +394,14 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Weekly Digest",
                     onClick = onOpenWeeklyDigest
+                )
+                RowDivider()
+                // Advanced Blocking (Premium). Quiet-hours window + NANP area-code allowlist.
+                SettingsNavRow(
+                    icon = Icons.Filled.FilterList,
+                    tint = settingsBlue,
+                    title = "Advanced Blocking",
+                    onClick = onOpenAdvancedBlocking
                 )
                 RowDivider()
                 // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users
