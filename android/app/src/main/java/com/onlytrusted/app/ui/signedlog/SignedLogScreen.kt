@@ -29,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -141,15 +142,14 @@ fun SignedLogScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Signed Audit Log", color = PrimaryTextDark) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("Back", color = BrandCyanDark) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         snackbarHost = { SnackbarHost(snackbar) }

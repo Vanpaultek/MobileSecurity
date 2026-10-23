@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -150,15 +151,14 @@ fun StegoVaultScreen(onBack: () -> Unit) {
         }
     }
 
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Steganographic Vault", color = PrimaryTextDark) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("Back", color = BrandCyanDark) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         snackbarHost = { SnackbarHost(snackbar) }

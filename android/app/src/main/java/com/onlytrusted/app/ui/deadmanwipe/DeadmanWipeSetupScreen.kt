@@ -22,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -80,15 +81,14 @@ fun DeadmanWipeSetupScreen(onBack: () -> Unit) {
         deadline = DeadmanWipeState.wipeDeadline(context)
     }
 
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Dead-Man Wipe", color = PrimaryTextDark) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("Back", color = BrandCyanDark) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->

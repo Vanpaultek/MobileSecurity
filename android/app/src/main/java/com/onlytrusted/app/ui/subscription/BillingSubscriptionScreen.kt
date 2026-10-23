@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -87,7 +88,7 @@ fun BillingSubscriptionScreen(onBack: () -> Unit = {}) {
     val paymentState = rememberModalBottomSheetState()
     val historyState = rememberModalBottomSheetState()
 
-    Scaffold(containerColor = MidnightBackground) { padding ->
+    AppBackdropScaffold() { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

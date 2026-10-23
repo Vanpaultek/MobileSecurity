@@ -36,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -96,15 +97,14 @@ fun FaceLockSetupScreen(onBack: () -> Unit) {
     var showEnrollDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Face-Change Lock", color = PrimaryTextDark) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("Back", color = BrandCyanDark) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->

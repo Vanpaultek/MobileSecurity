@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.appBackdropBackground
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
 import com.onlytrusted.app.ui.theme.SecondaryTextDark
@@ -80,7 +81,7 @@ fun LegalScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
     ) {
         // Pinned top: back + title AND section chips — opaque, extends to status bar
         Column(

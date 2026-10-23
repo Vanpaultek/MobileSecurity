@@ -54,6 +54,7 @@ import com.onlytrusted.app.ui.subscription.subGold
 import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.DangerDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.appBackdropBackground
 import com.onlytrusted.app.ui.theme.MidnightCard
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
@@ -88,7 +89,7 @@ fun HardwareKeySetupScreen(onBack: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
     ) {
         Row(
             modifier = Modifier

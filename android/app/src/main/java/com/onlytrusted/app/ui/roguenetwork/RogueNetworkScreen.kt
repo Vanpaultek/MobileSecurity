@@ -26,6 +26,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -72,15 +73,14 @@ fun RogueNetworkScreen(onBack: () -> Unit) {
         alerts = RogueNetworkState.alerts(context)
     }
 
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Rogue Network Scanner", color = PrimaryTextDark) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text("Back", color = BrandCyanDark) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->

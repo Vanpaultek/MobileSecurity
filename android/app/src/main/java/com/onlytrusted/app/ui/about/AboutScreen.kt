@@ -68,6 +68,7 @@ import com.onlytrusted.app.R
 import com.onlytrusted.app.ui.subscription.SubscriptionState
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.appBackdropBackground
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
 import com.onlytrusted.app.ui.theme.SecondaryTextDark
@@ -107,7 +108,7 @@ fun AboutScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MidnightBackground)
+                    .appBackdropBackground()
             ) {
                 Column(
                     modifier = Modifier
@@ -401,7 +402,7 @@ private fun SubScreenScaffold(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(

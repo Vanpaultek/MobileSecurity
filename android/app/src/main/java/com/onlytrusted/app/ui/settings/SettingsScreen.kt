@@ -292,7 +292,7 @@ fun SettingsScreen(
         return
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
+    com.onlytrusted.app.ui.theme.AppBackdropScaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

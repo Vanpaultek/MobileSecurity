@@ -48,6 +48,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.graphics.Color
+import com.onlytrusted.app.ui.theme.AppBackdropScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -125,8 +127,7 @@ fun VaultScreen(
     var pendingDelete by remember { mutableStateOf<MaskedContact?>(null) }
 
     com.onlytrusted.app.ui.facelock.FaceLockShield {
-    Scaffold(
-        containerColor = MidnightBackground,
+    AppBackdropScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -156,7 +157,7 @@ fun VaultScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MidnightBackground,
+                    containerColor = Color.Transparent,
                     titleContentColor = PrimaryTextDark
                 )
             )

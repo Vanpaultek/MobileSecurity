@@ -142,28 +142,30 @@ fun UpgradeToPremiumScreen(onBack: () -> Unit = {}) {
     var showPurchaseConfirmation by remember { mutableStateOf(false) }
     var restoreNotice by remember { mutableStateOf<String?>(null) }
 
-    Scaffold(containerColor = MidnightBackground) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            // Pinned top header — opaque, extends to status bar
-            Box(
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            com.onlytrusted.app.ui.theme.AppBackdrop()
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MidnightBackground,
-                                MidnightBackground.copy(alpha = 0.95f)
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                // Pinned top header — translucent so backdrop shows through
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    MidnightBackground.copy(alpha = 0.85f),
+                                    MidnightBackground.copy(alpha = 0.55f)
+                                )
                             )
                         )
-                    )
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
-            ) {
-                Header(onBack = onBack)
-            }
+                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                ) {
+                    Header(onBack = onBack)
+                }
 
             Column(
                 modifier = Modifier
@@ -199,6 +201,7 @@ fun UpgradeToPremiumScreen(onBack: () -> Unit = {}) {
                     }
                 }
             )
+            }
             }
         }
 

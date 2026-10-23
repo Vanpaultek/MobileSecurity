@@ -86,6 +86,7 @@ import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.DangerDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.appBackdropBackground
 import com.onlytrusted.app.ui.theme.MidnightCard
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
@@ -147,7 +148,7 @@ private fun LockedView(error: String?, onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -250,7 +251,7 @@ private fun EditForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
     ) {
         // Top bar
         Row(

@@ -71,6 +71,7 @@ import com.onlytrusted.app.ui.theme.BrandAccentDark
 import com.onlytrusted.app.ui.theme.BrandCyanDark
 import com.onlytrusted.app.ui.theme.DangerDark
 import com.onlytrusted.app.ui.theme.MidnightBackground
+import com.onlytrusted.app.ui.theme.appBackdropBackground
 import com.onlytrusted.app.ui.theme.MidnightElevated
 import com.onlytrusted.app.ui.theme.PrimaryTextDark
 import com.onlytrusted.app.ui.theme.SecondaryTextDark
@@ -180,7 +181,7 @@ fun EventsScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBackground)
+            .appBackdropBackground()
     ) {
         // Pinned top header — opaque, extends to status bar
         Box(
