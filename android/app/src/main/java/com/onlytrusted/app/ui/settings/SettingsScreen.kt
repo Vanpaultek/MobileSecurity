@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MarkEmailUnread
+import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Notifications
@@ -160,7 +162,9 @@ fun SettingsScreen(
     onOpenRogueNetwork: () -> Unit = {},
     onOpenThreatIntel: () -> Unit = {},
     onOpenPrivacyShield: () -> Unit = {},
-    onOpenAppShield: () -> Unit = {}
+    onOpenAppShield: () -> Unit = {},
+    onOpenBreachWatch: () -> Unit = {},
+    onOpenDataRemoval: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -337,6 +341,26 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Privacy Shield",
                     onClick = onOpenPrivacyShield
+                )
+                RowDivider()
+                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
+                // feed. Monthly WorkManager recheck + ad-hoc "Check now" from the screen.
+                SettingsNavRow(
+                    icon = Icons.Filled.MarkEmailUnread,
+                    tint = settingsBlue,
+                    title = "Breach Watch",
+                    onClick = onOpenBreachWatch
+                )
+                RowDivider()
+                // Data Removal Scan (FREE, visibility-only). Opens search URLs on common
+                // people-search sites; cannot and does not remove data. Caption makes
+                // that unambiguous.
+                SettingsNavRow(
+                    icon = Icons.Filled.PersonSearch,
+                    tint = settingsBlue,
+                    title = "Data Removal Scan",
+                    value = "View only — can't remove",
+                    onClick = onOpenDataRemoval
                 )
                 RowDivider()
                 // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users

@@ -604,6 +604,26 @@ struct SettingsScreen: View {
                                    iconTint: Color.settingsBlue, label: "Privacy Shield")
                 }
                 SettingsDivider()
+                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
+                // feed. Monthly local reminder + ad-hoc "Check now". Elite upsell copy is
+                // inside the screen.
+                NavigationLink { BreachWatchScreen() } label: {
+                    SettingsNavRow(icon: "envelope.badge.shield.half.filled",
+                                   iconTint: Color.settingsBlue, label: "Breach Watch")
+                }
+                SettingsDivider()
+                // Data Removal Scan (FREE, visibility-only). Deep-link search URLs for
+                // common people-search sites — opens each in Safari. Does NOT remove
+                // anything; the row subtitle makes that unambiguous.
+                NavigationLink { DataRemovalScreen() } label: {
+                    SettingsNavRow(
+                        icon: "person.text.rectangle",
+                        iconTint: Color.settingsBlue,
+                        label: "Data Removal Scan",
+                        value: "View only — can't remove"
+                    )
+                }
+                SettingsDivider()
                 // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
                 // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
                 // to the setup wizard.

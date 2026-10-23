@@ -1,0 +1,14 @@
+[
+  {"name": "Spokeo", "search_url": "https://www.spokeo.com/{first}-{last}"},
+  {"name": "BeenVerified", "search_url": "https://www.beenverified.com/people/{first}-{last}/"},
+  {"name": "Whitepages", "search_url": "https://www.whitepages.com/name/{first}-{last}"},
+  {"name": "PeopleFinder", "search_url": "https://www.peoplefinder.com/people/{first}-{last}"},
+  {"name": "TruePeopleSearch", "search_url": "https://www.truepeoplesearch.com/results?name={first}%20{last}"},
+  {"name": "FastPeopleSearch", "search_url": "https://www.fastpeoplesearch.com/name/{first}-{last}"},
+  {"name": "Radaris", "search_url": "https://radaris.com/p/{First}/{Last}/"},
+  {"name": "USSearch", "search_url": "https://www.ussearch.com/people-search?firstName={first}&lastName={last}"},
+  {"name": "InstantCheckmate", "search_url": "https://www.instantcheckmate.com/people/{first}-{last}/"},
+  {"name": "Intelius", "search_url": "https://www.intelius.com/people-search/{first}-{last}"},
+  {"name": "MyLife", "search_url": "https://www.mylife.com/{first}-{last}"},
+  {"name": "PublicDataUSA", "search_url": "https://publicdatausa.com/search?name={first}%20{last}"}
+]

@@ -105,6 +105,10 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object PermissionHardening : Destination("permission_hardening", "Hardening", Icons.Filled.Security)
     // Auto Privacy Shield — Phase 2 (Elite). Guided Digital Wellbeing walkthrough.
     data object AppShield : Destination("app_shield", "App shield", Icons.Filled.Shield)
+    // FREE — Breach Watch: monitors one email against the bundled breach-hash prefix list.
+    data object BreachWatch : Destination("breach_watch", "Breach Watch", Icons.Filled.Shield)
+    // FREE — Data Removal Scan (visibility only). Deep-link search URLs for people-search sites.
+    data object DataRemoval : Destination("data_removal", "Data Removal", Icons.Filled.Security)
 }
 
 private val bottomBarDestinations = listOf(
@@ -242,7 +246,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenRogueNetwork = { navController.navigate(Destination.RogueNetwork.route) },
                     onOpenThreatIntel = { navController.navigate(Destination.ThreatIntel.route) },
                     onOpenPrivacyShield = { navController.navigate(Destination.PrivacyShield.route) },
-                    onOpenAppShield = { navController.navigate(Destination.AppShield.route) }
+                    onOpenAppShield = { navController.navigate(Destination.AppShield.route) },
+                    onOpenBreachWatch = { navController.navigate(Destination.BreachWatch.route) },
+                    onOpenDataRemoval = { navController.navigate(Destination.DataRemoval.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -266,6 +272,16 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.AppShield.route) {
                 com.onlytrusted.app.ui.appshield.AppShieldSetupScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.BreachWatch.route) {
+                com.onlytrusted.app.ui.breachwatch.BreachWatchScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.DataRemoval.route) {
+                com.onlytrusted.app.ui.dataremoval.DataRemovalScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
