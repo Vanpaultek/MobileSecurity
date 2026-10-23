@@ -3,6 +3,7 @@
 import Foundation
 import Security
 import SwiftUI
+import UserNotifications
 
 /// Static catalog of identity-protection actions. All entries deep-link to official
 /// self-service portals (US bureaus and federal agencies). OnlyTrusted does **not**
@@ -184,29 +185,79 @@ final class IdentityActionsProgress: ObservableObject {
 
     @Published private(set) var done: Set<String> = []
 
-    private let key = "identity_actions.v1.done"
+    /// Premium-only: per-action `[id: nextReminderDate]`. The reminder fires once per
+    /// year and is rescheduled when the user re-arms it from the UI.
+    @Published private(set) var reminders: [String: Date] = [:]
+
+    static let reminderYears: TimeInterval = 1
+
+    private let doneKey = "identity_actions.v1.done"
+    private let remindersKey = "identity_actions.v1.reminders"
 
     private init() {
-        if let raw = Keychain.get(key) {
+        if let raw = Keychain.get(doneKey) {
             done = Set(raw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
+        }
+        if let raw = Keychain.get(remindersKey),
+           let data = raw.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode([String: Date].self, from: data) {
+            reminders = decoded
         }
     }
 
     func toggle(_ id: String) {
         if done.contains(id) { done.remove(id) } else { done.insert(id) }
-        persist()
+        persistDone()
     }
 
     func isDone(_ id: String) -> Bool { done.contains(id) }
 
-    func clearAll() {
-        done = []
-        Keychain.delete(key)
+    /// Premium: schedule / cancel a yearly renewal reminder for an action.
+    func setReminder(_ id: String, title: String, now: Date = Date()) {
+        let fireAt = now.addingTimeInterval(Self.reminderYears * 365 * 86400)
+        reminders[id] = fireAt
+        persistReminders()
+        let content = UNMutableNotificationContent()
+        content.title = "Renew: \(title)"
+        content.body = "It's been a year since you flagged this identity-protection step. Open OnlyTrusted → Identity Protection to re-verify."
+        content.sound = .default
+        let comps = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute], from: fireAt)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        let req = UNNotificationRequest(identifier: Self.notifID(id), content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(req) { _ in }
     }
 
-    private func persist() {
+    func clearReminder(_ id: String) {
+        reminders.removeValue(forKey: id)
+        persistReminders()
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [Self.notifID(id)]
+        )
+    }
+
+    func reminderDate(_ id: String) -> Date? { reminders[id] }
+
+    func clearAll() {
+        reminders.keys.forEach { clearReminder($0) }
+        done = []
+        reminders = [:]
+        Keychain.delete(doneKey)
+        Keychain.delete(remindersKey)
+    }
+
+    private static func notifID(_ id: String) -> String {
+        "identity_actions.v1.reminder.\(id)"
+    }
+
+    private func persistDone() {
         let s = done.sorted().joined(separator: ",")
-        Keychain.set(s, for: key)
+        Keychain.set(s, for: doneKey)
+    }
+
+    private func persistReminders() {
+        let data = (try? JSONEncoder().encode(reminders)) ?? Data()
+        let str = String(data: data, encoding: .utf8) ?? "{}"
+        Keychain.set(str, for: remindersKey)
     }
 }
 

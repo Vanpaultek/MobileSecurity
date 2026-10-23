@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
@@ -67,8 +69,10 @@ import com.onlytrusted.app.ui.theme.TertiaryTextDark
 fun IdentityProtectionScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     var done by remember { mutableStateOf(IdentityActionsProgress.done(context)) }
+    var reminders by remember { mutableStateOf(IdentityActionsProgress.reminders(context)) }
     var showMenu by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
+    val isPremium = com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)
 
     val total = IdentityActionsCatalog.all.size
     val completed = done.size
@@ -166,11 +170,21 @@ fun IdentityProtectionScreen(onBack: () -> Unit) {
                             ActionRow(
                                 action = action,
                                 isDone = done.contains(action.id),
+                                isPremium = isPremium,
+                                reminderOn = reminders.containsKey(action.id),
                                 onToggle = {
                                     IdentityActionsProgress.toggle(context, action.id)
                                     done = IdentityActionsProgress.done(context)
                                 },
-                                onOpen = { openUrl(context, action.url) }
+                                onOpen = { openUrl(context, action.url) },
+                                onToggleReminder = {
+                                    if (reminders.containsKey(action.id)) {
+                                        IdentityActionsProgress.clearReminder(context, action.id)
+                                    } else {
+                                        IdentityActionsProgress.setReminder(context, action.id, action.title)
+                                    }
+                                    reminders = IdentityActionsProgress.reminders(context)
+                                }
                             )
                         }
                     }
@@ -232,8 +246,11 @@ fun IdentityProtectionScreen(onBack: () -> Unit) {
 private fun ActionRow(
     action: IdentityAction,
     isDone: Boolean,
+    isPremium: Boolean,
+    reminderOn: Boolean,
     onToggle: () -> Unit,
-    onOpen: () -> Unit
+    onOpen: () -> Unit,
+    onToggleReminder: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -260,10 +277,39 @@ private fun ActionRow(
                 Text(action.notes, fontSize = 11.sp, color = SecondaryTextDark)
             }
         }
-        TextButton(onClick = onOpen, contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 34.dp, top = 0.dp, bottom = 0.dp, end = 8.dp)) {
-            Icon(Icons.Filled.OpenInNew, null, tint = BrandCyanDark, modifier = Modifier.size(14.dp))
-            Spacer(Modifier.size(4.dp))
-            Text("Open ${action.organisation}", color = BrandCyanDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(start = 34.dp)
+        ) {
+            TextButton(
+                onClick = onOpen,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+            ) {
+                Icon(Icons.Filled.OpenInNew, null, tint = BrandCyanDark, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.size(4.dp))
+                Text("Open ${action.organisation}", color = BrandCyanDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+            if (isPremium) {
+                TextButton(
+                    onClick = onToggleReminder,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        if (reminderOn) Icons.Filled.NotificationsActive else Icons.Filled.Notifications,
+                        null,
+                        tint = if (reminderOn) BrandAccentDark else SecondaryTextDark,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        if (reminderOn) "Reminder set" else "Remind yearly",
+                        color = if (reminderOn) BrandAccentDark else SecondaryTextDark,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

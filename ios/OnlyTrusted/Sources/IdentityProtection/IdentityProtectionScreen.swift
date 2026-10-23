@@ -11,6 +11,7 @@ import UIKit
 struct IdentityProtectionScreen: View {
 
     @StateObject private var progress = IdentityActionsProgress.shared
+    @StateObject private var sub = SubscriptionState.shared
     @State private var showResetConfirm = false
 
     private var groups: [(IdentityActionPhase, [IdentityAction])] {
@@ -147,17 +148,39 @@ struct IdentityProtectionScreen: View {
                 Spacer(minLength: 4)
             }
 
-            Button {
-                UIApplication.shared.open(action.url)
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.up.right.square")
-                    Text("Open \(action.organisation)")
+            HStack(spacing: 14) {
+                Button {
+                    UIApplication.shared.open(action.url)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.up.right.square")
+                        Text("Open \(action.organisation)")
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.appAccent)
                 }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.appAccent)
+                .buttonStyle(.plain)
+
+                // Premium: yearly renewal reminder toggle per row.
+                if sub.hasPremium {
+                    let reminderOn = progress.reminderDate(action.id) != nil
+                    Button {
+                        if reminderOn {
+                            progress.clearReminder(action.id)
+                        } else {
+                            progress.setReminder(action.id, title: action.title)
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: reminderOn ? "bell.fill" : "bell")
+                            Text(reminderOn ? "Reminder set" : "Remind yearly")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(reminderOn ? Color.appSuccess : Color.appSecondaryText)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, 6)
     }

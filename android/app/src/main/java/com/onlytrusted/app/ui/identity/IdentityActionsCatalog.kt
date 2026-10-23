@@ -7,6 +7,12 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import org.json.JSONArray
+import org.json.JSONObject
+import androidx.work.Data as WorkData
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.onlytrusted.app.work.IdentityReminderWorker
+import java.util.concurrent.TimeUnit
 
 /**
  * Static catalog of identity-protection actions. Mirrors iOS `IdentityActionsCatalog`.
@@ -145,6 +151,10 @@ object IdentityActionsProgress {
 
     private const val PREFS = "identity_actions_prefs_v1"
     private const val KEY_DONE = "done_ids"
+    private const val KEY_REMINDERS = "reminders_json"
+
+    /** Yearly cadence for Premium renewal reminders. */
+    const val REMINDER_YEARS: Long = 1
 
     // Cache the MasterKey to avoid the Keystore round-trip on every prefs() call.
     @Volatile private var cachedMasterKey: MasterKey? = null
@@ -186,7 +196,51 @@ object IdentityActionsProgress {
 
     fun isDone(ctx: Context, id: String): Boolean = done(ctx).contains(id)
 
+    // --- Premium: yearly renewal reminders -----------------------------------
+
+    fun reminders(ctx: Context): Map<String, Long> {
+        val raw = prefs(ctx).getString(KEY_REMINDERS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = JSONObject(raw)
+            buildMap<String, Long> { obj.keys().forEach { k -> put(k, obj.getLong(k)) } }
+        }.getOrDefault(emptyMap())
+    }
+
+    fun reminderAt(ctx: Context, id: String): Long? = reminders(ctx)[id]
+
+    fun setReminder(ctx: Context, id: String, title: String, nowMillis: Long = System.currentTimeMillis()) {
+        val fireAt = nowMillis + REMINDER_YEARS * 365 * 24L * 60 * 60 * 1000
+        val current = reminders(ctx).toMutableMap()
+        current[id] = fireAt
+        persistReminders(ctx, current)
+        val data = WorkData.Builder()
+            .putString("action_id", id)
+            .putString("title", title)
+            .build()
+        val req = OneTimeWorkRequestBuilder<IdentityReminderWorker>()
+            .setInitialDelay(REMINDER_YEARS * 365, TimeUnit.DAYS)
+            .setInputData(data)
+            .addTag(tag(id))
+            .build()
+        WorkManager.getInstance(ctx.applicationContext).enqueue(req)
+    }
+
+    fun clearReminder(ctx: Context, id: String) {
+        val updated = reminders(ctx).toMutableMap().apply { remove(id) }
+        persistReminders(ctx, updated)
+        WorkManager.getInstance(ctx.applicationContext).cancelAllWorkByTag(tag(id))
+    }
+
+    private fun tag(id: String) = "identity_reminder_$id"
+
+    private fun persistReminders(ctx: Context, map: Map<String, Long>) {
+        val obj = JSONObject()
+        map.forEach { (k, v) -> obj.put(k, v) }
+        prefs(ctx).edit().putString(KEY_REMINDERS, obj.toString()).apply()
+    }
+
     fun clearAll(ctx: Context) {
-        prefs(ctx).edit().remove(KEY_DONE).apply()
+        reminders(ctx).keys.forEach { clearReminder(ctx, it) }
+        prefs(ctx).edit().remove(KEY_DONE).remove(KEY_REMINDERS).apply()
     }
 }
