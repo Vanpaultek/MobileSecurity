@@ -109,6 +109,10 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object BreachWatch : Destination("breach_watch", "Breach Watch", Icons.Filled.Shield)
     // FREE — Data Removal Scan (visibility only). Deep-link search URLs for people-search sites.
     data object DataRemoval : Destination("data_removal", "Data Removal", Icons.Filled.Security)
+    // FREE — Private Aliases. On-device alias generator; forwarding is done by the user's chosen relay.
+    data object Aliases : Destination("aliases", "Aliases", Icons.Filled.Shield)
+    // FREE — Identity Protection catalog. Deep-link checklist for credit freezes, fraud alerts, etc.
+    data object IdentityProtection : Destination("identity_protection", "Identity Protection", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -248,7 +252,9 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenPrivacyShield = { navController.navigate(Destination.PrivacyShield.route) },
                     onOpenAppShield = { navController.navigate(Destination.AppShield.route) },
                     onOpenBreachWatch = { navController.navigate(Destination.BreachWatch.route) },
-                    onOpenDataRemoval = { navController.navigate(Destination.DataRemoval.route) }
+                    onOpenDataRemoval = { navController.navigate(Destination.DataRemoval.route) },
+                    onOpenAliases = { navController.navigate(Destination.Aliases.route) },
+                    onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -282,6 +288,16 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.DataRemoval.route) {
                 com.onlytrusted.app.ui.dataremoval.DataRemovalScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.Aliases.route) {
+                com.onlytrusted.app.ui.aliases.AliasesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.IdentityProtection.route) {
+                com.onlytrusted.app.ui.identity.IdentityProtectionScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

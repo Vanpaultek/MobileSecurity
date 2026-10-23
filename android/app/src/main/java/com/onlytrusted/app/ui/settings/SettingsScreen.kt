@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Warning
@@ -164,7 +165,9 @@ fun SettingsScreen(
     onOpenPrivacyShield: () -> Unit = {},
     onOpenAppShield: () -> Unit = {},
     onOpenBreachWatch: () -> Unit = {},
-    onOpenDataRemoval: () -> Unit = {}
+    onOpenDataRemoval: () -> Unit = {},
+    onOpenAliases: () -> Unit = {},
+    onOpenIdentityProtection: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -360,6 +363,24 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Data Removal Scan",
                     onClick = onOpenDataRemoval
+                )
+                RowDivider()
+                // Private Aliases (FREE, unlimited). On-device alias generator; user's
+                // chosen relay provider does the forwarding. Honest claim lives inside.
+                SettingsNavRow(
+                    icon = Icons.Filled.AlternateEmail,
+                    tint = settingsBlue,
+                    title = "Private Aliases",
+                    onClick = onOpenAliases
+                )
+                RowDivider()
+                // Identity Protection (FREE). Deep-link checklist of credit freezes, fraud
+                // alerts, HIBP enrollment, FTC report, SSA block. Local checkmarks only.
+                SettingsNavRow(
+                    icon = Icons.Filled.VerifiedUser,
+                    tint = settingsBlue,
+                    title = "Identity Protection",
+                    onClick = onOpenIdentityProtection
                 )
                 RowDivider()
                 // App Shield (Elite) — Phase 2 Selected-App Restriction. Non-Elite users

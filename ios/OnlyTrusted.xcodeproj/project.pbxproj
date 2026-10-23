@@ -58,12 +58,14 @@
 		555F43EF319DADE0656DC37F /* SmartLinkGuardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8D8237C800B6BE3D6B1B5FA /* SmartLinkGuardScreen.swift */; };
 		5932FF1AD173D13604866D0B /* ShamirSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F2FB3D59C4ED0CC76ABDE9 /* ShamirSetupScreen.swift */; };
 		599CA7A18C864590B62C9DFA /* DataRemovalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9175C2D0C46ABCD5771CD716 /* DataRemovalScreen.swift */; };
+		5A587A0BE8D357F75567FE50 /* IdentityProtectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4412C36499A9161B1E9D24FA /* IdentityProtectionScreen.swift */; };
 		5B55298D0C056AB4FC7237EA /* DeadmanWipeSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F45B80EDAAA7B50465F2E0 /* DeadmanWipeSetupScreen.swift */; };
 		5F3A4A8B92CBCA4672369C31 /* ShamirSSS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C18F7192B55359DB4F01021 /* ShamirSSS.swift */; };
 		63302E65BD76169E845C3814 /* TrackerFinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C66099C7EE48ABCF66D354FD /* TrackerFinderScreen.swift */; };
 		636BDD0135549321356A2CF3 /* ThreatIntelScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1E4647F6100EDB64A27C53 /* ThreatIntelScreen.swift */; };
 		68C1782A2C3E52DE72EF04A4 /* HardwareKeyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86ACF06C58669C735244AE6 /* HardwareKeyState.swift */; };
 		6977DB921C17609B9ACDFB9D /* CheckInState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A322615CAB3BF4B117D1EEB4 /* CheckInState.swift */; };
+		6A993A61736317DC193099BC /* AliasesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90C8E097D1A3EBB7F2FC1AC /* AliasesScreen.swift */; };
 		6B5F51EB9CCAA5F6DFCAD304 /* PhoneUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A651F201558860B72E2B18EA /* PhoneUtils.swift */; };
 		6BF24298F1FCC081CE0F460B /* SafetyFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1728B07C771A9794B257D74 /* SafetyFeatures.swift */; };
 		751BD6FC052CDABEF855688F /* BillingSubscriptionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A017ADDC045A7C7B506B730 /* BillingSubscriptionScreen.swift */; };
@@ -90,11 +92,13 @@
 		9900BF9584D373B4CBC0CD22 /* FaceLockEmbeddingBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D26A68D8D2D1ECD9CD57DB /* FaceLockEmbeddingBridge.swift */; };
 		9AF2D6B37908BF34F5E28F86 /* AppShieldUpsellSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544B263871B4083B1535C862 /* AppShieldUpsellSheet.swift */; };
 		9B5924F2D9A005A736056B0F /* HardwareKeySetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E76DA3F7913747A56B51D1 /* HardwareKeySetupScreen.swift */; };
+		9B9CA67F7A9FDDA5D4064A60 /* IdentityActionsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB5501D663860F4BA1E3B3 /* IdentityActionsCatalog.swift */; };
 		9D16A205367825F7EFFCCA65 /* AppShieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69066F426C1043AEA4777B58 /* AppShieldState.swift */; };
 		9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B875C9E9199F8E854722B33A /* AppLockGate.swift */; };
 		9E3FC5A389094A3AF0331964 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E116181529A59548B1AA0523 /* SettingsScreen.swift */; };
 		9F7A1840EF5FC66F71635709 /* GeofenceSMSComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6124EF4DBF39E34ECD1B6178 /* GeofenceSMSComposer.swift */; };
 		A14ECB6E3A4062C3FB63BF9C /* VoiceBioSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73691742FBB9DAB95541EDB /* VoiceBioSetupScreen.swift */; };
+		A267C6DB9BEA2222E0673FD5 /* AliasStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB543254C7F54C29BF10C53C /* AliasStore.swift */; };
 		A45D023551ECE303E393FB67 /* DataRemovalScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA9EF383B50B59CAD6FDC0E /* DataRemovalScan.swift */; };
 		A7D08FD7989FEFBD2D6982A9 /* BlockListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5119E1DD2B769DD08DF147 /* BlockListScreen.swift */; };
 		A7D804FF40A8CB965BDB9055 /* DuressSMSComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB948A2AA60E02745F417204 /* DuressSMSComposer.swift */; };
@@ -219,7 +223,9 @@
 		3BA4D28EB9A8DA24BCA4B8C3 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
 		3F2F158C36AD593B1896D652 /* WangiriEventKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriEventKind.swift; sourceTree = "<group>"; };
 		3F8621EE175927F0FEAF9EC9 /* VoiceBioMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBioMonitor.swift; sourceTree = "<group>"; };
+		4412C36499A9161B1E9D24FA /* IdentityProtectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityProtectionScreen.swift; sourceTree = "<group>"; };
 		4851D38B8F1106FC519D68DD /* OnlyTrusted.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OnlyTrusted.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		48BB5501D663860F4BA1E3B3 /* IdentityActionsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityActionsCatalog.swift; sourceTree = "<group>"; };
 		48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultEditScreen.swift; sourceTree = "<group>"; };
 		4916E2EF293691F7203D197D /* CyberBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberBackground.swift; sourceTree = "<group>"; };
 		501D17326F04F78A780C80B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -294,6 +300,7 @@
 		C66099C7EE48ABCF66D354FD /* TrackerFinderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerFinderScreen.swift; sourceTree = "<group>"; };
 		C6C07EA52904EFEE798C4433 /* TrackerFinderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerFinderStore.swift; sourceTree = "<group>"; };
 		C7A62D69894E411B41A3CACF /* BorderModeSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderModeSetupScreen.swift; sourceTree = "<group>"; };
+		C90C8E097D1A3EBB7F2FC1AC /* AliasesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AliasesScreen.swift; sourceTree = "<group>"; };
 		CA8A4B571B36982CD4221F2A /* OnlyTrustedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyTrustedApp.swift; sourceTree = "<group>"; };
 		CCDBDF9D8A581BFB083F95F5 /* FaceLockMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLockMonitor.swift; sourceTree = "<group>"; };
 		D256F9AD16A6B634B328716B /* UpgradeToPremiumScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeToPremiumScreen.swift; sourceTree = "<group>"; };
@@ -312,6 +319,7 @@
 		E6F45B80EDAAA7B50465F2E0 /* DeadmanWipeSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadmanWipeSetupScreen.swift; sourceTree = "<group>"; };
 		E9C26378948D69C41DC6EFEA /* BackupRestoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreScreen.swift; sourceTree = "<group>"; };
 		EAF4E39ABA84E2C395182096 /* GeofenceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceState.swift; sourceTree = "<group>"; };
+		EB543254C7F54C29BF10C53C /* AliasStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AliasStore.swift; sourceTree = "<group>"; };
 		EC53C69B45FE2CE695C4963A /* CallDirectoryExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CallDirectoryExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEFF4754051354FB2E3F10DA /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F0393312C797275B88012608 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
@@ -384,6 +392,7 @@
 				1ADC02C146AF9BB4346F4B30 /* FaceLock */,
 				865807B86013A831ADF0A495 /* Geofence */,
 				564C8681F6FEEFCF4CA6B6B7 /* HardwareKey */,
+				9F038669EB712919BB85442C /* IdentityProtection */,
 				BE88C114F01F7FB7F4965C92 /* Legal */,
 				59FC3E7C7CBEEB57ED07CBFB /* Lock */,
 				8B2BAE45A4D64FD531E8626F /* Onboarding */,
@@ -391,6 +400,7 @@
 				49F3738B372CAA8817DF84AC /* PanicLockdown */,
 				FF9A0805C0F7AD6BBAAF478A /* PermissionWatchdog */,
 				C38E1CBF7386E06D09B658CA /* PrivacyShield */,
+				5F0D6E2790D44F7770802977 /* PrivateAliases */,
 				E0BEBB8BCADF302F3D864698 /* Reports */,
 				C9DD4ACE2BAD89F849D6C48D /* RogueNetwork */,
 				2797CB6C9550BAA22F04740C /* Safety */,
@@ -529,6 +539,15 @@
 			path = Lock;
 			sourceTree = "<group>";
 		};
+		5F0D6E2790D44F7770802977 /* PrivateAliases */ = {
+			isa = PBXGroup;
+			children = (
+				C90C8E097D1A3EBB7F2FC1AC /* AliasesScreen.swift */,
+				EB543254C7F54C29BF10C53C /* AliasStore.swift */,
+			);
+			path = PrivateAliases;
+			sourceTree = "<group>";
+		};
 		6090D23C3520BFEAD7394652 /* Vault */ = {
 			isa = PBXGroup;
 			children = (
@@ -657,6 +676,15 @@
 				72ABF45F2F96A9542EBB9715 /* BreachWatchState.swift */,
 			);
 			path = BreachWatch;
+			sourceTree = "<group>";
+		};
+		9F038669EB712919BB85442C /* IdentityProtection */ = {
+			isa = PBXGroup;
+			children = (
+				48BB5501D663860F4BA1E3B3 /* IdentityActionsCatalog.swift */,
+				4412C36499A9161B1E9D24FA /* IdentityProtectionScreen.swift */,
+			);
+			path = IdentityProtection;
 			sourceTree = "<group>";
 		};
 		A0B05AEE4E3997DC697C3AA5 /* ThreatIntel */ = {
@@ -972,6 +1000,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				06B64183C02925954AB1C87B /* AboutScreen.swift in Sources */,
+				A267C6DB9BEA2222E0673FD5 /* AliasStore.swift in Sources */,
+				6A993A61736317DC193099BC /* AliasesScreen.swift in Sources */,
 				4C091E1465E0117CF62999EA /* AppBackdrop.swift in Sources */,
 				F3FC4BEA9BF8AF5BB6F1EE26 /* AppGate.swift in Sources */,
 				9E181F631CFCFA6B86F2BE23 /* AppLockGate.swift in Sources */,
@@ -1027,6 +1057,8 @@
 				810CFBAF25DEB421D58DE806 /* HardwareKeyGate.swift in Sources */,
 				9B5924F2D9A005A736056B0F /* HardwareKeySetupScreen.swift in Sources */,
 				68C1782A2C3E52DE72EF04A4 /* HardwareKeyState.swift in Sources */,
+				9B9CA67F7A9FDDA5D4064A60 /* IdentityActionsCatalog.swift in Sources */,
+				5A587A0BE8D357F75567FE50 /* IdentityProtectionScreen.swift in Sources */,
 				F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */,
 				B9133CBDCF92C2136AA035CE /* LegalScreen.swift in Sources */,
 				942EF088BB21A3B91BC880C6 /* MFCC.swift in Sources */,

@@ -623,6 +623,28 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
+                // Private Aliases (FREE, unlimited). On-device alias generator; forwarding
+                // is done by the user's chosen relay (iCloud Hide My Email, DDG, SimpleLogin,
+                // Firefox Relay, custom domain). Honest claim lives inside the screen.
+                NavigationLink { AliasesScreen() } label: {
+                    SettingsNavRow(
+                        icon: "at.badge.plus",
+                        iconTint: Color.settingsBlue,
+                        label: "Private Aliases"
+                    )
+                }
+                SettingsDivider()
+                // Identity Protection (FREE). Deep-link checklist of credit freezes, fraud
+                // alerts, HIBP enrollment, FTC report, SSA block. We don't contact any
+                // bureau; we show the official self-service URLs and track your checkmarks.
+                NavigationLink { IdentityProtectionScreen() } label: {
+                    SettingsNavRow(
+                        icon: "person.badge.shield.checkmark",
+                        iconTint: Color.settingsBlue,
+                        label: "Identity Protection"
+                    )
+                }
+                SettingsDivider()
                 // App Shield (Elite) — Phase 2 Family Controls based Selected-App Restriction.
                 // Elite-gated. Non-Elite users see the upsell sheet; Elite users jump straight
                 // to the setup wizard.
