@@ -174,7 +174,8 @@ fun SettingsScreen(
     onOpenIdentityProtection: () -> Unit = {},
     onOpenWeeklyDigest: () -> Unit = {},
     onOpenAdvancedBlocking: () -> Unit = {},
-    onOpenContactScan: () -> Unit = {}
+    onOpenContactScan: () -> Unit = {},
+    onOpenSmsScan: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -588,6 +589,16 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Contact Safety Scan",
                     onClick = onOpenContactScan
+                )
+                RowDivider()
+                // Scam SMS Scan — on-device scan of SMS inbox against bundled scam-numbers
+                // + phishing-URLs + classic scam phrases. Opt-in READ_SMS; nothing leaves
+                // the device. See ui/smsscan/SmsScamScanner.kt.
+                SettingsNavRow(
+                    icon = Icons.AutoMirrored.Filled.Message,
+                    tint = settingsBlue,
+                    title = "Scam SMS Scan",
+                    onClick = onOpenSmsScan
                 )
                 RowDivider()
                 SettingsNavRow(

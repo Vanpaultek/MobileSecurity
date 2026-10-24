@@ -120,6 +120,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     // FREE — Contact Safety Scan: cross-checks the system contact list against the
     // bundled scam-numbers feed on-device.
     data object ContactScan : Destination("contact_scan", "Contact Safety Scan", Icons.Filled.Shield)
+    // FREE — Scam SMS Scan: cross-checks the SMS inbox against bundled scam-numbers +
+    // phishing-URLs + classic scam phrases on-device.
+    data object SmsScan : Destination("sms_scan", "Scam SMS Scan", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -266,7 +269,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) },
                     onOpenWeeklyDigest = { navController.navigate(Destination.WeeklyDigest.route) },
                     onOpenAdvancedBlocking = { navController.navigate(Destination.AdvancedBlocking.route) },
-                    onOpenContactScan = { navController.navigate(Destination.ContactScan.route) }
+                    onOpenContactScan = { navController.navigate(Destination.ContactScan.route) },
+                    onOpenSmsScan = { navController.navigate(Destination.SmsScan.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -325,6 +329,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.ContactScan.route) {
                 com.onlytrusted.app.ui.contactscan.ContactScanScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.SmsScan.route) {
+                com.onlytrusted.app.ui.smsscan.SmsScanScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
