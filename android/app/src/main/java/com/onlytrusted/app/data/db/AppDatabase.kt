@@ -25,9 +25,13 @@ import java.security.SecureRandom
         TrustedNumber::class,
         ShieldSession::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
+// v4 — Nov 2026: added `systemContactLookupKey` to trusted_contacts for Phase 1 of the
+//                hybrid contact-reference system. fallbackToDestructiveMigration() takes
+//                care of the ALTER TABLE on debug builds; prod should write a proper
+//                Migration3To4 that preserves existing user data.
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun eventDao(): EventDao

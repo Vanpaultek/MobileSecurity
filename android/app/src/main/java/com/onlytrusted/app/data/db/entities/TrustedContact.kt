@@ -19,7 +19,11 @@ data class TrustedContact(
     val addressEncrypted: String? = null,
     val notesEncrypted: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    /** ContactsContract LOOKUP_KEY of the linked system contact, when imported via
+     *  the picker. Null for manually-entered contacts. Enables Phase 2 live-read of
+     *  always-fresh name + number from the OS Contacts database. */
+    val systemContactLookupKey: String? = null
 )
 
 @Entity(

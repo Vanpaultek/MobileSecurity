@@ -197,6 +197,8 @@ private fun EditForm(
     onDelete: (Long) -> Unit,
     onCancel: () -> Unit
 ) {
+    val context = LocalContext.current
+
     // Form state
     var name by remember { mutableStateOf("") }
     var countryCode by remember { mutableStateOf(CountryCode.US) }
@@ -212,6 +214,48 @@ private fun EditForm(
 
     var showCountryPicker by remember { mutableStateOf(false) }
     var showPhotoNotice by remember { mutableStateOf(false) }
+
+    // Contact picker (Phase 1 of hybrid approach). Launches the system contact picker;
+    // on return, we read the picked contact's display name + first phone number via
+    // ContentResolver and auto-fill the form. Phase 2 will also store the LOOKUP_KEY
+    // on the TrustedContact entity + live-read it so updates in Contacts flow through.
+    //
+    // Honest claim stays intact: we only read the ONE contact the user picks, never
+    // their full address book. The permission prompt only fires when the user taps
+    // "Pick from Contacts" — tapping Save manually never triggers it.
+    val pickContactLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.PickContact()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val resolver = context.contentResolver
+        runCatching {
+            resolver.query(uri, arrayOf(
+                android.provider.ContactsContract.Contacts.DISPLAY_NAME,
+                android.provider.ContactsContract.Contacts._ID
+            ), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val pickedName = cursor.getString(0).orEmpty()
+                    val contactId = cursor.getLong(1)
+                    name = pickedName
+                    // Grab the first phone number for this contact id.
+                    resolver.query(
+                        android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        arrayOf(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER),
+                        "${android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
+                        arrayOf(contactId.toString()),
+                        null
+                    )?.use { phoneCursor ->
+                        if (phoneCursor.moveToFirst()) {
+                            val rawNumber = phoneCursor.getString(0).orEmpty()
+                            val (code, digits) = splitDialCode(rawNumber)
+                            if (code != null) countryCode = code
+                            phoneDigits = digits
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(contactId) {
         if (contactId == null) return@LaunchedEffect
@@ -325,6 +369,26 @@ private fun EditForm(
         ) {
             // Portrait + Add Photo side-by-side
             PhotoRow(onAddPhoto = { showPhotoNotice = true })
+
+            // Pick from Contacts (Phase 1 of hybrid approach). Only shown when adding
+            // a new contact (not when editing an existing one). Pre-fills name + first
+            // phone number from the system picker so users don't have to transcribe.
+            if (contactId == null) {
+                Button(
+                    onClick = { pickContactLauncher.launch(null) },
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandCyanDark.copy(alpha = 0.15f))
+                ) {
+                    Icon(Icons.Filled.Person, null, tint = BrandCyanDark, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Pick from Contacts", color = BrandCyanDark, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                }
+                Text(
+                    "We only read the one contact you tap — never your full address book.",
+                    color = SecondaryTextDark,
+                    fontSize = 11.sp
+                )
+            }
 
             // Name field
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
