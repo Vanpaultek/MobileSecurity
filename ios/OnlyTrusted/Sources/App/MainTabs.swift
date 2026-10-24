@@ -285,19 +285,31 @@ struct DashboardScreen: View {
     }
 
     private var statsRow: some View {
-        HStack(spacing: 10) {
-            StatTile(icon: "person.2.fill",
-                     tint: Color.appAccent,
-                     value: trustedCount,
-                     label: "Trusted\nContacts")
-            StatTile(icon: "nosign",
-                     tint: Color.appDanger,
-                     value: blockedToday,
-                     label: "Blocked\nToday")
-            StatTile(icon: "chart.bar.fill",
-                     tint: Color.appBrightCyan,
-                     value: blockedWeek,
-                     label: "Blocked\nThis Week")
+        // Scam Contacts tile — populated by the last Contact Safety Scan. Tapping
+        // Settings → Contact Safety Scan → Scan refreshes the count persisted in
+        // ContactScanState.
+        let scamContacts = ContactScanState.matchCount()
+        return VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                StatTile(icon: "person.2.fill",
+                         tint: Color.appAccent,
+                         value: trustedCount,
+                         label: "Trusted\nContacts")
+                StatTile(icon: "nosign",
+                         tint: Color.appDanger,
+                         value: blockedToday,
+                         label: "Blocked\nToday")
+            }
+            HStack(spacing: 10) {
+                StatTile(icon: "chart.bar.fill",
+                         tint: Color.appBrightCyan,
+                         value: blockedWeek,
+                         label: "Blocked\nThis Week")
+                StatTile(icon: "exclamationmark.triangle.fill",
+                         tint: scamContacts > 0 ? Color.appDanger : Color.appAccent,
+                         value: scamContacts,
+                         label: "Scam\nContacts")
+            }
         }
     }
 

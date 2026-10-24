@@ -209,10 +209,14 @@ fun DashboardScreen(
             ) {
                 ProtectionActiveCard(isActive = protectionActive)
             }
+            val scamContactsCount = remember {
+                com.onlytrusted.app.ui.contactscan.ContactScanState.matchCount(context)
+            }
             StatsRow(
                 trusted = state.trustedContactCount,
                 blockedToday = state.blockedCalls24h,
-                blockedWeek = state.flaggedSms24h
+                blockedWeek = state.flaggedSms24h,
+                scamContacts = scamContactsCount
             )
             QuickActionsSection(
                 onAddContact = onGoToVault,
@@ -534,14 +538,26 @@ private fun ProtectionActiveCard(isActive: Boolean) {
 // MARK: - 3 stat tiles
 
 @Composable
-private fun StatsRow(trusted: Int, blockedToday: Int, blockedWeek: Int) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        StatTile(Modifier.weight(1f), Icons.Filled.Groups, BrandAccentDark, trusted, "Trusted\nContacts")
-        StatTile(Modifier.weight(1f), Icons.Filled.Block, DangerDark, blockedToday, "Blocked\nToday")
-        StatTile(Modifier.weight(1f), Icons.AutoMirrored.Filled.ShowChart, BrandCyanDark, blockedWeek, "Blocked\nThis Week")
+private fun StatsRow(trusted: Int, blockedToday: Int, blockedWeek: Int, scamContacts: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            StatTile(Modifier.weight(1f), Icons.Filled.Groups, BrandAccentDark, trusted, "Trusted\nContacts")
+            StatTile(Modifier.weight(1f), Icons.Filled.Block, DangerDark, blockedToday, "Blocked\nToday")
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            StatTile(Modifier.weight(1f), Icons.AutoMirrored.Filled.ShowChart, BrandCyanDark, blockedWeek, "Blocked\nThis Week")
+            // Scam Contacts tile — populated by the last Contact Safety Scan. Tapping
+            // the Contact Safety Scan row in Settings refreshes the count.
+            StatTile(Modifier.weight(1f), Icons.Filled.Warning,
+                if (scamContacts > 0) DangerDark else BrandAccentDark,
+                scamContacts, "Scam\nContacts")
+        }
     }
 }
 

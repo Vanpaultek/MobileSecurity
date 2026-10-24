@@ -92,7 +92,9 @@ fun ContactScanScreen(onBack: () -> Unit) {
         if (granted) {
             scope.launch {
                 scanning = true
-                report = withContext(Dispatchers.IO) { ContactsScamScanner.scan(context) }
+                val r = withContext(Dispatchers.IO) { ContactsScamScanner.scan(context) }
+                ContactScanState.save(context, r)
+                report = r
                 scanning = false
             }
         }
@@ -179,9 +181,11 @@ fun ContactScanScreen(onBack: () -> Unit) {
                                 onClick = {
                                     scope.launch {
                                         scanning = true
-                                        report = withContext(Dispatchers.IO) {
+                                        val r = withContext(Dispatchers.IO) {
                                             ContactsScamScanner.scan(context)
                                         }
+                                        ContactScanState.save(context, r)
+                                        report = r
                                         scanning = false
                                     }
                                 },
@@ -220,9 +224,11 @@ fun ContactScanScreen(onBack: () -> Unit) {
                             TextButton(onClick = {
                                 scope.launch {
                                     scanning = true
-                                    report = withContext(Dispatchers.IO) {
+                                    val r = withContext(Dispatchers.IO) {
                                         ContactsScamScanner.scan(context)
                                     }
+                                    ContactScanState.save(context, r)
+                                    report = r
                                     scanning = false
                                 }
                             }) { Text("Re-scan", color = BrandCyanDark) }

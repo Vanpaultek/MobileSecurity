@@ -124,6 +124,7 @@ struct ContactScanScreen: View {
         ContactsScamScanner.scan { r, err in
             scanning = false
             report = r
+            ContactScanState.save(r)
             if let err {
                 error = err.localizedDescription
             }
