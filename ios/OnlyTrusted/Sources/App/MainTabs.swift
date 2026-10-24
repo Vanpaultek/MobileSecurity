@@ -588,27 +588,19 @@ private struct ProtectionActiveCard: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            // Neon shield badge — thick glowing cyan ring with heavy bloom + bright white
-            // shield in the center. Previous version used a thin ring with low alpha glow;
-            // this matches the "neon" reference.
-            ZStack {
-                Circle()
-                    .stroke(Color.appBrightCyan.opacity(isActive ? 1.0 : 0.35), lineWidth: 4)
-                    .frame(width: 86, height: 86)
-                    .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.9 : 0),
-                            radius: 14, x: 0, y: 0)
-                    .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.55 : 0),
-                            radius: 28, x: 0, y: 0)
-                // Vector shield-check tinted brand cyan. Earlier BrandShield PNG attempt
-                // (c03ec7e) carried a baked-in dark background that showed as a dark
-                // rectangle inside the cyan ring; the vector version renders cleanly at
-                // any size and composes correctly with the ring + glow.
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 46, weight: .bold))
-                    .foregroundStyle(Color.appBrightCyan.opacity(isActive ? 1.0 : 0.5))
-                    .shadow(color: Color.appBrightCyan.opacity(0.6), radius: 8, x: 0, y: 0)
-                    .accessibilityLabel("Protection shield")
-            }
+            // Full OnlyTrusted brand-logo tile (shield + wordmark on midnight bg with
+            // baked-in cyan ring + sparkles). The asset already carries its own ring
+            // treatment, so we drop the extra Circle stroke / glow that used to wrap the
+            // glyph and just add a soft cyan drop shadow when protection is active.
+            Image("BrandLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 86, height: 86)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .opacity(isActive ? 1.0 : 0.55)
+                .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.55 : 0),
+                        radius: 14, x: 0, y: 0)
+                .accessibilityLabel("OnlyTrusted protection shield")
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(isActive ? "Protection is active" : "Setup needed")

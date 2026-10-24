@@ -475,45 +475,26 @@ private fun ProtectionActiveCard(isActive: Boolean) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Neon shield badge — thick glowing cyan ring with heavy bloom + bright white
-        // shield in the center. Previous version used a thin ring; this is the "neon" look.
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.size(86.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(86.dp)
-                    .shadow(
-                        elevation = 14.dp,
-                        shape = CircleShape,
-                        ambientColor = BrandCyanDark,
-                        spotColor = BrandCyanDark
-                    )
-                    .border(
-                        4.dp,
-                        BrandCyanDark.copy(alpha = if (isActive) 1f else 0.35f),
-                        CircleShape
-                    )
-            )
-            // Vector shield-check tinted brand cyan. Earlier launcher-PNG attempt
-            // (c03ec7e) carried a baked-in dark background that showed as a dark
-            // rectangle inside the cyan ring; the vector icon renders cleanly at any
-            // size and composes correctly with the ring + glow.
-            Icon(
-                imageVector = Icons.Filled.GppGood,
-                contentDescription = "Protection shield",
-                tint = BrandCyanDark.copy(alpha = if (isActive) 1.0f else 0.5f),
-                modifier = Modifier
-                    .size(52.dp)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = CircleShape,
-                        ambientColor = BrandCyanDark,
-                        spotColor = BrandCyanDark
-                    )
-            )
-        }
+        // Full OnlyTrusted brand-logo tile (shield + wordmark on midnight bg with
+        // baked-in cyan ring + sparkles). The asset already carries its own ring
+        // treatment, so we drop the extra Circle border/glow that used to wrap the
+        // glyph and just add a soft cyan drop shadow when protection is active.
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(
+                id = com.onlytrusted.app.R.drawable.brand_logo
+            ),
+            contentDescription = "OnlyTrusted protection shield",
+            modifier = Modifier
+                .size(86.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .shadow(
+                    elevation = if (isActive) 14.dp else 0.dp,
+                    shape = RoundedCornerShape(18.dp),
+                    ambientColor = BrandCyanDark,
+                    spotColor = BrandCyanDark
+                ),
+            alpha = if (isActive) 1.0f else 0.55f
+        )
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
