@@ -638,8 +638,8 @@ private fun QuickActionsSection(
             QuickActionCard(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Filled.PersonAdd,
-                title = "Add Contact",
-                subtitle = "Add to trusted list",
+                title = "Emergency Contact",
+                subtitle = "Manual or pick from Contacts",
                 tint = BrandAccentDark,
                 onClick = onAddContact
             )

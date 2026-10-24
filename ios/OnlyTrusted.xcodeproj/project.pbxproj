@@ -60,6 +60,7 @@
 		4FFCC7C60D5B6AA2A6FE5024 /* SmartLinkGuardRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E7C544A79123DD3E8F7D11 /* SmartLinkGuardRules.swift */; };
 		515C2A5DD466A2542B4E505D /* TrustedWitnessGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3108D7373B9B8950933F08 /* TrustedWitnessGate.swift */; };
 		54F1222A590D224BD05496FB /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB5D1A7B6BB307FBE5482B /* VaultStore.swift */; };
+		551EF281D329A3C4D21F4E2B /* ContactPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541C6D8691948E04267DF9C8 /* ContactPickerSheet.swift */; };
 		555F43EF319DADE0656DC37F /* SmartLinkGuardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8D8237C800B6BE3D6B1B5FA /* SmartLinkGuardScreen.swift */; };
 		5932FF1AD173D13604866D0B /* ShamirSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F2FB3D59C4ED0CC76ABDE9 /* ShamirSetupScreen.swift */; };
 		599CA7A18C864590B62C9DFA /* DataRemovalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9175C2D0C46ABCD5771CD716 /* DataRemovalScreen.swift */; };
@@ -244,6 +245,7 @@
 		49669B533AB496A677885A3F /* ContactScanScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactScanScreen.swift; sourceTree = "<group>"; };
 		501D17326F04F78A780C80B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		528559BBE2D0AE609BD1D884 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		541C6D8691948E04267DF9C8 /* ContactPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPickerSheet.swift; sourceTree = "<group>"; };
 		5446E4ED8EF9B425975F7CED /* WangiriSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriSettingsScreen.swift; sourceTree = "<group>"; };
 		544B263871B4083B1535C862 /* AppShieldUpsellSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShieldUpsellSheet.swift; sourceTree = "<group>"; };
 		58B0DC08C2C3C5A31D857A53 /* SafetyCheckInScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyCheckInScreen.swift; sourceTree = "<group>"; };
@@ -587,6 +589,7 @@
 		6090D23C3520BFEAD7394652 /* Vault */ = {
 			isa = PBXGroup;
 			children = (
+				541C6D8691948E04267DF9C8 /* ContactPickerSheet.swift */,
 				DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */,
 				A651F201558860B72E2B18EA /* PhoneUtils.swift */,
 				48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */,
@@ -1096,6 +1099,7 @@
 				127BB6F634006652CE0D4D99 /* CheckInSMSComposer.swift in Sources */,
 				6977DB921C17609B9ACDFB9D /* CheckInState.swift in Sources */,
 				95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */,
+				551EF281D329A3C4D21F4E2B /* ContactPickerSheet.swift in Sources */,
 				FA2F9C3259D71ECD03649C5E /* ContactScanScreen.swift in Sources */,
 				F339E19F3F017A22DAA75368 /* ContactScanState.swift in Sources */,
 				2A246AEF0EA888FEAA195FC6 /* ContactsScamScanner.swift in Sources */,

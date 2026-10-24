@@ -36,6 +36,7 @@ struct VaultEditScreen: View {
     // Sheets / alerts
     @State private var showCountryPicker = false
     @State private var showPhotoNotice = false
+    @State private var showContactPicker = false
 
     @State private var authorised: Bool
     @State private var authError: String?
@@ -76,6 +77,7 @@ struct VaultEditScreen: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 24) {
                         photoPicker
+                        if contactId == nil { pickFromContactsButton }
                         nameField
                         phoneRow
                         labelRow
@@ -205,6 +207,54 @@ struct VaultEditScreen: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, 8)
+    }
+
+    /// "Pick from Contacts" button — only shown when adding a new contact. Opens the
+    /// system CNContactPickerViewController; on return, pre-fills `name` + the phone
+    /// fields. The user can still edit the pre-filled fields before saving. Honest
+    /// claim: we only read the ONE contact tapped, never the full address book.
+    private var pickFromContactsButton: some View {
+        VStack(spacing: 6) {
+            Button {
+                showContactPicker = true
+            } label: {
+                HStack {
+                    Image(systemName: "person.crop.circle.badge.plus")
+                        .foregroundStyle(Color.appBrightCyan)
+                    Text("Pick from Contacts")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Color.appBrightCyan)
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(Color.appBrightCyan.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            Text("We only read the one contact you tap — never your full address book.")
+                .font(.caption)
+                .foregroundStyle(Color.appSecondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .sheet(isPresented: $showContactPicker) {
+            ContactPickerSheet { pickedName, pickedPhone in
+                if !pickedName.isEmpty { name = pickedName }
+                if !pickedPhone.isEmpty {
+                    // Strip to digits + parse country-code prefix.
+                    let digitsOnly = pickedPhone.filter(\.isNumber)
+                    if digitsOnly.count == 11 && digitsOnly.hasPrefix("1") {
+                        countryCode = .us
+                        phoneDigits = String(digitsOnly.dropFirst())
+                    } else if digitsOnly.count == 10 {
+                        countryCode = .us
+                        phoneDigits = digitsOnly
+                    } else {
+                        phoneDigits = digitsOnly
+                    }
+                }
+                showContactPicker = false
+            }
+        }
     }
 
     private var nameField: some View {

@@ -309,8 +309,8 @@ struct DashboardScreen: View {
             HStack(spacing: 10) {
                 QuickActionCard(
                     icon: "person.badge.plus.fill",
-                    title: "Add Contact",
-                    subtitle: "Add to trusted list",
+                    title: "Emergency Contact",
+                    subtitle: "Manual or pick from Contacts",
                     tint: Color.appAccent,
                     action: { onNavigate(.contacts) }
                 )
