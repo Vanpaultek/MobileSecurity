@@ -121,6 +121,11 @@ fun DataRemovalScreen(onBack: () -> Unit) {
         ) {
             WarningHero()
 
+            val region = remember { com.onlytrusted.app.ui.region.RegionState.snapshot(context) }
+            if (region.country != "US") {
+                RegionNoticeCard(country = region.country)
+            }
+
             // Mode picker
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SearchMode.entries.forEachIndexed { index, m ->
@@ -398,6 +403,35 @@ private fun StatePickerRow(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RegionNoticeCard(country: String) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MidnightElevated,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Info, null, tint = BrandAccentDark)
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    "US-centric catalog",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = PrimaryTextDark
+                )
+            }
+            Text(
+                "The broker sites below are all US people-search engines (Spokeo, " +
+                    "Whitepages, Radaris, etc.). They won't surface listings for people " +
+                    "outside the US. Your detected region is $country — email " +
+                    "admin@vanpaultek.com if you'd like a catalog added for your country.",
+                fontSize = 11.sp, color = SecondaryTextDark
+            )
         }
     }
 }

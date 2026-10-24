@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Notifications
@@ -339,6 +340,18 @@ fun SettingsScreen(
             // --- Security & data (Android-preserved functionality) ---
             SectionHeader("Device & data")
             SettingsCard {
+                // Region row — read-only summary of what the app detected from the OS.
+                // Used by Identity Protection to pick the right action catalog.
+                val regionSnapshot = remember { com.onlytrusted.app.ui.region.RegionState.snapshot(context) }
+                SettingsNavRow(
+                    icon = Icons.Filled.Public,
+                    tint = BrandAccentDark,
+                    title = "Region",
+                    value = regionSnapshot.country,
+                    showChevron = false,
+                    onClick = {}
+                )
+                RowDivider()
                 ToggleRow(
                     icon = Icons.Filled.Lock,
                     tint = BrandAccentDark,
@@ -463,14 +476,17 @@ fun SettingsScreen(
                         action()
                     }
                 )
-                // F8 — Carrier spam report shortcut.
-                RowDivider()
-                SettingsNavRow(
-                    icon = Icons.Filled.Campaign,
-                    tint = BrandAccentDark,
-                    title = "Carrier spam report",
-                    onClick = { showCarrierPicker = true }
-                )
+                // F8 — Carrier spam report shortcut. US-only (7726 + carrier short-codes
+                // are North American conventions); hidden on non-US devices.
+                if (com.onlytrusted.app.ui.region.RegionState.snapshot(context).country == "US") {
+                    RowDivider()
+                    SettingsNavRow(
+                        icon = Icons.Filled.Campaign,
+                        tint = BrandAccentDark,
+                        title = "Carrier spam report",
+                        onClick = { showCarrierPicker = true }
+                    )
+                }
                 RowDivider()
                 SettingsNavRow(
                     icon = Icons.Filled.Lock,

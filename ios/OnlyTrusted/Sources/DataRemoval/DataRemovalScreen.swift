@@ -26,6 +26,7 @@ struct DataRemovalScreen: View {
         ScrollView {
             VStack(spacing: 16) {
                 warningHero
+                if RegionState.shared.country != "US" { regionNoticeCard }
                 modePicker
                 formCard
                 scanButton
@@ -341,6 +342,24 @@ struct DataRemovalScreen: View {
         let elapsed = Date().timeIntervalSince(requestedAt) / 86400
         let remaining = DataRemovalReminders.reminderDays - elapsed
         return max(0, Int(remaining.rounded()))
+    }
+
+    private var regionNoticeCard: some View {
+        PremiumCard {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    Image(systemName: "globe.americas.fill")
+                        .foregroundStyle(Color.appAccent)
+                    Text("US-centric catalog")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.appPrimaryText)
+                }
+                Text("The 12 broker sites below are all US people-search engines (Spokeo, Whitepages, Radaris, etc.). They won't surface listings for people outside the US. Your detected region is \(RegionState.shared.country) — email admin@vanpaultek.com if you'd like a catalog added for your country.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.appSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     private var paidToolsCard: some View {

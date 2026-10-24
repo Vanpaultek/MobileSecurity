@@ -1069,6 +1069,26 @@ struct SettingsScreen: View {
     private var securityCard: some View {
         PremiumCard {
             VStack(spacing: 0) {
+                // Region row — read-only summary of what the app detected from the OS.
+                // Used by Identity Protection to pick the right action catalog. Zero
+                // network; see RegionState.swift.
+                HStack(spacing: 14) {
+                    settingsIcon("globe", tint: Color.appAccent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Region")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.appPrimaryText)
+                        Text(RegionState.shared.displaySummary)
+                            .font(.caption)
+                            .foregroundStyle(Color.appSecondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(2)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                SettingsDivider()
                 Toggle(isOn: $appLockToggle) {
                     HStack(spacing: 14) {
                         settingsIcon("lock.shield.fill", tint: Color.appAccent)
@@ -1154,13 +1174,18 @@ struct SettingsScreen: View {
                                    label: "Export evidence pack", chevron: false)
                 }
                 .buttonStyle(.plain)
-                // F8 — Carrier spam report shortcut.
-                SettingsDivider()
-                Button { showCarrierPicker = true } label: {
-                    SettingsNavRow(icon: "megaphone.fill", iconTint: Color.appAccent,
-                                   label: "Carrier spam report")
+                // F8 — Carrier spam report shortcut. US-only (the carrier shortcodes
+                // 7726 / spam-report numbers are a North American numbering convention).
+                // Hidden entirely on non-US devices to avoid surfacing a feature that
+                // wouldn't work for them.
+                if RegionState.shared.country == "US" {
+                    SettingsDivider()
+                    Button { showCarrierPicker = true } label: {
+                        SettingsNavRow(icon: "megaphone.fill", iconTint: Color.appAccent,
+                                       label: "Carrier spam report")
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 // Panic SOS backend (SafetyShield-inspired optional server fanout).
                 SettingsDivider()
                 NavigationLink { PanicBackendScreen() } label: {
