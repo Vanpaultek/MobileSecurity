@@ -496,19 +496,22 @@ private fun ProtectionActiveCard(isActive: Boolean) {
                         CircleShape
                     )
             )
-            // OnlyTrusted brand shield (same shield-only asset the launcher icon uses).
-            androidx.compose.foundation.Image(
-                painter = androidx.compose.ui.res.painterResource(id = com.onlytrusted.app.R.drawable.ic_launcher_foreground_src),
+            // Vector shield-check tinted brand cyan. Earlier launcher-PNG attempt
+            // (c03ec7e) carried a baked-in dark background that showed as a dark
+            // rectangle inside the cyan ring; the vector icon renders cleanly at any
+            // size and composes correctly with the ring + glow.
+            Icon(
+                imageVector = Icons.Filled.GppGood,
                 contentDescription = "Protection shield",
+                tint = BrandCyanDark.copy(alpha = if (isActive) 1.0f else 0.5f),
                 modifier = Modifier
-                    .size(68.dp)
+                    .size(52.dp)
                     .shadow(
                         elevation = 8.dp,
                         shape = CircleShape,
                         ambientColor = BrandCyanDark,
                         spotColor = BrandCyanDark
-                    ),
-                alpha = if (isActive) 1.0f else 0.6f
+                    )
             )
         }
 

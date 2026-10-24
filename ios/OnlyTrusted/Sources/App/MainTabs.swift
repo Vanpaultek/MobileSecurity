@@ -599,12 +599,14 @@ private struct ProtectionActiveCard: View {
                             radius: 14, x: 0, y: 0)
                     .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.55 : 0),
                             radius: 28, x: 0, y: 0)
-                // OnlyTrusted brand shield (same shield-only asset the launcher icon uses).
-                Image("BrandShield")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 68, height: 68)
-                    .opacity(isActive ? 1.0 : 0.6)
+                // Vector shield-check tinted brand cyan. Earlier BrandShield PNG attempt
+                // (c03ec7e) carried a baked-in dark background that showed as a dark
+                // rectangle inside the cyan ring; the vector version renders cleanly at
+                // any size and composes correctly with the ring + glow.
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 46, weight: .bold))
+                    .foregroundStyle(Color.appBrightCyan.opacity(isActive ? 1.0 : 0.5))
+                    .shadow(color: Color.appBrightCyan.opacity(0.6), radius: 8, x: 0, y: 0)
                     .accessibilityLabel("Protection shield")
             }
 
