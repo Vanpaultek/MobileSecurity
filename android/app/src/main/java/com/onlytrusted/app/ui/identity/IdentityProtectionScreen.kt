@@ -85,7 +85,9 @@ fun IdentityProtectionScreen(onBack: () -> Unit) {
     var showResetDialog by remember { mutableStateOf(false) }
     val isPremium = com.onlytrusted.app.ui.subscription.SubscriptionState.hasPremium(context)
 
-    val total = IdentityActionsCatalog.all.size
+    val region = remember { com.onlytrusted.app.ui.region.RegionState.snapshot(context) }
+    val groupedActions = remember(region) { IdentityActionsCatalog.grouped(region.country) }
+    val total = groupedActions.flatMap { it.second }.size
     val completed = done.size
 
     AppBackdropScaffold(
@@ -165,7 +167,7 @@ fun IdentityProtectionScreen(onBack: () -> Unit) {
             }
 
             // Phase sections
-            IdentityActionsCatalog.grouped().forEach { (phase, actions) ->
+            groupedActions.forEach { (phase, actions) ->
                 CardBox {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

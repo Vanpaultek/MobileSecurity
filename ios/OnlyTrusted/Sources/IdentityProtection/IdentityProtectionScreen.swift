@@ -12,14 +12,15 @@ struct IdentityProtectionScreen: View {
 
     @StateObject private var progress = IdentityActionsProgress.shared
     @StateObject private var sub = SubscriptionState.shared
+    @StateObject private var region = RegionState.shared
     @State private var showResetConfirm = false
 
     private var groups: [(IdentityActionPhase, [IdentityAction])] {
-        IdentityActionsCatalog.grouped()
+        IdentityActionsCatalog.grouped(for: region.country)
     }
 
     private var completed: Int { progress.done.count }
-    private var total: Int { IdentityActionsCatalog.all.count }
+    private var total: Int { groups.flatMap { $0.1 }.count }
 
     var body: some View {
         PremiumGate(

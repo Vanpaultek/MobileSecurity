@@ -43,6 +43,8 @@ enum IdentityActionPhase: String, Codable, CaseIterable, Identifiable {
 struct IdentityAction: Identifiable, Equatable {
     let id: String
     let phase: IdentityActionPhase
+    /// 2-letter ISO country code the action applies to, or "WW" for worldwide.
+    let region: String
     let title: String
     let organisation: String
     let timeEstimate: String
@@ -65,6 +67,7 @@ enum IdentityActionsCatalog {
         // --- Urgent freeze ---
         .init(id: "equifax-freeze",
               phase: .urgentFreeze,
+              region: "US",
               title: "Freeze credit at Equifax",
               organisation: "Equifax",
               timeEstimate: "~5 min",
@@ -72,6 +75,7 @@ enum IdentityActionsCatalog {
               notes: "Free. Takes effect within one business day. Reversible with a PIN."),
         .init(id: "experian-freeze",
               phase: .urgentFreeze,
+              region: "US",
               title: "Freeze credit at Experian",
               organisation: "Experian",
               timeEstimate: "~5 min",
@@ -79,6 +83,7 @@ enum IdentityActionsCatalog {
               notes: "Free. Must be done separately from the other two bureaus."),
         .init(id: "transunion-freeze",
               phase: .urgentFreeze,
+              region: "US",
               title: "Freeze credit at TransUnion",
               organisation: "TransUnion",
               timeEstimate: "~5 min",
@@ -86,6 +91,7 @@ enum IdentityActionsCatalog {
               notes: "Free. Keep the PIN somewhere safer than this app's screen."),
         .init(id: "innovis-freeze",
               phase: .urgentFreeze,
+              region: "US",
               title: "Freeze at Innovis (4th bureau)",
               organisation: "Innovis",
               timeEstimate: "~5 min",
@@ -93,6 +99,7 @@ enum IdentityActionsCatalog {
               notes: "Smaller bureau that some lenders still pull from. Skipped by most guides."),
         .init(id: "chex-freeze",
               phase: .urgentFreeze,
+              region: "US",
               title: "Freeze at ChexSystems",
               organisation: "ChexSystems",
               timeEstimate: "~5 min",
@@ -102,6 +109,7 @@ enum IdentityActionsCatalog {
         // --- Monitoring ---
         .init(id: "hibp-notify",
               phase: .monitoring,
+              region: "US",
               title: "Enroll in Have I Been Pwned notifications",
               organisation: "Have I Been Pwned",
               timeEstimate: "~2 min",
@@ -109,6 +117,7 @@ enum IdentityActionsCatalog {
               notes: "Separate from OnlyTrusted's own Breach Watch — gives you Troy Hunt's full feed with explicit breach names."),
         .init(id: "irs-ip-pin",
               phase: .monitoring,
+              region: "US",
               title: "Get an IRS Identity Protection PIN",
               organisation: "IRS",
               timeEstimate: "~15 min",
@@ -116,6 +125,7 @@ enum IdentityActionsCatalog {
               notes: "Blocks someone else filing a fraudulent tax return in your name. Needs ID.me verification."),
         .init(id: "ssa-mysocialsecurity",
               phase: .monitoring,
+              region: "US",
               title: "Open your my Social Security account",
               organisation: "Social Security Administration",
               timeEstimate: "~15 min",
@@ -123,6 +133,7 @@ enum IdentityActionsCatalog {
               notes: "Prevents a thief from creating one in your name first and redirecting your benefits."),
         .init(id: "ssa-eservices-block",
               phase: .monitoring,
+              region: "US",
               title: "Block online SSN changes (eServices block)",
               organisation: "Social Security Administration",
               timeEstimate: "~10 min (phone call)",
@@ -130,6 +141,7 @@ enum IdentityActionsCatalog {
               notes: "Call 1-800-772-1213 after you've opened the account above to lock out online changes."),
         .init(id: "annualcreditreport",
               phase: .monitoring,
+              region: "US",
               title: "Pull free weekly credit reports",
               organisation: "AnnualCreditReport.com",
               timeEstimate: "~10 min",
@@ -139,6 +151,7 @@ enum IdentityActionsCatalog {
         // --- Recovery ---
         .init(id: "ftc-identitytheft",
               phase: .recovery,
+              region: "US",
               title: "File an FTC identity theft report",
               organisation: "FTC",
               timeEstimate: "~20 min",
@@ -146,6 +159,7 @@ enum IdentityActionsCatalog {
               notes: "This report is what banks and lenders ask for to reverse fraudulent charges. Save the PDF."),
         .init(id: "fraud-alert-one-call",
               phase: .recovery,
+              region: "US",
               title: "Place a 1-year fraud alert (one-call does all three bureaus)",
               organisation: "Equifax / Experian / TransUnion",
               timeEstimate: "~5 min",
@@ -153,6 +167,7 @@ enum IdentityActionsCatalog {
               notes: "Lenders must verify your identity before opening new credit. One bureau notifies the others."),
         .init(id: "police-report",
               phase: .recovery,
+              region: "US",
               title: "File a local police report",
               organisation: "Local law enforcement",
               timeEstimate: "~45 min",
@@ -160,6 +175,7 @@ enum IdentityActionsCatalog {
               notes: "Bring your FTC report. Some banks require a police report before refunding six-figure losses."),
         .init(id: "dmv-id-theft",
               phase: .recovery,
+              region: "US",
               title: "Report ID theft to your state DMV",
               organisation: "State DMV",
               timeEstimate: "~15 min",
@@ -167,11 +183,126 @@ enum IdentityActionsCatalog {
               notes: "Blocks someone replacing your driver's licence or state ID. Procedure varies by state.")
     ]
 
+    /// Legacy call-site that returns the US catalog by default. Prefer `grouped(for:)`.
     static func grouped() -> [(IdentityActionPhase, [IdentityAction])] {
-        IdentityActionPhase.allCases.map { phase in
-            (phase, all.filter { $0.phase == phase })
+        grouped(for: "US")
+    }
+
+    /// Region-aware grouping. Returns the entries that apply to `countryCode` (2-letter
+    /// ISO) plus any worldwide entries. Unknown codes fall back to the US catalog so the
+    /// screen always has something to show.
+    static func grouped(for countryCode: String) -> [(IdentityActionPhase, [IdentityAction])] {
+        let region = countryCode.uppercased()
+        let fallback = regionActions.keys.contains(region) ? region : "US"
+        let applicable = (regionActions[fallback] ?? []) + (regionActions["WW"] ?? [])
+        return IdentityActionPhase.allCases.map { phase in
+            (phase, applicable.filter { $0.phase == phase })
         }
     }
+
+    /// All US actions + India actions + any future per-region additions, keyed by
+    /// 2-letter ISO code. "WW" is reserved for worldwide actions (currently empty).
+    private static var regionActions: [String: [IdentityAction]] {
+        [
+            "US": all,
+            "IN": indiaActions,
+            "WW": []
+        ]
+    }
+
+    /// India-specific identity-protection actions. Mirrors the US flow (freeze →
+    /// monitor → recover) using Indian government / credit-bureau portals.
+    static let indiaActions: [IdentityAction] = [
+        // --- Urgent freeze (Aadhaar + credit bureau locks) ---
+        .init(id: "aadhaar-biometric-lock", phase: .urgentFreeze, region: "IN",
+              title: "Lock Aadhaar biometric at UIDAI",
+              organisation: "UIDAI",
+              timeEstimate: "~5 min",
+              url: Self.url("https://resident.uidai.gov.in/aadhaar-lockunlock"),
+              notes: "Prevents anyone from using your Aadhaar biometric for KYC until you unlock it. Free. Needs your Aadhaar number + registered mobile."),
+        .init(id: "aadhaar-online-lock", phase: .urgentFreeze, region: "IN",
+              title: "Lock Aadhaar online services",
+              organisation: "UIDAI",
+              timeEstimate: "~5 min",
+              url: Self.url("https://myaadhaar.uidai.gov.in/"),
+              notes: "Blocks e-KYC + Virtual ID requests until unlocked. Separate from biometric lock."),
+        .init(id: "cibil-freeze", phase: .urgentFreeze, region: "IN",
+              title: "Freeze CIBIL report",
+              organisation: "TransUnion CIBIL",
+              timeEstimate: "~15 min",
+              url: Self.url("https://www.cibil.com/"),
+              notes: "India's largest credit bureau. Freeze prevents new loan accounts in your name."),
+        .init(id: "experian-india-freeze", phase: .urgentFreeze, region: "IN",
+              title: "Freeze Experian India report",
+              organisation: "Experian India",
+              timeEstimate: "~15 min",
+              url: Self.url("https://www.experian.in/"),
+              notes: "Second-largest Indian credit bureau. Must freeze separately from CIBIL + CRIF + Equifax."),
+        .init(id: "crif-highmark-freeze", phase: .urgentFreeze, region: "IN",
+              title: "Freeze CRIF High Mark report",
+              organisation: "CRIF High Mark",
+              timeEstimate: "~15 min",
+              url: Self.url("https://www.crifhighmark.com/"),
+              notes: "Lender-focused bureau. Still used by many NBFCs and microfinance institutions."),
+        .init(id: "equifax-india-freeze", phase: .urgentFreeze, region: "IN",
+              title: "Freeze Equifax India report",
+              organisation: "Equifax India",
+              timeEstimate: "~15 min",
+              url: Self.url("https://www.equifax.co.in/"),
+              notes: "Fourth Indian bureau. Required for complete coverage."),
+
+        // --- Monitoring (ongoing watchdog setups) ---
+        .init(id: "hibp-notify-india", phase: .monitoring, region: "IN",
+              title: "Enroll in Have I Been Pwned notifications",
+              organisation: "Have I Been Pwned",
+              timeEstimate: "~2 min",
+              url: Self.url("https://haveibeenpwned.com/NotifyMe"),
+              notes: "Global breach feed. Covers Indian breaches too (BigBasket, JustDial, Zomato, Dr Lal PathLabs, etc.)."),
+        .init(id: "aadhaar-history", phase: .monitoring, region: "IN",
+              title: "Review Aadhaar authentication history",
+              organisation: "UIDAI",
+              timeEstimate: "~10 min",
+              url: Self.url("https://resident.uidai.gov.in/aadhaar-auth-history"),
+              notes: "Shows every e-KYC + biometric auth against your Aadhaar in the last 6 months. Spot unexpected activity early."),
+        .init(id: "trai-dnd-register", phase: .monitoring, region: "IN",
+              title: "Register with DND (Do Not Disturb)",
+              organisation: "TRAI",
+              timeEstimate: "~5 min",
+              url: Self.url("https://www.ncpr.dnd.gov.in/"),
+              notes: "Blocks promotional calls + SMS. SMS 'START 0' to 1909 for full block."),
+        .init(id: "income-tax-portal", phase: .monitoring, region: "IN",
+              title: "Register / check your Income Tax e-filing account",
+              organisation: "Income Tax Department",
+              timeEstimate: "~15 min",
+              url: Self.url("https://www.incometax.gov.in/"),
+              notes: "Enables 2FA on your PAN. Prevents fraudulent returns in your name."),
+
+        // --- Recovery (post-incident reports + helplines) ---
+        .init(id: "cybercrime-india", phase: .recovery, region: "IN",
+              title: "File a cybercrime report",
+              organisation: "National Cyber Crime Reporting Portal",
+              timeEstimate: "~20 min",
+              url: Self.url("https://cybercrime.gov.in/"),
+              notes: "Official MHA portal. Covers financial fraud, impersonation, cyber-stalking. Call 1930 for financial fraud < 24 hours old."),
+        .init(id: "ncu-financial", phase: .recovery, region: "IN",
+              title: "Call 1930 — Cyber financial fraud helpline",
+              organisation: "I4C / Cyber Crime Coordination Centre",
+              timeEstimate: "~5 min (call)",
+              url: Self.url("https://cybercrime.gov.in/webform/helpline.aspx"),
+              notes: "Freeze fraudulent UPI / net-banking transactions in minutes if you call within the golden hour (first 60 min)."),
+        .init(id: "nchelpline", phase: .recovery, region: "IN",
+              title: "Call 1800-11-4000 — National Consumer Helpline",
+              organisation: "Department of Consumer Affairs",
+              timeEstimate: "~15 min (call)",
+              url: Self.url("https://consumerhelpline.gov.in/"),
+              notes: "For non-fraud consumer disputes — unauthorized charges, service denial, warranty issues."),
+        .init(id: "local-police-india", phase: .recovery, region: "IN",
+              title: "File a local police FIR",
+              organisation: "Local police",
+              timeEstimate: "~60 min",
+              url: Self.url("https://digitalpolice.gov.in/"),
+              notes: "Bring your cybercrime.gov.in acknowledgement + bank statement. FIR is required for insurance / chargeback claims above ₹10k."),
+    ]
 }
 
 // MARK: - Local "done" tracker
