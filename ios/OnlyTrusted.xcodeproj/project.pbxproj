@@ -33,6 +33,7 @@
 		2420B6E74701F0C713800BF4 /* ProfileSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2134D9A69C809E4AFF789B01 /* ProfileSetupScreen.swift */; };
 		2684C20B6C66EC750384154D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFF4754051354FB2E3F10DA /* Theme.swift */; };
 		27E2C84DD0592B59A8F2C562 /* PanicLockdownUpsellSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DE20437DD9F7423C7F8EBA /* PanicLockdownUpsellSheet.swift */; };
+		2A246AEF0EA888FEAA195FC6 /* ContactsScamScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7BB2D9C57E50D140D89B54 /* ContactsScamScanner.swift */; };
 		2A354125918CB0473F1B02D1 /* BorderModeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8881F1B53DE849BEEA079AC3 /* BorderModeState.swift */; };
 		2A8308A8CEF8DEF2DAEC42DE /* MessageFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883FF356FE2F6565E7E15758 /* MessageFilterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2AA8ED70571262B71B0E8BC2 /* FieldCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF5C23DD1366EBCD7E51AE09 /* FieldCrypto.swift */; };
@@ -154,6 +155,7 @@
 		F5DD5E6F9379C96863E60A4F /* BackupCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BF559E3B22A4899C299D29 /* BackupCrypto.swift */; };
 		F7DF651DE1812C277E09FA69 /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB8BB9444909AA0350EAE85 /* LegalContent.swift */; };
 		F80A9A4055C8790F8FF84F57 /* RegionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A842ED8E66337DE833C83D /* RegionState.swift */; };
+		FA2F9C3259D71ECD03649C5E /* ContactScanScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49669B533AB496A677885A3F /* ContactScanScreen.swift */; };
 		FBAF24D2385B82FC0AE306B0 /* SharedContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287E737C235F26B6F586928 /* SharedContainer.swift */; };
 		FC4A55D9129C704233C77615 /* StegoVaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0622302C519D1D5732A303 /* StegoVaultScreen.swift */; };
 		FD52E2394CD39132E36205A0 /* WangiriWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB2DE5D1EA1E4544CE34095 /* WangiriWatcher.swift */; };
@@ -230,6 +232,7 @@
 		34E46FD5F5F6653A0001FD58 /* AppShieldManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShieldManager.swift; sourceTree = "<group>"; };
 		3622B589D813F020125F28F4 /* TrustedWitnessSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedWitnessSetupScreen.swift; sourceTree = "<group>"; };
 		3BA4D28EB9A8DA24BCA4B8C3 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
+		3C7BB2D9C57E50D140D89B54 /* ContactsScamScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsScamScanner.swift; sourceTree = "<group>"; };
 		3F2F158C36AD593B1896D652 /* WangiriEventKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriEventKind.swift; sourceTree = "<group>"; };
 		3F8621EE175927F0FEAF9EC9 /* VoiceBioMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBioMonitor.swift; sourceTree = "<group>"; };
 		4412C36499A9161B1E9D24FA /* IdentityProtectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityProtectionScreen.swift; sourceTree = "<group>"; };
@@ -237,6 +240,7 @@
 		48BB5501D663860F4BA1E3B3 /* IdentityActionsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityActionsCatalog.swift; sourceTree = "<group>"; };
 		48C877F0862987F2ED74DA26 /* VaultEditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultEditScreen.swift; sourceTree = "<group>"; };
 		4916E2EF293691F7203D197D /* CyberBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberBackground.swift; sourceTree = "<group>"; };
+		49669B533AB496A677885A3F /* ContactScanScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactScanScreen.swift; sourceTree = "<group>"; };
 		501D17326F04F78A780C80B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		528559BBE2D0AE609BD1D884 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5446E4ED8EF9B425975F7CED /* WangiriSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WangiriSettingsScreen.swift; sourceTree = "<group>"; };
@@ -370,6 +374,15 @@
 			path = FaceLock;
 			sourceTree = "<group>";
 		};
+		1E2E3E32407B90E78906623B /* ContactScan */ = {
+			isa = PBXGroup;
+			children = (
+				49669B533AB496A677885A3F /* ContactScanScreen.swift */,
+				3C7BB2D9C57E50D140D89B54 /* ContactsScamScanner.swift */,
+			);
+			path = ContactScan;
+			sourceTree = "<group>";
+		};
 		2797CB6C9550BAA22F04740C /* Safety */ = {
 			isa = PBXGroup;
 			children = (
@@ -401,6 +414,7 @@
 				E7B7F85AC213BF48CEDEBFCC /* BorderMode */,
 				95991EAFDBE2FFD70A7DB9B2 /* BreachWatch */,
 				34250A565EA44B0CF4414182 /* CheckIn */,
+				1E2E3E32407B90E78906623B /* ContactScan */,
 				A8E4AC277A2AA60324A4B805 /* DataRemoval */,
 				3603D6214065B6B236E3E0B4 /* DeadmanWipe */,
 				BC0A016966A74D0D19E991FC /* Duress */,
@@ -1079,6 +1093,8 @@
 				127BB6F634006652CE0D4D99 /* CheckInSMSComposer.swift in Sources */,
 				6977DB921C17609B9ACDFB9D /* CheckInState.swift in Sources */,
 				95BFABF5B3C7975153263D4E /* ConsentScreen.swift in Sources */,
+				FA2F9C3259D71ECD03649C5E /* ContactScanScreen.swift in Sources */,
+				2A246AEF0EA888FEAA195FC6 /* ContactsScamScanner.swift in Sources */,
 				C17DF555649579E8DF08C98A /* CyberBackground.swift in Sources */,
 				32EC0E6A780981E90D488F89 /* CyberComponents.swift in Sources */,
 				619D10664FD5CCCF8D99E778 /* DataRemovalReminders.swift in Sources */,

@@ -22,6 +22,12 @@
     <string>2</string>
     <key>NSFaceIDUsageDescription</key>
     <string>OnlyTrusted uses Face ID to unlock the app and the family vault.</string>
+    <!-- Contact Safety Scan: reads your contacts' phone numbers in a single pass and
+         compares each against the bundled scam-numbers list. Nothing is uploaded or
+         transmitted off-device. The permission prompt only appears when the user taps
+         Scan in Settings → Contact Safety Scan. -->
+    <key>NSContactsUsageDescription</key>
+    <string>OnlyTrusted scans your contacts' phone numbers against a bundled scam-numbers list to warn you about dangerous entries. Runs on this device only — your contacts are never uploaded or shared.</string>
     <!-- Voice Biometric Trusted Contact Verification (Elite). The microphone is used
          exclusively to (a) enroll a trusted contact's 10-second voice sample during
          setup, and (b) sample 2 seconds of a live call to detect AI-cloned voices.

@@ -634,9 +634,17 @@ struct SettingsScreen: View {
                     )
                 }
                 SettingsDivider()
-                // Breach Watch (FREE) — monitor one email against the bundled breach-hash
-                // feed. Monthly local reminder + ad-hoc "Check now". Elite upsell copy is
-                // inside the screen.
+                // Contact Safety Scan — on-device scan of system contacts against the
+                // bundled scam-numbers feed. Opt-in Contacts permission; nothing leaves
+                // the device. See Sources/ContactScan/ContactsScamScanner.swift.
+                NavigationLink { ContactScanScreen() } label: {
+                    SettingsNavRow(
+                        icon: "person.2.badge.gearshape.fill",
+                        iconTint: Color.settingsBlue,
+                        label: "Contact Safety Scan"
+                    )
+                }
+                SettingsDivider()
                 NavigationLink { BlockListScreen() } label: {
                     SettingsNavRow(icon: "shield.lefthalf.filled", iconTint: Color.settingsBlue, label: "Blocking & Unknown")
                 }
