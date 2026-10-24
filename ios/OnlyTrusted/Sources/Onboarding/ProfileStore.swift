@@ -55,9 +55,15 @@ final class ProfileStore: ObservableObject {
 
     /// Hashes the PIN with PBKDF2-HMAC-SHA256 (100k iterations) + a fresh random salt
     /// before storing. The raw PIN is never persisted.
-    func setPIN(_ pin: String) {
+    ///
+    /// `async` so the 100k-iter HMAC loop runs on a detached background task — on an
+    /// iPhone 11-class device the hash takes ~250–600 ms and would freeze the setup
+    /// screen if run on the MainActor.
+    func setPIN(_ pin: String) async {
         let salt = Data((0..<16).map { _ in UInt8.random(in: 0...255) })
-        let hash = Self.pbkdf2(pin: pin, salt: salt)
+        let hash = await Task.detached(priority: .userInitiated) {
+            Self.pbkdf2(pin: pin, salt: salt)
+        }.value
         self.pinSaltHex = salt.map { String(format: "%02x", $0) }.joined()
         self.pinHashHex = hash.map { String(format: "%02x", $0) }.joined()
         Keychain.set(pinSaltHex, for: Keys.pinSalt)
@@ -102,9 +108,9 @@ final class ProfileStore: ObservableObject {
 
     // MARK: - PBKDF2 (CommonCrypto-free, via CryptoKit HMAC loop)
 
-    private static let pbkdf2Iterations = 100_000
+    nonisolated private static let pbkdf2Iterations = 100_000
 
-    private static func pbkdf2(pin: String, salt: Data) -> Data {
+    nonisolated private static func pbkdf2(pin: String, salt: Data) -> Data {
         // One-block PBKDF2 is sufficient — SHA-256 produces 32 bytes = 256 bits. For a
         // 6-digit PIN the entropy ceiling is 10^6 (~20 bits) regardless; 100k iterations
         // raise the brute-force cost to seconds-per-guess on commodity hardware.

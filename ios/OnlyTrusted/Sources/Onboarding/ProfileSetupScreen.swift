@@ -167,11 +167,13 @@ struct ProfileSetupScreen: View {
             errorMessage = "PINs don't match."
             return
         }
-        store.setPIN(digits)
-        pinDraft = ""
-        pinConfirm = ""
-        errorMessage = nil
-        step = .biometric
+        Task {
+            await store.setPIN(digits)
+            pinDraft = ""
+            pinConfirm = ""
+            errorMessage = nil
+            step = .biometric
+        }
     }
 
     // MARK: - Step: Biometric

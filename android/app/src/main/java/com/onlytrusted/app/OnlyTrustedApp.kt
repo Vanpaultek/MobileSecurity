@@ -15,6 +15,7 @@ import com.onlytrusted.app.ui.smartlinkguard.SmartLinkGuardRules
 import com.onlytrusted.app.ui.threatintel.ThreatIntelDatabase
 import com.onlytrusted.app.ui.wangiri.WangiriPrefs
 import com.onlytrusted.app.util.NotificationHelper
+import kotlin.concurrent.thread
 
 class OnlyTrustedApp : Application() {
 
@@ -37,7 +38,13 @@ class OnlyTrustedApp : Application() {
         // Fortress R4 recovery: Rogue Network Scanner (Elite). Snapshot the radio
         // + Wi-Fi state once at launch so a 2G downgrade or lookalike SSID lands as
         // an alert even before the user visits the dedicated screen.
-        runCatching { RogueNetworkMonitor.scanOnce(this) }
+        //
+        // Fired on a background thread so the Binder IPC into TelephonyManager +
+        // WifiManager + the resulting EncryptedSharedPreferences write don't block
+        // Application.onCreate and delay first paint of MainActivity.
+        thread(name = "rogue-network-boot-scan", isDaemon = true) {
+            runCatching { RogueNetworkMonitor.scanOnce(this) }
+        }
         // Smart Link Guard ↔ Offline Threat Intel bridge. Lets the Smart Link Guard
         // engine consult the bundled APWG phishing-URL set when inspecting URLs.
         SmartLinkGuardRules.phishingHostLookup = { host ->

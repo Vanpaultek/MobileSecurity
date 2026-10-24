@@ -202,6 +202,10 @@ struct DashboardScreen: View {
     @StateObject private var duress = DuressState.shared
     @State private var blockedToday: Int = 0
     @State private var blockedWeek: Int = 0
+    // Cached ContactScanState.matchCount() value — the underlying call does a Keychain
+    // read, so we snapshot it once in `.task` instead of re-reading on every body
+    // re-evaluation (which happened on every state change — trustedCount, banners, etc.).
+    @State private var scamContactsCount: Int = 0
     @State private var showHonestLimitsSheet = false
     @State private var confirmDuressExit = false
 
@@ -265,7 +269,7 @@ struct DashboardScreen: View {
         .navigationDestination(isPresented: $showReports) { ReportsScreen() }
         .task {
             await vault.reload()
-            refreshStats()
+            await refreshStats()
             refreshBanners()
         }
         .sheet(isPresented: $showHonestLimitsSheet) {
@@ -286,16 +290,16 @@ struct DashboardScreen: View {
 
     private var statsRow: some View {
         // 1x3 row: Trusted Contacts · Blocked (today + week combined) · Scam Contacts.
-        let scamContacts = ContactScanState.matchCount()
-        return HStack(spacing: 10) {
+        // scamContactsCount is cached @State refreshed in `.task` — see property above.
+        HStack(spacing: 10) {
             StatTile(icon: "person.2.fill",
                      tint: Color.appAccent,
                      value: trustedCount,
                      label: "Trusted\nContacts")
             BlockedCombinedTile(blockedToday: blockedToday, blockedWeek: blockedWeek)
             StatTile(icon: "exclamationmark.triangle.fill",
-                     tint: scamContacts > 0 ? Color.appDanger : Color.appAccent,
-                     value: scamContacts,
+                     tint: scamContactsCount > 0 ? Color.appDanger : Color.appAccent,
+                     value: scamContactsCount,
                      label: "Scam\nContacts")
         }
     }
@@ -332,13 +336,23 @@ struct DashboardScreen: View {
         }
     }
 
-    private func refreshStats() {
-        let all = BlockListStore.shared.allRecent()
-        let cal = Calendar.current
-        let startOfToday = cal.startOfDay(for: Date())
-        let startOfWeek = cal.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
-        blockedToday = all.filter { $0.addedAt >= startOfToday }.count
-        blockedWeek  = all.filter { $0.addedAt >= startOfWeek }.count
+    private func refreshStats() async {
+        // Move the synchronous disk read + JSON decode off the main actor — BlockListStore
+        // uses a serial queue.sync internally so any main-thread caller blocks until the
+        // read completes. Same for ContactScanState (Keychain read).
+        let (todayCount, weekCount, scamCount) = await Task.detached(priority: .userInitiated) {
+            let all = BlockListStore.shared.allRecent()
+            let cal = Calendar.current
+            let startOfToday = cal.startOfDay(for: Date())
+            let startOfWeek = cal.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
+            let today = all.filter { $0.addedAt >= startOfToday }.count
+            let week = all.filter { $0.addedAt >= startOfWeek }.count
+            let scam = ContactScanState.matchCount()
+            return (today, week, scam)
+        }.value
+        blockedToday = todayCount
+        blockedWeek = weekCount
+        scamContactsCount = scamCount
     }
 
     private func refreshBanners() {

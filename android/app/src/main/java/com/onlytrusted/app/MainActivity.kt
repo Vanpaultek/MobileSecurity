@@ -11,10 +11,13 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -61,11 +64,33 @@ class MainActivity : FragmentActivity() {
         setContent {
             OnlyTrustedTheme {
                 var splashDone by remember { mutableStateOf(false) }
-                var onboarded by remember { mutableStateOf(OnboardingState.hasOnboarded(this)) }
-                var consented by remember { mutableStateOf(OnboardingState.hasAccepted(this)) }
-                var profileSetup by remember { mutableStateOf(ProfileStore.isSetupComplete(this)) }
+                // Initial state reads below hit EncryptedSharedPreferences (ProfileStore)
+                // which triggers Tink master-key resolution on first launch — can be
+                // 100–500 ms. Hoisted off the composition thread into a LaunchedEffect
+                // so the splash renders immediately; the gate below holds the splash in
+                // place until the IO read completes (practically always finishes within
+                // the splash's 1400 ms window).
+                var initialStateLoaded by remember { mutableStateOf(false) }
+                var onboarded by remember { mutableStateOf(false) }
+                var consented by remember { mutableStateOf(false) }
+                var profileSetup by remember { mutableStateOf(false) }
                 val lifecycleOwner = LocalLifecycleOwner.current
-                var unlocked by remember { mutableStateOf(!AppLockManager.shouldPrompt(this)) }
+                var unlocked by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    val ob: Boolean; val cn: Boolean; val pr: Boolean; val un: Boolean
+                    withContext(Dispatchers.IO) {
+                        ob = OnboardingState.hasOnboarded(this@MainActivity)
+                        cn = OnboardingState.hasAccepted(this@MainActivity)
+                        pr = ProfileStore.isSetupComplete(this@MainActivity)
+                        un = !AppLockManager.shouldPrompt(this@MainActivity)
+                    }
+                    onboarded = ob
+                    consented = cn
+                    profileSetup = pr
+                    unlocked = un
+                    initialStateLoaded = true
+                }
 
                 DisposableEffect(lifecycleOwner) {
                     val observer = LifecycleEventObserver { _, event ->
@@ -80,7 +105,8 @@ class MainActivity : FragmentActivity() {
                 }
 
                 when {
-                    !splashDone -> SplashScreen(onDone = { splashDone = true })
+                    !splashDone || !initialStateLoaded ->
+                        SplashScreen(onDone = { splashDone = true })
                     !onboarded -> OnboardingScreen(onContinue = { onboarded = true })
                     !consented -> ConsentScreen(onConfirmed = { consented = true })
                     !profileSetup -> ProfileSetupScreen(onComplete = { profileSetup = true })
