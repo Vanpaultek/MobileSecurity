@@ -158,9 +158,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     contentColor = PrimaryTextDark
                 ) {
                     bottomBarDestinations.forEach { dest ->
-                        val selected = backStackEntry?.destination?.hierarchy
-                            ?.any { it.route == dest.route } == true ||
-                            currentRoute == dest.route
+                        // Strict compare — hierarchy.any lit up the Home tab for any
+                        // descendant route (Vault, BlockList, Events, Settings all push
+                        // on top of Dashboard), so taps on Home couldn't visually
+                        // confirm the nav. Compare just the current route.
+                        val selected = currentRoute == dest.route
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
