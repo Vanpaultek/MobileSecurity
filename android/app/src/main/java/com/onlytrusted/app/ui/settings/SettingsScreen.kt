@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.BluetoothSearching
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.CreditCard
@@ -172,7 +173,8 @@ fun SettingsScreen(
     onOpenAliases: () -> Unit = {},
     onOpenIdentityProtection: () -> Unit = {},
     onOpenWeeklyDigest: () -> Unit = {},
-    onOpenAdvancedBlocking: () -> Unit = {}
+    onOpenAdvancedBlocking: () -> Unit = {},
+    onOpenContactScan: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as OnlyTrustedApp
@@ -576,6 +578,16 @@ fun SettingsScreen(
                     tint = settingsBlue,
                     title = "Data Removal Scan",
                     onClick = onOpenDataRemoval
+                )
+                RowDivider()
+                // Contact Safety Scan — on-device scan of system contacts against the
+                // bundled scam-numbers feed. Opt-in READ_CONTACTS; nothing leaves the
+                // device. See ui/contactscan/ContactsScamScanner.kt.
+                SettingsNavRow(
+                    icon = Icons.Filled.Contacts,
+                    tint = settingsBlue,
+                    title = "Contact Safety Scan",
+                    onClick = onOpenContactScan
                 )
                 RowDivider()
                 SettingsNavRow(

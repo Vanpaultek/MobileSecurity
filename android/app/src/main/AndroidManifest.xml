@@ -18,6 +18,11 @@
     <!-- Required by Duress Mode (Pro). We fire a silent SOS SMS via SmsManager when the
          duress PIN is entered at the lock screen. We NEVER send SMS otherwise. -->
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- Required by Contact Safety Scan: reads every stored contact's phone number and
+         compares it against the bundled scam-numbers feed on-device. One-time user grant;
+         we never upload contacts anywhere. Prompt only appears when the user taps the
+         Scan button in Settings → Contact Safety Scan. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

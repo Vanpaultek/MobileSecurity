@@ -117,6 +117,9 @@ sealed class Destination(val route: String, val label: String, val icon: ImageVe
     data object WeeklyDigest : Destination("weekly_digest", "Weekly Digest", Icons.Filled.Shield)
     // Premium — Advanced Blocking (quiet hours + area-code allowlist).
     data object AdvancedBlocking : Destination("advanced_blocking", "Advanced Blocking", Icons.Filled.Shield)
+    // FREE — Contact Safety Scan: cross-checks the system contact list against the
+    // bundled scam-numbers feed on-device.
+    data object ContactScan : Destination("contact_scan", "Contact Safety Scan", Icons.Filled.Shield)
 }
 
 private val bottomBarDestinations = listOf(
@@ -260,7 +263,8 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
                     onOpenAliases = { navController.navigate(Destination.Aliases.route) },
                     onOpenIdentityProtection = { navController.navigate(Destination.IdentityProtection.route) },
                     onOpenWeeklyDigest = { navController.navigate(Destination.WeeklyDigest.route) },
-                    onOpenAdvancedBlocking = { navController.navigate(Destination.AdvancedBlocking.route) }
+                    onOpenAdvancedBlocking = { navController.navigate(Destination.AdvancedBlocking.route) },
+                    onOpenContactScan = { navController.navigate(Destination.ContactScan.route) }
                 )
             }
             composable(Destination.PrivacyShield.route) {
@@ -314,6 +318,11 @@ fun AppNavigation(onPanic: () -> Unit = {}) {
             }
             composable(Destination.AdvancedBlocking.route) {
                 com.onlytrusted.app.ui.advancedblocking.AdvancedBlockingScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Destination.ContactScan.route) {
+                com.onlytrusted.app.ui.contactscan.ContactScanScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
