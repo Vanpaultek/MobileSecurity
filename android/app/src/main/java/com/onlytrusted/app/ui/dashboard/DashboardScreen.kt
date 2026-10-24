@@ -539,25 +539,52 @@ private fun ProtectionActiveCard(isActive: Boolean) {
 
 @Composable
 private fun StatsRow(trusted: Int, blockedToday: Int, blockedWeek: Int, scamContacts: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            StatTile(Modifier.weight(1f), Icons.Filled.Groups, BrandAccentDark, trusted, "Trusted\nContacts")
-            StatTile(Modifier.weight(1f), Icons.Filled.Block, DangerDark, blockedToday, "Blocked\nToday")
+    // 1x3 row: Trusted Contacts · Blocked (today + week combined) · Scam Contacts.
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        StatTile(Modifier.weight(1f), Icons.Filled.Groups, BrandAccentDark, trusted, "Trusted\nContacts")
+        BlockedCombinedTile(Modifier.weight(1f), blockedToday = blockedToday, blockedWeek = blockedWeek)
+        // Scam Contacts tile — populated by the last Contact Safety Scan.
+        StatTile(Modifier.weight(1f), Icons.Filled.Warning,
+            if (scamContacts > 0) DangerDark else BrandAccentDark,
+            scamContacts, "Scam\nContacts")
+    }
+}
+
+/**
+ * Combined "Blocked" tile that stacks today's count prominently with the 7-day total
+ * underneath. Replaces the former pair of Blocked Today + Blocked This Week tiles so
+ * the dashboard reads 1x3 instead of 2x2.
+ */
+@Composable
+private fun BlockedCombinedTile(modifier: Modifier, blockedToday: Int, blockedWeek: Int) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MidnightElevated)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Row(verticalAlignment = Alignment.Top) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(DangerDark.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
+            ) {
+                Icon(Icons.Filled.Block, null, tint = DangerDark, modifier = Modifier.size(15.dp))
+            }
+            Spacer(Modifier.weight(1f))
+            Text(blockedToday.toString(), color = DangerDark, fontSize = 26.sp, fontWeight = FontWeight.Bold)
         }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            StatTile(Modifier.weight(1f), Icons.AutoMirrored.Filled.ShowChart, BrandCyanDark, blockedWeek, "Blocked\nThis Week")
-            // Scam Contacts tile — populated by the last Contact Safety Scan. Tapping
-            // the Contact Safety Scan row in Settings refreshes the count.
-            StatTile(Modifier.weight(1f), Icons.Filled.Warning,
-                if (scamContacts > 0) DangerDark else BrandAccentDark,
-                scamContacts, "Scam\nContacts")
-        }
+        Text("Blocked", color = PrimaryTextDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+            "Today · $blockedWeek this week",
+            color = SecondaryTextDark,
+            fontSize = 10.sp
+        )
     }
 }
 

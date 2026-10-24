@@ -285,31 +285,18 @@ struct DashboardScreen: View {
     }
 
     private var statsRow: some View {
-        // Scam Contacts tile — populated by the last Contact Safety Scan. Tapping
-        // Settings → Contact Safety Scan → Scan refreshes the count persisted in
-        // ContactScanState.
+        // 1x3 row: Trusted Contacts · Blocked (today + week combined) · Scam Contacts.
         let scamContacts = ContactScanState.matchCount()
-        return VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                StatTile(icon: "person.2.fill",
-                         tint: Color.appAccent,
-                         value: trustedCount,
-                         label: "Trusted\nContacts")
-                StatTile(icon: "nosign",
-                         tint: Color.appDanger,
-                         value: blockedToday,
-                         label: "Blocked\nToday")
-            }
-            HStack(spacing: 10) {
-                StatTile(icon: "chart.bar.fill",
-                         tint: Color.appBrightCyan,
-                         value: blockedWeek,
-                         label: "Blocked\nThis Week")
-                StatTile(icon: "exclamationmark.triangle.fill",
-                         tint: scamContacts > 0 ? Color.appDanger : Color.appAccent,
-                         value: scamContacts,
-                         label: "Scam\nContacts")
-            }
+        return HStack(spacing: 10) {
+            StatTile(icon: "person.2.fill",
+                     tint: Color.appAccent,
+                     value: trustedCount,
+                     label: "Trusted\nContacts")
+            BlockedCombinedTile(blockedToday: blockedToday, blockedWeek: blockedWeek)
+            StatTile(icon: "exclamationmark.triangle.fill",
+                     tint: scamContacts > 0 ? Color.appDanger : Color.appAccent,
+                     value: scamContacts,
+                     label: "Scam\nContacts")
         }
     }
 
@@ -652,6 +639,43 @@ private struct ProtectionActiveCard: View {
 }
 
 // MARK: - Stat tile (icon chip + number + label, previous version)
+
+/// Combined "Blocked" tile: today's count prominent + 7-day total underneath. Replaces
+/// the former pair of Blocked Today + Blocked This Week tiles so the dashboard reads
+/// 1x3 instead of 2x2.
+private struct BlockedCombinedTile: View {
+    let blockedToday: Int
+    let blockedWeek: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                Image(systemName: "nosign")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.appDanger)
+                    .frame(width: 32, height: 32)
+                    .background(Color.appDanger.opacity(0.18), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Spacer()
+                Text("\(blockedToday)")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.appDanger)
+                    .minimumScaleFactor(0.6)
+            }
+            Text("Blocked")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.appPrimaryText)
+            Text("Today · \(blockedWeek) this week")
+                .font(.system(size: 10))
+                .foregroundStyle(Color.appSecondaryText)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.appElevatedSurface)
+        )
+    }
+}
 
 private struct StatTile: View {
     let icon: String
