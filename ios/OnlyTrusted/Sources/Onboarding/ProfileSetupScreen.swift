@@ -24,26 +24,25 @@ struct ProfileSetupScreen: View {
     private enum Step { case email, pin, biometric, done }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                header
-                switch step {
-                case .email:     emailStep
-                case .pin:       pinStep
-                case .biometric: biometricStep
-                case .done:      Color.clear
-                }
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundStyle(Color.appDanger)
-                        .padding(.top, 4)
-                }
+        VStack(spacing: 24) {
+            header
+            switch step {
+            case .email:     emailStep
+            case .pin:       pinStep
+            case .biometric: biometricStep
+            case .done:      Color.clear
             }
-            .padding(24)
-            .padding(.top, 120)  // approximate vertical centering by pushing content below the top status bar / backdrop header area
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(Color.appDanger)
+                    .padding(.top, 4)
+            }
         }
-        .appBackdrop()
+        .padding(.horizontal, 24)
+        // Centers the VStack inside the full-screen frame (horizontal + vertical).
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .background(AppBackdrop())
     }
 
     // MARK: - Header
