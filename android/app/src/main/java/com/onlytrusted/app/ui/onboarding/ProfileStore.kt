@@ -76,15 +76,6 @@ object ProfileStore {
         prefs(ctx).edit().putLong(KEY_COMPLETED_AT, System.currentTimeMillis()).apply()
     }
 
-    fun verifyPIN(ctx: Context, pin: String): Boolean {
-        val saltHex = prefs(ctx).getString(KEY_PIN_SALT, null) ?: return false
-        val hashHex = prefs(ctx).getString(KEY_PIN_HASH, null) ?: return false
-        val salt = saltHex.fromHex() ?: return false
-        val expected = hashHex.fromHex() ?: return false
-        val computed = pbkdf2(pin, salt)
-        return constantTimeEqual(computed, expected)
-    }
-
     fun clearAll(ctx: Context) {
         prefs(ctx).edit().clear().apply()
     }
@@ -97,22 +88,6 @@ object ProfileStore {
         return factory.generateSecret(spec).encoded
     }
 
-    private fun constantTimeEqual(a: ByteArray, b: ByteArray): Boolean {
-        if (a.size != b.size) return false
-        var diff = 0
-        for (i in a.indices) diff = diff or (a[i].toInt() xor b[i].toInt())
-        return diff == 0
-    }
-
     private fun ByteArray.toHex(): String =
         joinToString("") { "%02x".format(it) }
-
-    private fun String.fromHex(): ByteArray? {
-        if (length % 2 != 0) return null
-        return runCatching {
-            ByteArray(length / 2) {
-                substring(it * 2, it * 2 + 2).toInt(16).toByte()
-            }
-        }.getOrNull()
-    }
 }

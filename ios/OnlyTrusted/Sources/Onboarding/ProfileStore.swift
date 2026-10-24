@@ -83,16 +83,6 @@ final class ProfileStore: ObservableObject {
         self.isSetupComplete = true
     }
 
-    // MARK: - Verification
-
-    /// Returns true if the given PIN matches the stored hash. Used by the unlock gate.
-    func verifyPIN(_ pin: String) -> Bool {
-        guard !pinHashHex.isEmpty, !pinSaltHex.isEmpty else { return false }
-        guard let salt = Data(hex: pinSaltHex) else { return false }
-        let computed = Self.pbkdf2(pin: pin, salt: salt).map { String(format: "%02x", $0) }.joined()
-        return constantTimeEqual(computed, pinHashHex)
-    }
-
     func clearAll() {
         email = ""
         pinHashHex = ""
@@ -127,29 +117,6 @@ final class ProfileStore: ObservableObject {
         return out
     }
 
-    private func constantTimeEqual(_ a: String, _ b: String) -> Bool {
-        guard a.count == b.count else { return false }
-        var diff: UInt8 = 0
-        for (x, y) in zip(a.utf8, b.utf8) { diff |= (x ^ y) }
-        return diff == 0
-    }
-}
-
-// MARK: - Hex helpers
-
-private extension Data {
-    init?(hex: String) {
-        guard hex.count.isMultiple(of: 2) else { return nil }
-        var data = Data(capacity: hex.count / 2)
-        var i = hex.startIndex
-        while i < hex.endIndex {
-            let next = hex.index(i, offsetBy: 2)
-            guard let b = UInt8(hex[i..<next], radix: 16) else { return nil }
-            data.append(b)
-            i = next
-        }
-        self = data
-    }
 }
 
 // MARK: - Keychain shim

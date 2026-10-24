@@ -406,8 +406,13 @@ private suspend fun commitMerkleBatch(
     context: android.content.Context
 ): SignedLogState.MerkleCommit? {
     val app = context.applicationContext as OnlyTrustedApp
-    val events = app.database.eventDao().recent(limit = 100_000).first()
-        .sortedBy { it.timestamp }
+    // Caller runs on the compose scope (Main.immediate). The DB read is already a Flow
+    // off the DAO's own executor, but `.sortedBy { it.timestamp }` over up to 100k rows
+    // happens on the collecting dispatcher — move the collect + sort + the batch build
+    // below off main so the activity stays responsive if the log is large.
+    val events = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        app.database.eventDao().recent(limit = 100_000).first().sortedBy { it.timestamp }
+    }
     if (events.isEmpty()) return null
 
     val existing = SignedLogState.merkleCommits(context)

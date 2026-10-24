@@ -81,11 +81,17 @@ class SensorMonitorService : Service() {
     private fun startPolling() {
         val am = audioManager ?: return
         // The AudioRecordingCallback fires on every change; this loop is only a safety net
-        // against missed callbacks, so a slow interval is enough and saves significant battery.
+        // against missed callbacks. We adapt the interval to activity: tight 30 s poll
+        // while a recording is live (catch any missed end-events quickly) and relaxed
+        // 2 min poll while idle (don't burn CPU wake-ups when nothing is recording).
         pollJob = scope.launch {
+            var lastWasActive = false
             while (true) {
-                delay(POLL_INTERVAL_MS)
-                handleAudioConfigs(am.activeRecordingConfigurations)
+                val interval = if (lastWasActive) ACTIVE_POLL_INTERVAL_MS else IDLE_POLL_INTERVAL_MS
+                delay(interval)
+                val configs = am.activeRecordingConfigurations
+                lastWasActive = configs.isNotEmpty()
+                handleAudioConfigs(configs)
             }
         }
     }
@@ -149,7 +155,8 @@ class SensorMonitorService : Service() {
     }
 
     companion object {
-        private const val POLL_INTERVAL_MS = 30_000L
+        private const val ACTIVE_POLL_INTERVAL_MS = 30_000L
+        private const val IDLE_POLL_INTERVAL_MS = 120_000L
         private const val CAMERA_ALERT_COOLDOWN_MS = 10_000L
 
         fun start(context: Context) {

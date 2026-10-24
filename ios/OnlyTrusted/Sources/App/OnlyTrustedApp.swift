@@ -12,33 +12,30 @@ struct OnlyTrustedApp: App {
     init() {
         // Dead-Man Wipe (Elite): check the inactivity deadline before any UI renders. If the
         // window has already elapsed, wipe everything first — this makes the trip-wire fire
-        // reliably even if the user keeps re-opening the app without unlocking it.
-        // `performWipe()` is MainActor-isolated and so is the shared instance; dispatch
-        // synchronously on the main queue (SwiftUI App init runs there anyway).
+        // reliably even if the user keeps re-opening the app without unlocking it. Must
+        // stay synchronous here: a data-reading UI must never see the pre-wipe state.
         MainActor.assumeIsolated {
             let state = DeadmanWipeState.shared
             if state.shouldWipeNow() {
                 state.performWipe()
             }
-            // Geo-fence Auto-Lock (Elite). Re-register the user's trusted regions with
-            // CoreLocation on every launch. If `isEnabled` is false the manager is a no-op.
+        }
+        // Smart Link Guard ↔ Offline Threat Intel bridge. Just assigns a closure — the
+        // `ThreatIntelDatabase.shared` lazy init only fires when the closure is actually
+        // invoked for a URL lookup, so this is free at startup.
+        SmartLinkGuardRules.phishingHostLookup = { host in
+            ThreatIntelDatabase.shared.isPhishingHost(host)
+        }
+        // Defer the three remaining init-time eager loads below so they don't push back
+        // first paint — they'll run after SplashScreen renders. Each takes a few ms to a
+        // few tens of ms (Binder IPC + plist decode + CoreLocation region registration)
+        // and none of them need to complete before the user sees the splash.
+        Task { @MainActor in
             if GeofenceState.shared.isEnabled {
                 GeofenceManager.shared.startMonitoring()
             }
-            // Rogue Network Scanner (Elite). Snapshot the radio + Wi-Fi state once at
-            // launch so a 2G downgrade or lookalike SSID gets flagged even before the
-            // user visits the dedicated screen.
             RogueNetworkMonitor.scanOnce()
-            // App Shield (Elite, Phase 2). Reload the persisted FamilyControls selection +
-            // authorization snapshot so the Settings / dashboard rows reflect reality on
-            // launch. On simulator / un-approved builds this is a safe no-op.
             AppShieldManager.rehydrate()
-        }
-        // Smart Link Guard ↔ Offline Threat Intel bridge. Lets the SmartLinkGuardRules
-        // engine consult the bundled APWG phishing-URL set when inspecting URLs from
-        // the main app target (the share extension stays on the built-in rules).
-        SmartLinkGuardRules.phishingHostLookup = { host in
-            ThreatIntelDatabase.shared.isPhishingHost(host)
         }
     }
 
