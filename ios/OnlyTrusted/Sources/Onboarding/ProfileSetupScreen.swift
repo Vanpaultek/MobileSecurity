@@ -24,27 +24,25 @@ struct ProfileSetupScreen: View {
     private enum Step { case email, pin, biometric, done }
 
     var body: some View {
-        ZStack {
-            Color.appScreenBackground.ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 24) {
-                    header
-                    switch step {
-                    case .email:     emailStep
-                    case .pin:       pinStep
-                    case .biometric: biometricStep
-                    case .done:      Color.clear
-                    }
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.caption)
-                            .foregroundStyle(Color.appDanger)
-                            .padding(.top, 4)
-                    }
+        ScrollView {
+            VStack(spacing: 24) {
+                header
+                switch step {
+                case .email:     emailStep
+                case .pin:       pinStep
+                case .biometric: biometricStep
+                case .done:      Color.clear
                 }
-                .padding(24)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(Color.appDanger)
+                        .padding(.top, 4)
+                }
             }
+            .padding(24)
         }
+        .appBackdrop()
     }
 
     // MARK: - Header
