@@ -599,10 +599,12 @@ private struct ProtectionActiveCard: View {
                             radius: 14, x: 0, y: 0)
                     .shadow(color: Color.appBrightCyan.opacity(isActive ? 0.55 : 0),
                             radius: 28, x: 0, y: 0)
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.92))
-                    .shadow(color: Color.appBrightCyan.opacity(0.6), radius: 8, x: 0, y: 0)
+                // OnlyTrusted brand shield (same shield-only asset the launcher icon uses).
+                Image("BrandShield")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 68, height: 68)
+                    .opacity(isActive ? 1.0 : 0.6)
                     .accessibilityLabel("Protection shield")
             }
 

@@ -496,18 +496,19 @@ private fun ProtectionActiveCard(isActive: Boolean) {
                         CircleShape
                     )
             )
-            Icon(
-                imageVector = Icons.Filled.GppGood,
+            // OnlyTrusted brand shield (same shield-only asset the launcher icon uses).
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(id = com.onlytrusted.app.R.drawable.ic_launcher_foreground_src),
                 contentDescription = "Protection shield",
-                tint = Color.White.copy(alpha = 0.92f),
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(68.dp)
                     .shadow(
                         elevation = 8.dp,
                         shape = CircleShape,
                         ambientColor = BrandCyanDark,
                         spotColor = BrandCyanDark
-                    )
+                    ),
+                alpha = if (isActive) 1.0f else 0.6f
             )
         }
 
