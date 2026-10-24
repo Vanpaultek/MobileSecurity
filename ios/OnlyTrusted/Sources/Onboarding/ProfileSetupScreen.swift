@@ -24,28 +24,24 @@ struct ProfileSetupScreen: View {
     private enum Step { case email, pin, biometric, done }
 
     var body: some View {
-        GeometryReader { geo in
-            ScrollView {
-                VStack(spacing: 24) {
-                    Spacer(minLength: 0)
-                    header
-                    switch step {
-                    case .email:     emailStep
-                    case .pin:       pinStep
-                    case .biometric: biometricStep
-                    case .done:      Color.clear
-                    }
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.caption)
-                            .foregroundStyle(Color.appDanger)
-                            .padding(.top, 4)
-                    }
-                    Spacer(minLength: 0)
+        ScrollView {
+            VStack(spacing: 24) {
+                header
+                switch step {
+                case .email:     emailStep
+                case .pin:       pinStep
+                case .biometric: biometricStep
+                case .done:      Color.clear
                 }
-                .padding(24)
-                .frame(minHeight: geo.size.height)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(Color.appDanger)
+                        .padding(.top, 4)
+                }
             }
+            .padding(24)
+            .padding(.top, 120)  // approximate vertical centering by pushing content below the top status bar / backdrop header area
         }
         .appBackdrop()
     }
